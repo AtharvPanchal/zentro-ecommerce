@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} · ZENTRO{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/order_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-1">📦 Order #{{ order.id }}</h3>
+      <small class="text-muted">
+        Placed on {{ order.placed_at.strftime("%d %b %Y, %I:%M %p") if order.placed_at }}
+      </small>
+    </div>
+
+    <span class="badge px-3 py-2
+      {% if order.status == 'delivered' %} bg-success
+      {% elif order.status == 'cancelled' %} bg-danger
+      {% else %} bg-warning text-dark {% endif %}">
+      {{ order.status|capitalize }}
+    </span>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- LEFT: ITEMS -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">
+          🛒 Items in this order
+        </div>
+
+        <div class="card-body p-0">
+          <table class="table mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Product</th>
+                <th class="text-center">Qty</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in order.items %}
+              <tr>
+                <td>
+                  <div class="fw-medium">{{ it.name }}</div>
+                </td>
+                <td class="text-center">{{ it.qty }}</td>
+                <td class="text-end">₹{{ it.price }}</td>
+                <td class="text-end fw-semibold">
+                  ₹{{ it.price * it.qty }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SUMMARY -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white fw-semibold">
+          💳 Order Summary
+        </div>
+
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Items Total</span>
+            <span>₹{{ order.total }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span>Delivery</span>
+            <span class="text-success">FREE</span>
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between fs-5 fw-bold">
+            <span>Total Paid</span>
+            <span>₹{{ order.total }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="mt-3 d-grid gap-2">
+        <a href="{{ url_for('user.orders') }}" class="btn btn-outline-secondary">
+          ⬅ Back to Orders
+        </a>
+
+        {% if order.status not in ['delivered', 'cancelled'] %}
+        <button class="btn btn-outline-danger" disabled>
+          ❌ Cancel Order (Coming Soon)
+        </button>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

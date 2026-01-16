@@ -1,0 +1,102 @@
+{% extends "admin/admin_base.html" %}
+{% block page_title %}
+  {% if mode == "add" %}Add Category{% else %}Edit Category{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+
+  <!-- Page Header -->
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1">
+      {% if mode == "add" %}Add Category{% else %}Edit Category{% endif %}
+    </h2>
+    <p class="text-muted mb-0">
+      {% if mode == "add" %}
+        Create a new category for your products
+      {% else %}
+        Update existing category information
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Form Card -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+      <form method="post" novalidate>
+
+        <div class="row g-4">
+
+          <!-- Category Name -->
+          <div class="col-lg-6">
+            <label class="form-label fw-semibold">
+              Category Name <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   name="name"
+                   class="form-control form-control-lg"
+                   placeholder="Eg. Electronics, Fashion, Accessories"
+                   value="{{ category.name if category else '' }}"
+                   required>
+            <small class="text-muted">
+              This name will be visible to customers
+            </small>
+          </div>
+
+          <!-- Status -->
+          <div class="col-lg-4">
+            <label class="form-label fw-semibold">Status</label>
+            <select name="status"
+                    class="form-select form-select-lg">
+              <option value="ACTIVE"
+                {% if category and category.status == "ACTIVE" %}selected{% endif %}>
+                ACTIVE
+              </option>
+              <option value="INACTIVE"
+                {% if category and category.status == "INACTIVE" %}selected{% endif %}>
+                INACTIVE
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Divider -->
+        <hr class="my-4">
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{{ url_for('admin.category.list_categories') }}"
+   class="btn btn-secondary ms-2">
+  Cancel
+</a>
+
+          <button type="submit"
+                  class="btn btn-success px-5">
+            <i class="bi bi-check-circle me-1"></i>
+            Save Category
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

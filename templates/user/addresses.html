@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}My Addresses{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+<h4 class="fw-bold mb-4">📍 Manage Addresses</h4>
+{% include "partials/_flash_messages.html" %}
+
+<!-- ADD ADDRESS -->
+<div class="card shadow-sm mb-4">
+<div class="card-body">
+<h6 class="fw-semibold mb-3">➕ Add New Address</h6>
+    <form method="POST" class="row g-3">
+
+  <!-- Name + Phone -->
+  <div class="col-md-6">
+    <input class="form-control" name="full_name"
+           placeholder="👤 Full Name" required>
+  </div>
+
+  <div class="col-md-6">
+    <input class="form-control" name="phone"
+           placeholder="📞 Phone" required>
+  </div>
+
+  <!-- Pincode + City -->
+  <div class="col-md-6">
+    <input class="form-control" name="pincode"
+           placeholder="📮 Pincode" required>
+  </div>
+
+  <div class="col-md-6">
+    <select class="form-select" name="city" id="city" required>
+      <option value="">Select City</option>
+    </select>
+  </div>
+
+  <!-- Full Address (needs space) -->
+  <div class="col-md-12">
+    <input class="form-control" name="house_no"
+           placeholder="🏠 House / Flat No, Street" required>
+  </div>
+
+  <div class="col-md-12">
+    <input class="form-control" name="area"
+           placeholder="📍 Area / Locality" required>
+  </div>
+
+  <!-- State + Landmark -->
+  <div class="col-md-6">
+    <select class="form-select" name="state" id="state" required>
+      <option value="">Select State</option>
+      <option>Maharashtra</option>
+      <option>Gujarat</option>
+      <option>Karnataka</option>
+    </select>
+  </div>
+
+  <div class="col-md-6">
+    <input class="form-control" name="landmark"
+           placeholder="🗺 Landmark (Optional)">
+  </div>
+
+  <!-- Address Type -->
+  <div class="col-md-6">
+    <select class="form-select" name="address_type">
+      <option value="home">🏠 Home</option>
+      <option value="work">🏢 Work</option>
+    </select>
+  </div>
+
+  <!-- Default checkbox -->
+  <div class="col-md-6 d-flex align-items-center">
+    <div class="form-check mt-2">
+      <input class="form-check-input" type="checkbox" name="is_default">
+      <label class="form-check-label">Set as default</label>
+    </div>
+  </div>
+
+  <!-- Save Button -->
+  <div class="col-md-12">
+    <button class="btn btn-warning w-100">
+      💾 Save Address
+    </button>
+  </div>
+
+</form>
+</div>
+    </div>
+<!-- SAVED ADDRESSES -->
+<div class="row g-4">
+{% for a in addresses %}
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+
+        <b>{{ a.full_name }}</b>
+        {% if a.is_default %}
+          <span class="badge bg-success ms-2">Default</span>
+        {% endif %}
+
+        <p class="mb-1">{{ a.house_no }}, {{ a.area }}</p>
+        <p class="mb-1">{{ a.city }}, {{ a.state }} - {{ a.pincode }}</p>
+        <small>📞 {{ a.phone }} | {{ a.address_type|title }}</small>
+
+        <div class="mt-2 d-flex gap-2">
+          <a href="{{ url_for('user.edit_address', address_id=a.id) }}"
+             class="btn btn-sm btn-outline-primary">
+             ✏️ Edit
+          </a>
+
+          <a href="{{ url_for('user.delete_address', address_id=a.id) }}"
+             class="btn btn-sm btn-outline-danger"
+             onclick="return confirm('Delete this address?')">
+             🗑 Delete
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-muted">No addresses added yet.</p>
+{% endfor %}
+</div>
+
+
+
+<script>
+const cityMap = {
+  Maharashtra: ["Mumbai","Pune","Nagpur"],
+  Gujarat: ["Ahmedabad","Surat","Vadodara"],
+  Karnataka: ["Bengaluru","Mysuru","Hubli"]
+};
+
+const stateSelect = document.getElementById("state");
+const citySelect  = document.getElementById("city");
+
+if (stateSelect && citySelect) {
+  stateSelect.addEventListener("change", function () {
+    citySelect.innerHTML = '<option value="">Select City</option>';
+    (cityMap[this.value] || []).forEach(city => {
+      citySelect.innerHTML += `<option value="${city}">${city}</option>`;
+    });
+  });
+}
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,8 @@
+/* product grid and product card specific */
+.product-card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid rgba(11,27,43,.04);transition:transform var(--transition), box-shadow var(--transition);padding:.6rem}
+.product-card:hover{transform:translateY(-8px);box-shadow:0 18px 44px rgba(2,6,23,.06)}
+.product-image{height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f8fafc);border-radius:8px;padding:.6rem}
+.old-price{color:var(--muted);text-decoration:line-through;margin-left:.5rem}
+.discount{color:var(--gold);font-weight:700;margin-left:.5rem}
+.in-stock{font-size:.9rem;color:green}
+.out-stock{font-size:.9rem;color:#c22323;font-weight:700}

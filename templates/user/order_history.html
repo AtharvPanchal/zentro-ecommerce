@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Order History · ZENTRO{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/order_history.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Your Orders</h3>
+  <div class="list-group mt-3">
+    {% for o in orders %}
+      <a href="{{ url_for('user.order_detail', order_id=o.id) }}" class="list-group-item list-group-item-action">
+        Order #{{ o.id }} — {{ o.status }} — ₹{{ o.total }}
+      </a>
+    {% else %}
+      <div class="text-muted">No orders found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/order_history.js') }}"></script>
+{% endblock %}

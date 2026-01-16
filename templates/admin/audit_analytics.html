@@ -1,0 +1,297 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Audit Analytics{% endblock %}
+{% block page_title %}Audit Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+
+  <!-- KPI CARDS -->
+  <div class="row g-4 mb-4">
+
+  <!-- TOTAL -->
+  <div class="col-xl-3 col-md-6">
+    <div class="kpi-card">
+      <div class="kpi-icon bg-primary">
+        <i data-lucide="layers"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Total Logs</div>
+        <div class="kpi-value">{{ metrics.total }}</div>
+        <div class="kpi-sub">All audit events</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE -->
+  <div class="col-xl-3 col-md-6">
+    <div class="kpi-card">
+      <div class="kpi-icon bg-success">
+        <i data-lucide="activity"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Active Logs</div>
+        <div class="kpi-value text-success">{{ metrics.active }}</div>
+        <div class="kpi-sub">Currently visible</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIGH -->
+  <div class="col-xl-3 col-md-6">
+    <div class="kpi-card danger">
+      <div class="kpi-icon bg-danger">
+        <i data-lucide="alert-triangle"></i>
+      </div>
+      <div>
+        <div class="kpi-label">High Severity</div>
+        <div class="kpi-value text-danger">{{ metrics.high }}</div>
+        <div class="kpi-sub">Critical actions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAST 24H -->
+  <div class="col-xl-3 col-md-6">
+    <div class="kpi-card">
+      <div class="kpi-icon bg-warning">
+        <i data-lucide="clock"></i>
+      </div>
+      <div>
+        <div class="kpi-label">Last 24 Hours</div>
+        <div class="kpi-value">{{ metrics.last_24h }}</div>
+        <div class="kpi-sub">Recent activity</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- AI STYLE AUDIT INSIGHTS -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="analytics-card">
+
+      <div class="card-header">
+        <h6>Audit Insights</h6>
+      </div>
+
+      {% if insights and insights|length > 0 %}
+        {% for item in insights %}
+  <div class="alert alert-{{ item.severity|lower }} d-flex justify-content-between align-items-start mb-2">
+
+  <div class="d-flex align-items-start">
+    <i data-lucide="{{ item.icon }}" class="me-2 mt-1"></i>
+
+    <div>
+      <div class="fw-semibold">{{ item.message }}</div>
+
+      {% if item.recommendation %}
+        <div class="mt-1 text-muted" style="font-size: 0.85rem;">
+          <strong>Recommended Action:</strong>
+          {{ item.recommendation }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STEP-5 GOVERNANCE UI -->
+  <div class="text-end ms-3">
+
+    {% if item.is_seen %}
+      <span class="badge bg-secondary mb-1">Seen</span>
+    {% else %}
+      <span class="badge bg-warning mb-1">New</span>
+    {% endif %}
+
+    <div class="mt-1">
+      {% if not item.is_seen %}
+        <button
+          class="btn btn-sm btn-outline-success"
+          onclick="markInsightSeen({{ item.id }})">
+          Mark Seen
+        </button>
+      {% endif %}
+
+      <button
+        class="btn btn-sm btn-outline-danger"
+        onclick="archiveInsight({{ item.id }})">
+        Archive
+      </button>
+    </div>
+
+  </div>
+</div>
+
+{% endfor %}
+
+      {% else %}
+        <div class="alert alert-secondary">
+          No Unusual Audit Behavior Detected
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- CHARTS -->
+ <div class="row g-4">
+
+  <!-- TREND -->
+  <div class="col-xl-8">
+    <div class="analytics-card">
+      <div class="card-header">
+        <h6>Audit Activity Trend</h6>
+        <select id="daysRange" class="form-select w-auto">
+           <option value="7">Last 7 Days</option>
+           <option value="14">Last 14 Days</option>
+          <option value="30">Last 30 Days</option>
+         </select>
+
+      </div>
+      <div class="chart-box">
+  <canvas id="auditTrendChart"></canvas>
+</div>
+
+    </div>
+  </div>
+
+  <!-- SEVERITY -->
+  <div class="col-xl-4">
+    <div class="analytics-card">
+      <div class="card-header">
+        <h6>Severity Distribution</h6>
+      </div>
+      <div class="chart-box">
+  <canvas id="severityChart"></canvas>
+</div>
+
+    </div>
+  </div>
+
+
+   <!-- TOP ACTIONS -->
+<div class="col-xl-6">
+  <div class="analytics-card">
+    <div class="card-header">
+      <h6>Top Admin Actions</h6>
+    </div>
+    <div class="chart-box">
+  <canvas id="topActionsChart"></canvas>
+</div>
+
+  </div>
+</div>
+
+   <!---------- ADMIN VS SYSTEM ACTION ---------->
+   <div class="col-xl-6">
+  <div class="analytics-card">
+    <div class="card-header">
+      <h6>Admin vs System Actions</h6>
+    </div>
+   <div class="chart-box">
+  <canvas id="actorTrendChart"></canvas>
+</div>
+
+  </div>
+</div>
+
+
+</div>
+
+
+</div>
+<style>
+
+  .analytics-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.04);
+}
+
+.analytics-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+  /* ===============================
+   KPI CARDS – INDUSTRY GRADE
+   =============================== */
+
+.kpi-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border: 1px solid #eef2f7;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.12);
+}
+
+/* LEFT ICON */
+.kpi-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.kpi-icon i {
+  width: 22px;
+  height: 22px;
+}
+
+/* TEXT */
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.kpi-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #111827;
+}
+
+.kpi-sub {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* COLOR VARIANTS */
+.kpi-card.danger {
+  border-left: 6px solid #dc2626;
+}
+
+.kpi-card:not(.danger) {
+  border-left: 6px solid #2563eb;
+}
+
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin_audit_analytics.js') }}"></script>
+
+{% endblock %}

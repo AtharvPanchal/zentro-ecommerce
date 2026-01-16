@@ -1,0 +1,144 @@
+.chart-box {
+  position: relative;
+  height: 320px;  
+  width: 100%;
+}
+
+.analytics-card {
+  height: auto;      /* ensure card doesn’t stretch */
+}
+
+/* DO NOT BREAK BOOTSTRAP */
+table {
+  width: 100%;
+}
+
+body.admin-body {
+  font-family: Inter, sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+}
+
+.admin-wrapper {
+  display: flex;
+  height: 100vh;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, #0b1b2b, #091421);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  align-items: center;
+}
+
+.brand .logo {
+  background: #e29b26;
+  color: #000;
+  font-weight: 800;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.menu a {
+  display: block;
+  padding: 14px 20px;
+  color: #cfd8e3;
+  text-decoration: none;
+}
+
+.menu a.active, .menu a:hover {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+
+.logout {
+  margin-top: auto;
+  padding: 20px;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-topbar {
+  background: #fff;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+}
+
+.admin-content {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.badge-danger {
+  background: #dc3545;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  float: right;
+}
+
+/* -----------------------------
+   Sidebar Dropdown
+------------------------------ */
+
+.menu-dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.menu-toggle .dropdown-icon {
+  margin-left: auto;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.menu-dropdown .submenu {
+  display: none;
+  flex-direction: column;
+  padding-left: 28px;
+}
+
+.menu-dropdown .submenu a {
+  font-size: 14px;
+  padding: 8px 0;
+  color: #cbd5e1;
+}
+
+.menu-dropdown .submenu a.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* OPEN STATE */
+.menu-dropdown.open .submenu {
+  display: flex;
+}
+
+.menu-dropdown.open .dropdown-icon {
+  transform: rotate(180deg);
+}

@@ -1,0 +1,1790 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZENTRO – Everything at Your Center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ZENTRO – Your online marketplace for electronics, fashion, home, and more.">
+  <!-- Open Graph -->
+  <meta property="og:title" content="ZENTRO – Everything at Your Center">
+  <meta property="og:description" content="ZENTRO – Your online marketplace for electronics, fashion, home, and more.">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630?text=ZENTRO">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://zentro.example">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ZENTRO – Everything at Your Center">
+  <meta name="twitter:description" content="ZENTRO – Your online marketplace for electronics, fashion, home, and more.">
+  <meta name="twitter:image" content="https://via.placeholder.com/1200x630?text=ZENTRO">
+  <!-- Favicon (placeholder) -->
+  <link rel="icon" href="https://via.placeholder.com/32/0b1b2b/e29b26?text=Z" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{
+      --navy:#0b1b2b;
+      --gold:#e29b26;
+      --bg:#f5f7fa;
+      --muted:#6b7280;
+      --card-radius:12px;
+      --transition:.22s;
+      --container-gap:1.25rem;
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:#0f1724;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      font-size:15px;
+      line-height:1.4;
+    }
+
+    /* Skip link */
+    .skip-link{
+      position: absolute;
+      left: -999px;
+      top: auto;
+      background:#111;
+      color:#fff;
+      padding:.5rem .75rem;
+      z-index:2000;
+    }
+    .skip-link:focus{left:10px; top:10px; border-radius:6px;}
+
+    /* Navbar */
+    .main-nav{
+      background:var(--navy);
+      color:#fff;
+      position:sticky;
+      top:0;
+      z-index:1050;
+      box-shadow:0 2px 10px rgba(11,27,43,.12);
+    }
+    .brand-logo{
+      display:flex;
+      align-items:center;
+      gap:.6rem;
+      font-weight:700;
+      letter-spacing:.6px;
+      color:#fff;
+    }
+    .logo-icon{
+      width:45px;height:45px;
+      border-radius:7px;
+      background:linear-gradient(135deg,var(--gold),#ffd38f);
+      color:var(--navy);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:30px;box-shadow:10 8px 14px rgba(0,0,0,.19);
+    }
+
+    /* search area */
+    .search-box{background:#899;padding:.20rem;border-radius:8px;display:flex;gap:.9rem;align-items:center;}
+    .search-box select,.search-box input{border:0;outline:none;background:transparent;height:40px;}
+    .search-box .btn-search{background:var(--navy);color:#fff;border-radius:8px;border:0;padding:.60rem .9rem;}
+
+    /* badges */
+    .badge-count{
+      position:relative;
+      top:-8px;left:-10px;
+      background:var(--gold);
+      color:var(--navy);
+      font-weight:900;
+      border-radius:10px;
+      padding:2px 6px;font-size:12px;
+      box-shadow:0 2px 6px rgba(14,21,34,.18);
+    }
+
+    /* secondary nav */
+    .secondary-nav{background:linear-gradient(90deg,#ffffff00,#ffffff00);padding:.45rem 0;border-bottom:1px solid rgba(11,27,43,.04)}
+    .secondary-nav a{color:var(--navy);padding:.45rem .6rem;border-radius:6px;transition:all var(--transition) ease;}
+    .secondary-nav a:hover{background:rgba(226,155,38,.06);color:var(--gold);text-decoration:none;transform:translateY(-2px);}
+
+    /* hero */
+    .hero{
+      background:linear-gradient(135deg,var(--navy),#1d2b3b 50%, var(--gold) 120%);
+      color:#fff;padding:2.5rem 0;overflow:hidden;
+    }
+    .hero .card-cta{background:rgba(255,255,255,.06);border-radius:12px;padding:1.25rem;}
+    .hero h1{font-size:2.1rem;font-weight:800;letter-spacing:1px}
+    .hero p{opacity:.95}
+    .btn-cta{
+      background:var(--gold); color:var(--navy); border-radius:20px; font-weight:700;
+      padding:.6rem 1.05rem; border:0; transition:transform .18s ease, box-shadow .18s;
+    }
+    .btn-cta:hover{transform:translateY(-3px); box-shadow:0 10px 30px rgba(226,155,38,.18);}
+
+    .promo-cards .card{border-radius:12px;overflow:hidden;transition:transform var(--transition), box-shadow var(--transition);border:0}
+    .promo-cards .card:hover{transform:translateY(-6px); box-shadow:0 12px 30px rgba(2,6,23,.12);}
+
+    /* categories strip */
+    .categories-strip{padding:1rem 0;background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,.03);margin-top:-38px;z-index:10;position:relative;}
+    .category-card{background:transparent;border-radius:10px;padding:.6rem .75rem;text-align:center;transition:transform var(--transition), box-shadow var(--transition);cursor:pointer;}
+    .category-card:hover{transform:scale(1.05);box-shadow:0 10px 28px rgba(11,27,43,.06);}
+
+    /* deals */
+    .deals .deal-card{min-width:220px;border-radius:12px;overflow:hidden;background:#fff;padding:.6rem;border:1px solid rgba(11,27,43,.04);transition:transform var(--transition)}
+    .deals .deal-card:hover{transform:translateY(-6px)}
+    .deal-badge{background:var(--gold);color:var(--navy);padding:.25rem .5rem;border-radius:6px;font-weight:700;font-size:12px}
+
+    /* featured */
+    .featured .card{border-radius:14px;overflow:hidden;border:0;transition:transform var(--transition)}
+    .featured .card:hover{transform:translateY(-6px)}
+
+    /* big banners */
+    .mid-banner{height:220px;background-size:cover;background-position:center;border-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center}
+    .mid-banner .overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,27,43,.55),rgba(11,27,43,.12));}
+
+    /* products grid */
+    .product-card{border-radius:12px;overflow:hidden;background:#ddd;border:1px solid rgba(11,27,43,.04);transition:transform var(--transition), box-shadow var(--transition);padding:.6rem}
+    .product-card:hover{transform:translateY(-8px);box-shadow:0 18px 44px rgba(2,6,23,.06)}
+    .product-image{height:180px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f8fafc);border-radius:8px;padding:.6rem}
+    .old-price{color:var(--muted);text-decoration:line-through;margin-left:.5rem}
+    .discount{color:var(--gold);font-weight:700;margin-left:.5rem}
+
+    .in-stock{font-size:.9rem;color:green}
+    .out-stock{font-size:.9rem;color:#c22323;font-weight:700}
+
+    /* brands */
+    .brand-card{background:#ddd;border-radius:10px;padding:1rem;display:flex;align-items:center;justify-content:center;border:2px solid rgba(11,30,43,.09);transition:transform var(--transition)}
+    .brand-card:hover{transform:translateY(-6px)}
+
+    /* recommended + reviews */
+    .review-card{border-radius:10px;background:#ccc;padding:1rem;border:1px solid rgba(11,27,43,.09)}
+
+/* newsletter */
+    .newsletter{background:linear-gradient(90deg,#fff 0%, #fff 100%);padding:1.25rem;border-radius:12px;box-shadow:0 12px 30px rgba(2,6,23,.09)}
+
+    /* footer */
+    footer{background:#0f1724;color:#fff;padding:2rem 0;margin-top:2rem}
+    footer a{color:#e6d7b5}
+    .payment-icons i{background:rgba(255,255,255,.06);padding:.4rem .6rem;border-radius:6px;margin-right:.45rem}
+
+    /* floating chat */
+    .chat-btn{position:fixed;right:18px;bottom:90px;background:linear-gradient(180deg,var(--gold),#d68615);width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--navy);box-shadow:0 12px 28px rgba(2,6,23,.14);z-index:1200;border:0;cursor:pointer}
+
+    /* mobile sticky bottom bar */
+    .mobile-bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid rgba(11,27,43,.06);display:none;padding:.4rem .3rem;z-index:1100}
+    .mobile-bottom .btn{background:transparent;border:0;color:var(--navy);font-weight:600}
+
+    /* cookie banner */
+    .cookie-banner{position:fixed;left:16px;right:16px;bottom:18px;background:#fff;padding:1rem;border-radius:10px;box-shadow:0 12px 30px rgba(2,6,23,.08);z-index:1300;display:flex;align-items:center;gap:1rem;justify-content:space-between}
+
+    /* small screens */
+    @media (max-width:991px){
+      .search-box{display:flex;flex:1}
+      .hero h1{font-size:1.6rem}
+      .categories-strip{margin-top:-28px}
+      .product-image{height:160px}
+    }
+    @media (max-width:767px){
+      .mobile-bottom{display:flex;justify-content:space-around;align-items:center}
+      .categories-strip{overflow:auto;padding:.6rem 0}
+      .categories-strip .col-auto{flex:0 0 auto}
+    }
+
+    /* small micro animations (fade-in) */
+    .fade-in{animation:fadeInUp .6s ease both}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* quantity controls styling */
+    .qty-group .btn { min-width:34px; }
+    .qty-input { width:56px; text-align:center; padding:.25rem; }
+    .mini-cart-item { border-bottom:1px solid rgba(0,0,0,.05); padding: .6rem 0; }
+
+    /* offcanvas mini-cart child animations */
+    .offcanvas .mini-fade { opacity: 0; transform: translateX(8px) translateY(6px); transition: opacity .28s ease, transform .28s ease; }
+    .offcanvas.show .mini-fade { opacity: 1; transform: translateX(0) translateY(0); }
+    .mini-warning { color:#c22323; font-size:12px; margin-top:6px; display:none; }
+
+    /* small helper for summary */
+    .mini-summary { border-top:1px dashed rgba(0,0,0,0.06); padding-top:.75rem; margin-top:.75rem; }
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+  <!-- NAVBAR -->
+  <header class="main-nav py-2">
+    <div class="container">
+      <div class="d-flex align-items-center gap-3">
+        <!-- LEFT: Logo -->
+        <div class="d-flex align-items-center me-2">
+          <a href="#" class="brand-logo" aria-label="Zentro homepage">
+            <div class="logo-icon" aria-hidden="true">Z</div>
+            <div>
+              <div style="font-size:14px;opacity:.9">ZENTRO</div>
+              <small style="font-size:11px;color:rgba(255,255,255,.8);">Everything at Your Center.</small>
+            </div>
+          </a>
+        </div>
+    <!-- CENTER: Search -->
+    <div class="flex-grow-1 ms-2 me-2">
+      <div class="search-box d-flex align-items-center" role="search" aria-label="Site search">
+        <select id="search-category" class="form-select form-select-sm w-auto" aria-label="Search category" style="max-width:170px">
+          <option value="All">All</option>
+          <option>Electronics</option>
+          <option>Fashion</option>
+          <option>Beauty</option>
+          <option>Sports</option>
+          <option>Grocery</option>
+          <option>Home</option>
+        </select>
+        <input id="search-input" type="search" class="form-control form-control-sm" placeholder="Search products, brands and more" aria-label="Search products">
+        <button class="btn btn-search btn-sm" id="search-btn" aria-label="Start search"><i class="fa fa-search"></i></button>
+      </div>
+    </div>
+
+    <!-- RIGHT: controls -->
+    <div class="d-flex align-items-center gap-2">
+      <div class="dropdown me-1">
+        <button class="btn btn-sm btn-light" id="cityBtn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Select city">
+          <i class="fa fa-location-dot"></i> <span id="cityText">Delivering to <strong>Delhi</strong></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="cityBtn">
+          <li><button class="dropdown-item city-select">Delhi</button></li>
+          <li><button class="dropdown-item city-select">Mumbai</button></li>
+          <li><button class="dropdown-item city-select">Bengaluru</button></li>
+          <li><button class="dropdown-item city-select">Chennai</button></li>
+          <li><button class="dropdown-item city-select">Kolkata</button></li>
+        </ul>
+      </div>
+
+      <button class="btn btn-outline-light btn-sm position-relative" id="wishlistBtn" aria-label="Wishlist">
+        <i class="fa-regular fa-heart"></i>
+        <span id="wishlistBadge" class="badge-count" style="display:none">0</span>
+      </button>
+
+      <!-- Open mini cart offcanvas -->
+      <button class="btn btn-outline-light btn-sm position-relative" id="cartBtn" aria-label="Cart" data-bs-toggle="offcanvas" data-bs-target="#miniCartOffcanvas" aria-controls="miniCartOffcanvas">
+        <i class="fa fa-shopping-cart"></i>
+        <span id="cartBadge" class="badge-count" style="display:none">0</span>
+      </button>
+
+   {% if current_user.is_authenticated %}
+  <a class="btn btn-sm btn-light" href="{{ url_for('account.profile') }}" aria-label="Account">
+    <i class="fa fa-user"></i>
+    <span class="ms-1">Hi, {{ current_user.name or current_user.email }}</span>
+  </a>
+{% else %}
+  <a class="btn btn-sm btn-warning text-nowrap" id="authBtn" href="{{ url_for('auth.login') }}" aria-label="Signup or Login" rel="noopener">
+    <i class="fa fa-user"></i>
+    <div style="font-size:11px;display:inline-block">Signup / Login</div>
+  </a>
+{% endif %}
+
+{% if current_user.is_authenticated and current_user.is_admin %}
+  <a class="btn btn-sm btn-light" id="adminBtn" href="{{ url_for('admin.dashboard') }}" aria-label="Admin dashboard">Admin</a>
+{% else %}
+  <a class="btn btn-sm btn-light" id="adminBtn" href="{{ url_for('admin.login') }}" aria-label="Admin login">Admin Login</a>
+{% endif %}
+
+    </div>
+  </div>
+</div>
+
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <div class="card-cta fade-in">
+            <h1>ZENTRO — Everything at Your Center.</h1>
+            <p class="lead">Discover Top Brands, Daily Deals and Fast Delivery Across Categories — Electronics, Fashion, Home & More.</p>
+            <div class="mt-3 d-flex gap-2">
+              <button class="btn btn-cta btn-lg" id="heroShopBtn" aria-label="Shop now">Shop Now <i class="fa fa-arrow-right ms-2"></i></button>
+              <button class="btn btn-outline-light btn-lg" id="heroExplore" aria-label="Explore collections">Explore Collections</button>
+            </div>
+            <div class="mt-3 text-white-50 small">Free Delivery on orders over ₹999 · 30-day Returns</div>
+          </div>
+        </div>
+        <div class="col-lg-6 text-center fade-in">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1000&q=60" alt="Zentro hero product montage" class="img-fluid rounded" style="max-height:320px;object-fit:cover;box-shadow:0 18px 44px rgba(2,6,23,.08)">
+        </div>
+      </div>
+  <!-- promotional cards below hero -->
+  <div class="row mt-4 promo-cards g-3">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f6ff);display:flex;align-items:center;justify-content:center"><i class="fa fa-shirt fa-2x" style="color:var(--navy)"></i></div>
+          <div>
+            <h6 class="mb-0">Fashion Sale</h6>
+            <small class="text-muted">Up to 60% off on Top Brands</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f6ff);display:flex;align-items:center;justify-content:center"><i class="fa fa-mobile-screen-button fa-2x" style="color:var(--navy)"></i></div>
+          <div>
+            <h6 class="mb-0">Electronics Deals</h6>
+            <small class="text-muted">Latest Phones & Gadgets</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fff,#f2f6ff);display:flex;align-items:center;justify-content:center"><i class="fa fa-couch fa-2x" style="color:var(--navy)"></i></div>
+          <div>
+            <h6 class="mb-0">Home Essentials</h6>
+            <small class="text-muted">Comfort Meets Style</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  </section>
+  <!-- CATEGORY ICON STRIP -->
+  <section class="container categories-strip mt-n4 p-3">
+    <div class="row gx-2 gy-2 align-items-center">
+      <!-- 12 cards -->
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Electronics" tabindex="0" role="button" aria-label="Electronics category">
+          <i class="fa fa-tv fa-2x" style="color:var(--navy)"></i><div class="small">Electronics</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Mobiles" tabindex="0" role="button" aria-label="Mobiles category">
+          <i class="fa fa-mobile-screen-button fa-2x" style="color:var(--navy)"></i><div class="small">Mobiles</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Fashion" tabindex="0" role="button" aria-label="Fashion category">
+          <i class="fa fa-shirt fa-2x" style="color:var(--navy)"></i><div class="small">Fashion</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Men" tabindex="0" role="button" aria-label="Men category">
+          <i class="fa fa-mars fa-2x" style="color:var(--navy)"></i><div class="small">Men</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Women" tabindex="0" role="button" aria-label="Women category">
+          <i class="fa fa-venus fa-2x" style="color:var(--navy)"></i><div class="small">Women</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Kitchen" tabindex="0" role="button" aria-label="Kitchen category">
+          <i class="fa fa-utensils fa-2x" style="color:var(--navy)"></i><div class="small">Kitchen</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Appliances" tabindex="0" role="button" aria-label="Appliances category">
+          <i class="fa fa-blender fa-2x" style="color:var(--navy)"></i><div class="small">Appliances</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Grocery" tabindex="0" role="button" aria-label="Grocery category">
+          <i class="fa fa-basket-shopping fa-2x" style="color:var(--navy)"></i><div class="small">Grocery</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Beauty" tabindex="0" role="button" aria-label="Beauty category">
+          <i class="fa fa-magic fa-2x" style="color:var(--navy)"></i><div class="small">Beauty</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Sports" tabindex="0" role="button" aria-label="Sports category">
+          <i class="fa fa-basketball fa-2x" style="color:var(--navy)"></i><div class="small">Sports</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Toys" tabindex="0" role="button" aria-label="Toys category">
+          <i class="fa fa-puzzle-piece fa-2x" style="color:var(--navy)"></i><div class="small">Toys</div>
+        </div>
+      </div>
+      <div class="col-auto fade-in">
+        <div class="category-card text-center" data-cat="Automotive" tabindex="0" role="button" aria-label="Automotive category">
+          <i class="fa fa-car-side fa-2x" style="color:var(--navy)"></i><div class="small">Automotive</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- DEALS OF THE DAY -->
+  <section class="container mt-4 deals" id="offers">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">Deals of the Day <small id="dealLabel" class="text-muted" style="font-weight:600;font-size:.9rem"></small></h4>
+      <div class="text-muted small">Ends in <span id="countdown">--:--:--</span></div>
+    </div>
+    <div class="d-flex gap-3 overflow-auto pb-2" id="dealsRow" aria-live="polite"></div>
+  </section>
+  <!-- FEATURED COLLECTIONS -->
+  <section class="container featured mt-4">
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-3">
+        <div class="card text-white" style="background-image:url('https://images.unsplash.com/photo-1542293787938-c9e299b88076?w=800&q=60');background-size:cover">
+          <div class="p-4" style="background:linear-gradient(180deg,rgba(11,27,43,.45),rgba(11,27,43,.08))">
+            <h5>Top Brands</h5><small>Premium brands collection</small>
+            <div class="mt-2"><button class="btn btn-light btn-sm">Explore</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card text-white" style="background-image:url('https://images.unsplash.com/photo-1510557880182-3d4d3b5d6fb2?w=800&q=60');background-size:cover">
+          <div class="p-4" style="background:linear-gradient(180deg,rgba(11,27,43,.45),rgba(11,27,43,.08))">
+            <h5>Premium Electronics</h5><small>Selected items on sale</small>
+            <div class="mt-2"><button class="btn btn-light btn-sm">Explore</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card text-white" style="background-image:url('https://images.unsplash.com/photo-1521334884684-d80222895322?w=800&q=60');background-size:cover">
+          <div class="p-4" style="background:linear-gradient(180deg,rgba(11,27,43,.45),rgba(11,27,43,.08))">
+            <h5>Fashion Festival</h5><small>New seasonal arrivals</small>
+            <div class="mt-2"><button class="btn btn-light btn-sm">Explore</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="card text-white" style="background-image:url('https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=800&q=60');background-size:cover">
+          <div class="p-4" style="background:linear-gradient(180deg,rgba(11,27,43,.45),rgba(11,27,43,.08))">
+            <h5>Home Essentials</h5><small>Comfort & design</small>
+            <div class="mt-2"><button class="btn btn-light btn-sm">Explore</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- BIG PROMOTIONAL BANNERS -->
+  <section class="container mt-4">
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="mid-banner" style="background-image:url('https://images.unsplash.com/photo-1520975682952-1f11ed2f9f2f?w=1200&q=60')">
+          <div class="overlay"></div>
+          <div class="p-4 text-white" style="z-index:2">
+            <h4>Fashion Sale</h4><p>Up to 60% off select styles</p><button class="btn btn-cta btn-sm">Shop Fashion</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="mid-banner" style="background-image:url('https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=60')">
+          <div class="overlay"></div>
+          <div class="p-4 text-white" style="z-index:2">
+            <h4>Mobile Bonanza</h4><p>Best prices on latest phones</p><button class="btn btn-cta btn-sm">Shop Mobiles</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="mid-banner" style="background-image:url('https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200&q=60')">
+          <div class="overlay"></div>
+          <div class="p-4 text-white" style="z-index:2">
+            <h4>Super Savings</h4><p>New arrivals & great offers</p><button class="btn btn-cta btn-sm">Discover</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- MAIN PRODUCT GRID (with filters) -->
+  <main id="main-content" class="container mt-4">
+    <div class="row">
+      <aside class="col-lg-3 pe-lg-4">
+        <div class="card p-3 mb-3">
+          <h6>Filters</h6>
+          <div class="mb-2">
+            <label class="form-label small">Price</label>
+            <div class="d-flex gap-2">
+              <input type="number" id="minPrice" class="form-control form-control-sm" placeholder="Min" aria-label="Minimum price">
+              <input type="number" id="maxPrice" class="form-control form-control-sm" placeholder="Max" aria-label="Maximum price">
+            </div>
+            <div class="mt-2 d-flex gap-2">
+              <button class="btn btn-sm btn-primary" id="applyPrice">Apply</button>
+              <button class="btn btn-sm btn-outline-secondary" id="resetPrice">Reset</button>
+            </div>
+          </div>
+      <div class="mb-2">
+        <label class="form-label small">Sort</label>
+        <select id="sortSelect" class="form-select form-select-sm" aria-label="Sort products">
+          <option value="relevance">Relevance / Default</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating-desc">Rating: High to Low</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label small">Quick category</label>
+        <div class="d-flex flex-wrap gap-1">
+          <button class="btn btn-sm btn-outline-secondary cat-quick" data-cat="All">All</button>
+          <button class="btn btn-sm btn-outline-secondary cat-quick" data-cat="Electronics">Electronics</button>
+          <button class="btn btn-sm btn-outline-secondary cat-quick" data-cat="Fashion">Fashion</button>
+          <button class="btn btn-sm btn-outline-secondary cat-quick" data-cat="Home">Home</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h6>Brands</h6>
+      <div class="d-flex gap-2 flex-wrap mt-2">
+        <span class="badge bg-light text-dark">Samsung</span>
+        <span class="badge bg-light text-dark">Apple</span>
+        <span class="badge bg-light text-dark">Sony</span>
+        <span class="badge bg-light text-dark">Puma</span>
+      </div>
+    </div>
+
+    <div class="card p-3 mb-3">
+      <h6>Top Rated</h6>
+      <div class="small text-muted">Handpicked best products</div>
+      <div class="mt-2">
+        <div class="d-flex gap-2 align-items-center">
+          <img src="https://via.placeholder.com/64" alt="prod" class="rounded" width="64">
+          <div>
+            <div style="font-weight:700">Wireless Headphones</div>
+            <div class="small text-muted">₹3,499 · <i class="fa fa-star text-warning"></i> 4.6</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Products</h5>
+      <div class="d-flex gap-2 align-items-center">
+        <div class="small text-muted">Showing <span id="shownCount">0</span> of <span id="totalCount">0</span></div>
+      </div>
+    </div>
+
+    <!-- product grid -->
+    <div id="productsGrid" class="row g-3"></div>
+
+    <!-- no products -->
+    <div id="noProducts" class="text-center my-5" style="display:none">
+      <i class="fa fa-search fa-2x text-muted"></i>
+      <h5>No products match your search</h5>
+      <p class="text-muted">Try adjusting filters or clear search</p>
+    </div>
+
+    <div class="text-center mt-4 mb-5">
+      <button id="loadMoreBtn" class="btn btn-outline-primary">Load More</button>
+    </div>
+
+  </section>
+</div>
+
+  </main>
+  <!-- BRANDS YOU MAY LIKE -->
+  <section class="container mt-4">
+    <h5>Brands You May Like</h5>
+    <div class="row g-3 mt-2">
+      <div class="col-6 col-md-3"><div class="brand-card">Samsung</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">Sony</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">Apple</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">Adidas</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">Puma</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">LG</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">Titan</div></div>
+      <div class="col-6 col-md-3"><div class="brand-card">Philips</div></div>
+    </div>
+  </section>
+  <!-- RECOMMENDED FOR YOU -->
+  <section class="container mt-4">
+    <h5>Recommended for You</h5>
+    <div class="row g-3 mt-2" id="recommendedRow"></div>
+  </section>
+  <!-- CUSTOMER REVIEWS -->
+  <section class="container mt-4">
+    <h5>Customer Reviews</h5>
+    <div class="row g-3 mt-2">
+      <div class="col-md-4">
+        <div class="review-card">
+          <div style="font-weight:700">Rohit S. <span class="small text-muted">· 4.8 <i class="fa fa-star text-warning"></i></span></div>
+          <p class="small text-muted">Great deals on mobile accessories. Quick delivery and responsive support.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="review-card">
+          <div style="font-weight:700">Neha K. <span class="small text-muted">· 4.5 <i class="fa fa-star text-warning"></i></span></div>
+          <p class="small text-muted">Amazing fashion collection. Fit was perfect and return process was smooth.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="review-card">
+          <div style="font-weight:700">Ali P. <span class="small text-muted">· 4.7 <i class="fa fa-star text-warning"></i></span></div>
+          <p class="small text-muted">Electronics prices are competitive. Packaging was great.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- NEWSLETTER -->
+  <section class="container mt-4">
+    <div class="newsletter p-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+      <div>
+        <h5>Stay Updated with Zentro Deals</h5>
+        <p class="small text-muted mb-0">Sign up for exclusive offers and early access to sales.</p>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <input id="newsletterEmail" type="email" class="form-control form-control-lg" placeholder="Enter your email" aria-label="Newsletter email">
+        <button class="btn btn-primary btn-lg" id="subscribeBtn" aria-label="Subscribe to newsletter">Subscribe</button>
+      </div>
+    </div>
+  </section>
+  <!-- FOOTER -->
+  <footer class="mt-4">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-3">
+          <h6>ZENTRO</h6>
+          <ul class="list-unstyled small">
+            <li><a href="#">About us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Press</a></li>
+            <li><a href="#">Sitemap</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h6>Help</h6>
+          <ul class="list-unstyled small">
+            <li><a href="#">Payments</a></li>
+            <li><a href="#">Shipping</a></li>
+            <li><a href="#">Cancellation</a></li>
+            <li><a href="#">FAQs</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h6>Customer Policies</h6>
+          <ul class="list-unstyled small">
+            <li><a href="#">Return Policy</a></li>
+            <li><a href="#">Terms of Use</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h6>Follow Us</h6>
+          <div class="d-flex gap-2">
+            <a href="#" class="btn btn-sm btn-outline-light" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="btn btn-sm btn-outline-light" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="btn btn-sm btn-outline-light" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="btn btn-sm btn-outline-light" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+          <div class="mt-3 small payment-icons">
+            <i class="fa-brands fa-cc-visa"></i>
+            <i class="fa-brands fa-cc-mastercard"></i>
+            <i class="fa-solid fa-credit-card"></i>
+            <span class="small">UPI</span>
+          </div>
+        </div>
+      </div>
+  <div class="border-top mt-4 pt-3 d-flex justify-content-between align-items-center">
+    <div>© 2025 ZENTRO – All Rights Reserved</div>
+    <div class="small text-muted">Made with ❤️ for a demo · Privacy & Terms</div>
+  </div>
+</div>
+
+  </footer>
+  <!-- FLOATING CHAT BUTTON -->
+<button class="chat-btn" id="openChat" aria-label="Open chat support"><i class="fa fa-comments"></i></button>
+  <!-- MOBILE STICKY BOTTOM BAR -->
+  <div class="mobile-bottom d-md-none">
+    <button class="btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Home"><i class="fa fa-home"></i><div style="font-size:11px">Home</div></button>
+    <button class="btn" onclick="document.querySelector('.categories-strip').scrollIntoView({behavior:'smooth'})" aria-label="Categories"><i class="fa fa-th-large"></i><div style="font-size:11px">Categories</div></button>
+    <button class="btn" id="mobileCart" aria-label="Cart"><i class="fa fa-shopping-cart"></i><div style="font-size:11px">Cart</div></button>
+    <button class="btn" id="mobileWishlist" aria-label="Wishlist"><i class="fa-regular fa-heart"></i><div style="font-size:11px">Wishlist</div></button>
+
+    {% if current_user.is_authenticated %}
+  <a class="btn" href="{{ url_for('account.profile') }}" aria-label="Account">
+    <i class="fa fa-user"></i>
+    <div style="font-size:11px">Profile</div>
+  </a>
+{% else %}
+  <a class="btn" href="{{ url_for('auth.login') }}" aria-label="Account">
+    <i class="fa fa-user"></i>
+    <div style="font-size:11px">Account</div>
+  </a>
+{% endif %}
+
+
+
+  </div>
+  <!-- COOKIE BANNER -->
+  <div id="cookieBanner" class="cookie-banner" role="dialog" aria-label="Cookie consent" style="display:none">
+    <div>
+      <strong>Zentro uses cookies</strong>
+      <div class="small text-muted">to enhance your experience. By continuing, you agree to our cookie policy.</div>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn btn-primary" id="acceptCookies">Accept</button>
+      <button class="btn btn-outline-secondary" id="learnCookies">Learn More</button>
+    </div>
+  </div>
+  <!-- Quick aria-live region for announcements -->
+  <div id="announcer" aria-live="polite" aria-atomic="true" style="position:absolute;left:-9999px;top:auto;"></div>
+
+  <!-- QUICK VIEW MODAL -->
+  <div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewTitle" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="quickViewTitle" class="modal-title">Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close quick view"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6 text-center">
+              <img id="quickImage" src="" alt="" class="img-fluid rounded">
+            </div>
+            <div class="col-md-6">
+              <h5 id="quickName"></h5>
+              <div id="quickRating" class="mb-2"></div>
+              <div class="mb-2"><span id="quickPrice" style="font-weight:800"></span> <span id="quickOld" class="old-price"></span> <span id="quickDiscount" class="discount"></span></div>
+              <div id="quickStock" class="mb-2 small"></div>
+              <div id="quickTags" class="mb-2 small text-muted"></div>
+              <div class="d-flex gap-2 align-items-center mb-2">
+                <div class="input-group input-group-sm qty-group" style="width:120px">
+                  <button class="btn btn-outline-secondary qty-minus" type="button" aria-label="Decrease quantity">-</button>
+                  <input type="number" min="1" value="1" class="form-control qty-input" id="quickQty" aria-label="Quantity">
+                  <button class="btn btn-outline-secondary qty-plus" type="button" aria-label="Increase quantity">+</button>
+                </div>
+                <button class="btn btn-primary" id="quickAddCart">Add to Cart</button>
+                <button class="btn btn-outline-danger" id="quickWishlistBtn"><i class="fa-regular fa-heart"></i> Wishlist</button>
+              </div>
+              <div id="quickWarning" class="mini-warning" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- CHAT MODAL -->
+  <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatLabel" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-sm modal-dialog-bottom">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 id="chatLabel" class="modal-title">Chat Support</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close chat"></button>
+        </div>
+        <div class="modal-body">
+          <form id="chatForm">
+            <div class="mb-2">
+              <label class="form-label small">Name</label>
+              <input type="text" id="chatName" class="form-control" required>
+              <div class="invalid-feedback">Please provide your name</div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Email</label>
+              <input type="email" id="chatEmail" class="form-control" required>
+              <div class="invalid-feedback">Valid email required</div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Message</label>
+              <textarea id="chatMessage" class="form-control" rows="3" required></textarea>
+              <div class="invalid-feedback">Message required</div>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+            <div id="chatSuccess" class="mt-2 text-success" style="display:none">Thanks! We'll reply soon (demo).</div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW USER SIGNUP MODAL (show after ~3s first visit) -->
+  <div class="modal fade" id="newUserModal" tabindex="-1" aria-labelledby="newUserLabel" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="newUserLabel" class="modal-title">Welcome to Zentro!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close welcome"></button>
+        </div>
+        <div class="modal-body">
+          <p>Sign up now and get special discounts on your first order.</p>
+          <form id="newUserForm">
+            <div class="mb-2">
+              <label class="form-label small">Name</label>
+              <input type="text" id="newName" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Email</label>
+              <input type="email" id="newEmail" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label small">Password</label>
+              <input type="password" id="newPassword" class="form-control" minlength="6" required>
+            </div>
+            <div class="d-flex justify-content-end">
+              <button class="btn btn-warning" type="submit">Create Account</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI CART OFFCANVAS (slideout) -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="miniCartOffcanvas" aria-labelledby="miniCartLabel">
+    <div class="offcanvas-header">
+      <h5 id="miniCartLabel">Your Cart</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+      <div id="miniCartItems" class="mb-3" style="overflow:auto"></div>
+
+      <!-- checkout summary area (tax/shipping/grand total) -->
+      <div id="miniCartSummary" class="mini-summary">
+        <div class="d-flex justify-content-between"><div class="small text-muted">Subtotal</div><div id="miniCartSubtotal" style="font-weight:800">₹0</div></div>
+        <div class="d-flex justify-content-between mt-1"><div class="small text-muted">Tax (18%)</div><div id="miniCartTax" class="small" style="font-weight:700">₹0</div></div>
+        <div class="d-flex justify-content-between mt-1"><div class="small text-muted">Shipping</div><div id="miniCartShipping" class="small" style="font-weight:700">₹0</div></div>
+        <div class="d-flex justify-content-between mt-2"><div style="font-weight:700">Grand Total</div><div id="miniCartTotal" style="font-weight:900">₹0</div></div>
+      </div>
+
+      <div class="mt-auto">
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-outline-secondary w-100" data-bs-dismiss="offcanvas">Continue shopping</button>
+          <button class="btn btn-primary w-100" id="checkoutBtn" aria-disabled="true">Checkout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container (for stacking toasts using Bootstrap Toast API) -->
+  <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:1500"></div>
+
+  <!-- Legacy single toast (kept but unused, safe) -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1400;right:18px;bottom:120px;">
+    <div id="toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="polite" aria-atomic="true" style="display:none;min-width:220px;">
+      <div class="d-flex">
+        <div class="toast-body" id="toastBody">Added to cart</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" id="toastClose"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (bundle) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    /***********************
+     * Zentro Frontend Demo - small improvements added:
+     * - Product-card & quick-view qty validation (clamp + warn)
+     * - Robust setCartQty implementation (delta-based)
+     * - Debounced mini-qty-input handling
+     * - Announcer (aria-live) for warnings + toast when clamp occurs
+     * - Update dataset.max consistently and focus management + disable checkout when empty
+     ***********************/
+
+    // Basic utilities
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const fmtPrice = v => '₹' + Number(v).toLocaleString('en-IN');
+
+    // Local storage keys
+    const STORAGE = {
+      CART: 'zentro_cart',
+      WISHLIST: 'zentro_wishlist',
+      CITY: 'zentro_city',
+      COOKIE: 'zentro_cookie_accepted',
+      NEWUSER: 'zentro_newuser_shown',
+      MINI_OPEN: 'zentro_mini_open' // persisted mini-cart open state
+    };
+
+    // Announcer for accessibility (aria-live)
+    const announcer = $('#announcer');
+
+    // Simple announce helper
+    function announce(text){
+      if(announcer) announcer.textContent = text;
+    }
+
+    // Local toast + announcer combined helper
+    const toastContainer = $('#toastContainer');
+    function showToast(msg, type='success', timeout=2500){
+      // accessibility announce
+      announce(msg);
+      // create toast element using Bootstrap structure
+      const id = 't'+Date.now() + Math.floor(Math.random()*1000);
+      const bgClass = type === 'success' ? 'bg-success text-white' : 'bg-danger text-white';
+      const toastEl = document.createElement('div');
+      toastEl.className = `toast ${bgClass}`;
+      toastEl.role = 'status';
+      toastEl.setAttribute('aria-live','polite');
+      toastEl.setAttribute('aria-atomic','true');
+      toastEl.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body" style="min-width:180px">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      `;
+      toastContainer.appendChild(toastEl);
+      const bsToast = new bootstrap.Toast(toastEl, { delay: timeout });
+      bsToast.show();
+      // remove element after hidden to keep DOM clean
+      toastEl.addEventListener('hidden.bs.toast', ()=> { toastEl.remove(); });
+      return bsToast;
+    }
+
+    // Debounce helper
+    function debounce(fn, wait=220){
+      let t;
+      return (...args)=>{
+        clearTimeout(t);
+        t = setTimeout(()=> fn.apply(this, args), wait);
+      };
+    }
+
+    // Sample product data (~24 products)
+    const PRODUCTS = (() => {
+      const imgs = [
+        "https://images.unsplash.com/photo-1510557880182-3d4d3b5d6fb2?w=800&q=60",
+        "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=60",
+        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=60",
+        "https://images.unsplash.com/photo-1503602642458-232111445657?w=800&q=60",
+        "https://images.unsplash.com/photo-1541534401786-5d3f7d9f3a3b?w=800&q=60",
+        "https://images.unsplash.com/photo-1526178611496-0c2250d6a6b2?w=800&q=60"
+      ];
+      const names = [
+        "AeroBeat Wireless Headphones", "Lumina Smart TV 43\"", "Zephyr Air Purifier", "Orbit Fitness Band",
+        "Nova 5G Smartphone", "Prestige Mixer Grinder", "Lumen Desk Lamp", "Venture Backpack", "SilkBlend Shirt", "Ridge Running Shoes",
+        "Aurora Blender", "Echo Smart Speaker", "Nimbus Mattress", "Auric Smartwatch", "Pulse Wireless Mouse",
+        "Prime Laptop 14\"", "Glow Skincare Set", "HomeChef Nonstick Pan", "Fusion Juicer", "Comfy Sofa Cover",
+        "PlayPro Gaming Headset", "Speedster Bike Light", "EcoBottle 1L", "Titan Watch Classic"
+      ];
+      const cats = ["Electronics","Electronics","Home","Sports","Mobiles","Home","Home","Fashion","Fashion","Fashion","Home","Electronics","Home","Electronics","Electronics","Electronics","Beauty","Home","Home","Home","Electronics","Automotive","Home","Fashion"];
+      const arr = [];
+      for(let i=0;i<24;i++){
+        const price = Math.round((500 + Math.random()*75000));
+        const old = Math.round(price + (50 + Math.random()*price*0.35));
+        arr.push({
+          id: 'p'+(1000+i),
+          name: names[i],
+          category: cats[i],
+          image: imgs[i%imgs.length],
+          price: price,
+          oldPrice: old,
+          rating: +(3 + Math.random()*2).toFixed(1),
+          isDeal: Math.random() > 0.72,
+          dateAdded: Date.now() - (i*86400000),
+          stock: Math.floor(Math.random()*40),
+          tags: (Math.random()>.6) ? ["Best Seller"] : []
+        });
+      }
+      return arr;
+    })();
+
+    // State
+    let state = {
+      products: PRODUCTS.slice(),
+      filtered: [],
+      perPage: 8,
+      shown: 8,
+      cart: [], // {id, qty}
+      wishlist: [], // ids
+      currentCity: localStorage.getItem(STORAGE.CITY) || 'Delhi'
+    };
+
+    // Safe parse wrapper for localStorage (fix for corrupted values)
+    function safeParse(key, fallback = []) {
+      try {
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      } catch (e) {
+        console.warn('safeParse error for', key, e);
+        return fallback;
+      }
+    }
+
+    // Utilities for storage (now using safeParse)
+    function saveCart(){ localStorage.setItem(STORAGE.CART, JSON.stringify(state.cart)); }
+    function saveWishlist(){ localStorage.setItem(STORAGE.WISHLIST, JSON.stringify(state.wishlist)); }
+    function loadCart(){
+      const d = safeParse(STORAGE.CART, []);
+      state.cart = Array.isArray(d) ? d : [];
+    }
+    function loadWishlist(){
+      const d = safeParse(STORAGE.WISHLIST, []);
+      state.wishlist = Array.isArray(d) ? d : [];
+    }
+
+    // Reconcile stock with cart (deduct quantities from the visible products on init)
+    function reconcileStockWithCart(){
+      state.cart.forEach(ci=>{
+        const p = state.products.find(x=>x.id===ci.id);
+        if(p) p.stock = Math.max(0, p.stock - (ci.qty || 0));
+      });
+    }
+
+    // Initialize badges
+    function updateBadges(){
+      // Cart count: total quantity
+      const cartCount = state.cart.reduce((s,i)=>s+(i.qty||1),0);
+      const wlCount = state.wishlist.length;
+      const cartBadge = $('#cartBadge');
+      const wlBadge = $('#wishlistBadge');
+      if(cartCount>0){ cartBadge.style.display='inline-block'; cartBadge.textContent = cartCount; } else cartBadge.style.display='none';
+      if(wlCount>0){ wlBadge.style.display='inline-block'; wlBadge.textContent = wlCount; } else wlBadge.style.display='none';
+      // mobile icons: set title/tooltip as lightweight indicator (avoid DOM manipulation bugs)
+      const mobileCart = $('#mobileCart');
+      const mobileWl = $('#mobileWishlist');
+      if(mobileCart) mobileCart.title = cartCount>0 ? `Cart (${cartCount})` : 'Cart';
+      if(mobileWl) mobileWl.title = wlCount>0 ? `Wishlist (${wlCount})` : 'Wishlist';
+
+      // Update mini-cart content when badges change
+      renderMiniCart();
+      // Update checkout enable/disable
+      updateCheckoutState();
+    }
+
+    // Update checkout enabled state
+    function updateCheckoutState(){
+      const checkoutBtn = $('#checkoutBtn');
+      if(!checkoutBtn) return;
+      if(state.cart.length === 0){
+        checkoutBtn.setAttribute('disabled','disabled');
+        checkoutBtn.setAttribute('aria-disabled','true');
+        checkoutBtn.classList.add('disabled');
+      } else {
+        checkoutBtn.removeAttribute('disabled');
+        checkoutBtn.setAttribute('aria-disabled','false');
+        checkoutBtn.classList.remove('disabled');
+      }
+    }
+
+    // Render deals
+    function renderDeals(){
+      const deals = state.products.filter(p=>p.isDeal).slice(0,6);
+      $('#dealsRow').innerHTML = '';
+      deals.forEach(p=>{
+        const card = document.createElement('div');
+        card.className = 'deal-card';
+        card.innerHTML = `
+          <div class="text-center">
+            <img src="${p.image}" alt="${p.name}" style="height:120px;object-fit:cover;width:100%;">
+            <div style="font-weight:700;margin-top:.4rem">${p.name}</div>
+            <div class="small text-muted"><span class="old-price">${fmtPrice(p.oldPrice)}</span> <span style="font-weight:800">${fmtPrice(p.price)}</span></div>
+            <div class="mt-1"><span class="deal-badge">-${Math.round((1 - p.price/p.oldPrice)*100)}%</span> <small class="text-muted">${p.stock>0 ? 'Limited Stock' : 'Out of Stock'}</small></div>
+            <div class="mt-2">
+              <button class="btn btn-sm btn-primary quick-view-btn" data-id="${p.id}">Quick View</button>
+            </div>
+          </div>
+        `;
+        $('#dealsRow').appendChild(card);
+      });
+    }
+
+    // Countdown timer for deals (set to future time today + 6 hours for demo)
+    let dealEndsAt = new Date();
+    dealEndsAt.setHours(dealEndsAt.getHours() + 6);
+    function startCountdown(){
+      const label = $('#dealLabel');
+      function tick(){
+        const now = new Date();
+        const diff = dealEndsAt - now;
+        if(diff<=0){
+          $('#countdown').textContent = '00:00:00';
+          label.textContent = ' — Deal ended – New deals coming soon';
+          clearInterval(countInt);
+          return;
+        }
+        const hrs = String(Math.floor(diff/3600000)).padStart(2,'0');
+        const mins = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+        const secs = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+        $('#countdown').textContent = `${hrs}:${mins}:${secs}`;
+        label.textContent = '';
+      }
+      tick();
+      const countInt = setInterval(tick,1000);
+    }
+
+    // Render products grid based on filtered & sort & pagination
+    function renderProducts(){
+      // apply filters/sort then slice by shown
+      const grid = $('#productsGrid');
+      const totalCountEl = $('#totalCount');
+      const shownCountEl = $('#shownCount');
+      const noEl = $('#noProducts');
+      const q = $('#search-input').value.trim().toLowerCase();
+      const cat = $('#search-category').value;
+      const min = Number($('#minPrice').value) || 0;
+      const max = Number($('#maxPrice').value) || Infinity;
+      const sort = $('#sortSelect').value;
+
+      let filtered = state.products.filter(p=>{
+        // name filter
+        if(q && !p.name.toLowerCase().includes(q)) return false;
+        // category
+        if(cat && cat !== 'All' && p.category !== cat) return false;
+        // price
+        if(p.price < min) return false;
+        if(p.price > max) return false;
+        return true;
+      });
+
+      // sorting
+      if(sort === 'price-asc') filtered.sort((a,b)=>a.price-b.price);
+      else if(sort === 'price-desc') filtered.sort((a,b)=>b.price-a.price);
+      else if(sort === 'rating-desc') filtered.sort((a,b)=> {
+        if(b.rating !== a.rating) return b.rating - a.rating;
+        return a.price - b.price; // tie-breaker: cheaper first
+      });
+      else if(sort === 'newest') filtered.sort((a,b)=>b.dateAdded - a.dateAdded);
+      // else relevance: leave as default
+
+      state.filtered = filtered;
+      totalCountEl.textContent = filtered.length;
+
+      if(filtered.length===0){
+        grid.innerHTML='';
+        $('#loadMoreBtn').style.display='none';
+        noEl.style.display='block';
+        shownCountEl.textContent = 0;
+        return;
+      } else {
+        noEl.style.display='none';
+      }
+
+      // clamp shown
+      if(state.shown > filtered.length) state.shown = filtered.length;
+      const slice = filtered.slice(0, state.shown);
+      shownCountEl.textContent = slice.length;
+
+      grid.innerHTML = '';
+      slice.forEach(p=>{
+        const col = document.createElement('div');
+        col.className = 'col-12 col-md-6 col-lg-3';
+        const inWishlist = state.wishlist.includes(p.id);
+        const cartItem = state.cart.find(i=>i.id===p.id);
+        const qty = 1; // default visible qty control
+        col.innerHTML = `
+          <div class="product-card" role="region" aria-label="${p.name}">
+            <div class="product-image"><img src="${p.image}" alt="${p.name}" style="max-height:160px;width:100%;object-fit:cover;border-radius:8px" loading="lazy"></div>
+            <div style="margin-top:.6rem">
+              <div style="font-weight:700;height:36px;overflow:hidden">${p.name}</div>
+              <div class="small text-muted"><i class="fa fa-star text-warning"></i> ${p.rating}</div>
+              <div class="mt-1"><span style="font-weight:800">${fmtPrice(p.price)}</span> <span class="old-price">${fmtPrice(p.oldPrice)}</span> <span class="discount">-${Math.round((1-p.price/p.oldPrice)*100)}%</span></div>
+              <div class="mt-1">${p.stock>0 ? '<span class="in-stock">In stock: '+p.stock+'</span>' : '<span class="out-stock">Out of stock</span>'}</div>
+
+              <div class="d-flex gap-2 mt-2 align-items-center">
+                <div class="input-group input-group-sm qty-group" style="width:120px">
+                  <button class="btn btn-outline-secondary qty-minus" type="button" aria-label="Decrease quantity">-</button>
+                  <input type="number" min="1" value="${qty}" class="form-control qty-input" data-prod="${p.id}" aria-label="Quantity">
+                  <button class="btn btn-outline-secondary qty-plus" type="button" aria-label="Increase quantity">+</button>
+                </div>
+                <button class="btn btn-sm btn-primary add-cart" data-id="${p.id}" ${p.stock===0 ? 'disabled' : ''}>${p.stock===0? 'Out of stock' : 'Add to Cart'}</button>
+              </div>
+
+              <div class="d-flex gap-2 mt-2">
+                <button class="btn btn-sm ${inWishlist? 'btn-danger' : 'btn-outline-danger'} wishlist-toggle" data-id="${p.id}" aria-pressed="${inWishlist}"><i class="${inWishlist? 'fa-solid' : 'fa-regular'} fa-heart"></i></button>
+                <button class="btn btn-sm btn-outline-secondary quick-view-btn" data-id="${p.id}">Quick View</button>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(col);
+      });
+
+      if(state.shown < filtered.length){
+        $('#loadMoreBtn').style.display='inline-block';
+      } else {
+        $('#loadMoreBtn').style.display='none';
+      }
+
+    }
+
+    // Load more
+    $('#loadMoreBtn').addEventListener('click', ()=>{
+      state.shown = Math.min(state.shown + state.perPage, state.filtered.length);
+      renderProducts();
+    });
+
+    // Search + category listeners (search input debounced)
+    $('#search-input').addEventListener('input', debounce(()=>{
+      state.shown = state.perPage;
+      renderProducts();
+    }, 180));
+    $('#search-category').addEventListener('change', ()=>{
+      state.shown = state.perPage;
+      renderProducts();
+    });
+    $('#search-btn').addEventListener('click', ()=>{ state.shown = state.perPage; renderProducts(); });
+
+    // Price filter
+    $('#applyPrice').addEventListener('click', ()=>{ state.shown = state.perPage; renderProducts(); });
+    $('#resetPrice').addEventListener('click', ()=>{
+      $('#minPrice').value='';$('#maxPrice').value=''; state.shown = state.perPage; renderProducts();
+    });
+
+    // sort
+    $('#sortSelect').addEventListener('change', ()=>{ state.shown = state.perPage; renderProducts(); });
+
+    // Quick category on sidebar
+    $$('.cat-quick').forEach(btn=>btn.addEventListener('click', e=>{
+      const cat = e.currentTarget.dataset.cat;
+      $('#search-category').value = cat;
+      state.shown = state.perPage;
+      renderProducts();
+    }));
+
+    // Category strip click to filter
+    $$('.category-card').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const cat = el.dataset.cat;
+        $('#search-category').value = cat;
+        state.shown = state.perPage;
+        renderProducts();
+        window.scrollTo({top:document.querySelector('#main-content').offsetTop-70,behavior:'smooth'});
+      });
+    });
+
+    // Delegated click handlers: Add to Cart, wishlist, quick view, qty controls
+    document.body.addEventListener('click', (e)=>{
+      const target = e.target;
+
+      // qty plus (on product card / quick view)
+      const plus = target.closest('.qty-plus');
+      if(plus){
+        const group = plus.closest('.qty-group');
+        const input = group && group.querySelector('.qty-input');
+        if(input){
+          const cur = Number(input.value) || 1;
+          input.value = Math.min(999, cur + 1);
+        }
+        return;
+      }
+
+      // qty minus
+      const minus = target.closest('.qty-minus');
+      if(minus){
+        const group = minus.closest('.qty-group');
+        const input = group && group.querySelector('.qty-input');
+        if(input){
+          const cur = Number(input.value) || 1;
+          input.value = Math.max(1, cur - 1);
+        }
+        return;
+      }
+
+      // quick view
+      const qbtn = target.closest('.quick-view-btn');
+      if(qbtn){
+        const id = qbtn.dataset.id;
+        openQuickView(id);
+        return;
+      }
+      // add to cart
+      const addBtn = target.closest('.add-cart');
+      if(addBtn){
+        const id = addBtn.dataset.id;
+        // find nearest qty input
+        const parentCard = addBtn.closest('.product-card');
+        const qtyInput = parentCard && parentCard.querySelector('.qty-input');
+        const qty = qtyInput ? Math.max(1, Number(qtyInput.value)||1) : 1;
+        // Validate against available stock before calling addToCart
+        const p = state.products.find(x=>x.id===id);
+        const available = p ? p.stock : 0;
+        if(qty > available){
+          // clamp in UI, announce + toast
+          if(qtyInput) qtyInput.value = Math.max(1, available);
+          showToast(`Quantity adjusted to ${available} (only ${available} available)`, 'error');
+        }
+        addToCart(id, Math.min(qty, Math.max(0, available)));
+        return;
+      }
+      // wishlist toggle
+      const wbtn = target.closest('.wishlist-toggle');
+      if(wbtn){
+        const id = wbtn.dataset.id;
+        toggleWishlist(id);
+        return;
+      }
+    });
+
+    // Quick view modal logic
+    const quickModal = new bootstrap.Modal($('#quickViewModal'), {keyboard:true});
+    function openQuickView(id){
+      const p = state.products.find(x=>x.id===id);
+      if(!p) return;
+      $('#quickImage').src = p.image;
+      $('#quickImage').alt = p.name;
+      $('#quickName').textContent = p.name;
+      $('#quickPrice').textContent = fmtPrice(p.price);
+      $('#quickOld').textContent = fmtPrice(p.oldPrice);
+      $('#quickDiscount').textContent = '-'+Math.round((1-p.price/p.oldPrice)*100)+'%';
+      $('#quickStock').textContent = p.stock>0 ? 'In stock: '+p.stock : 'Out of stock';
+      $('#quickTags').textContent = p.tags.join(', ');
+      $('#quickViewModal').dataset.prodId = p.id;
+      $('#quickQty').value = 1;
+      $('#quickWarning').style.display = 'none';
+      quickModal.show();
+    }
+    $('#quickAddCart').addEventListener('click', ()=>{
+      const id = $('#quickViewModal').dataset.prodId;
+      const qty = Math.max(1, Number($('#quickQty').value)||1);
+      const p = state.products.find(x=>x.id===id);
+      const available = p ? p.stock : 0;
+      if(qty > available){
+        // clamp and inform
+        $('#quickQty').value = Math.max(0, available);
+        $('#quickWarning').style.display = 'block';
+        $('#quickWarning').textContent = `Only ${available} available`;
+        showToast(`Quantity adjusted to ${available} (only ${available} available)`, 'error');
+      }
+      const final = Math.min(qty, Math.max(0, available));
+      if(id && final > 0) addToCart(id, final);
+      quickModal.hide();
+    });
+    $('#quickWishlistBtn').addEventListener('click', ()=>{
+      const id = $('#quickViewModal').dataset.prodId;
+      if(id) toggleWishlist(id);
+    });
+
+    // Add to cart logic (persist + stock reduce)
+    function addToCart(id, qty=1){
+      const p = state.products.find(x=>x.id===id);
+      if(!p || p.stock<=0){ showToast('Item out of stock','error'); return; }
+      const actualQty = Math.min(qty, p.stock);
+      if(actualQty <= 0){ showToast('No stock available','error'); return; }
+      // reduce stock
+      p.stock = Math.max(0,p.stock - actualQty);
+      // add to cart
+      const existing = state.cart.find(i=>i.id===id);
+      if(existing){ existing.qty += actualQty; } else state.cart.push({id, qty: actualQty});
+      saveCart();
+      // ensure dataset.max and mini-cart updated
+      updateBadges();
+      renderProducts();
+      renderDeals();
+      showToast('Added to cart');
+    }
+
+    // Wishlist toggle
+    function toggleWishlist(id){
+      const idx = state.wishlist.indexOf(id);
+      if(idx===-1) state.wishlist.push(id); else state.wishlist.splice(idx,1);
+      saveWishlist();
+      updateBadges();
+      renderProducts();
+      showToast(idx===-1 ? 'Added to wishlist' : 'Removed from wishlist');
+    }
+
+    // Load saved cart/wishlist and restore stock adjustments
+    function initStorage(){
+      loadCart(); loadWishlist();
+      reconcileStockWithCart(); // <- IMPORTANT: sync visible stock with saved cart
+      updateBadges();
+    }
+
+    // Debounced wrapper for setCartQty to avoid excessive recalculation on fast typing
+    const debouncedSetCartQty = debounce((id, qty)=> setCartQty(id, qty), 300);
+
+    // Render mini-cart (offcanvas) content
+    function renderMiniCart(){
+      const container = $('#miniCartItems');
+      if(!container) return;
+      container.innerHTML = '';
+      if(state.cart.length === 0){
+        container.innerHTML = '<div class="text-muted mini-fade">Your cart is empty.</div>';
+        updateMiniSummary(0);
+        updateCheckoutState();
+        return;
+      }
+      let subtotal = 0;
+      state.cart.forEach((ci, idx)=>{
+        const p = state.products.find(x=>x.id===ci.id) || {};
+        const qty = ci.qty || 1;
+        const linePrice = (p.price || 0) * qty;
+        subtotal += linePrice;
+
+        // compute max allowed = current qty + remaining stock of product
+        const available = (p.stock || 0) + qty;
+        const div = document.createElement('div');
+        div.className = 'mini-cart-item d-flex gap-2 align-items-center mini-fade';
+        div.innerHTML = `
+          <div style="width:64px"><img src="${p.image||'https://via.placeholder.com/64'}" alt="${p.name||''}" style="width:64px;height:64px;object-fit:cover;border-radius:6px"></div>
+          <div class="flex-grow-1">
+            <div style="font-weight:700">${p.name||'Product'}</div>
+            <div class="small text-muted">${fmtPrice(p.price||0)} · <span class="text-muted">x</span> <span class="mini-item-qty">${qty}</span></div>
+            <div class="mt-1 d-flex gap-2 align-items-center">
+              <div class="input-group input-group-sm qty-group" style="width:110px">
+                <button class="btn btn-outline-secondary mini-qty-minus" data-id="${ci.id}" type="button">-</button>
+                <input type="number" min="1" value="${qty}" class="form-control mini-qty-input" data-id="${ci.id}" style="width:48px;text-align:center" aria-label="Quantity for ${p.name}">
+                <button class="btn btn-outline-secondary mini-qty-plus" data-id="${ci.id}" type="button">+</button>
+              </div>
+              <button class="btn btn-link btn-sm text-danger remove-mini-item" data-id="${ci.id}">Remove</button>
+            </div>
+            <div class="mini-warning" data-id="${ci.id}">Requested quantity not available</div>
+          </div>
+          <div style="min-width:80px;text-align:right;font-weight:700">${fmtPrice(linePrice)}</div>
+        `;
+        // attach available as dataset for validation
+        const inputEl = div.querySelector('.mini-qty-input');
+        if(inputEl){
+          inputEl.dataset.max = available;
+        }
+        container.appendChild(div);
+      });
+      updateMiniSummary(subtotal);
+      updateCheckoutState();
+      // after render, ensure focus if offcanvas is open
+      const miniEl = $('#miniCartOffcanvas');
+      if(miniEl && miniEl.classList.contains('show')){
+        const firstInput = container.querySelector('.mini-qty-input');
+        if(firstInput) firstInput.focus({preventScroll:true});
+      }
+    }
+
+    // Update summary (subtotal, tax, shipping, total)
+    function updateMiniSummary(subtotal){
+      const taxRate = 0.18;
+      const shippingFlat = 49;
+      const freeThreshold = 999;
+      const tax = Math.round(subtotal * taxRate);
+      const shipping = subtotal >= freeThreshold ? 0 : (subtotal === 0 ? 0 : shippingFlat);
+      const total = subtotal + tax + shipping;
+      $('#miniCartSubtotal').textContent = fmtPrice(subtotal);
+      $('#miniCartTax').textContent = fmtPrice(tax);
+      $('#miniCartShipping').textContent = fmtPrice(shipping);
+      $('#miniCartTotal').textContent = fmtPrice(total);
+    }
+
+    // Handlers for mini-cart interactions (delegated)
+    document.body.addEventListener('click', (e)=>{
+      // mini cart plus/minus/remove
+      if(e.target.closest('.mini-qty-plus')){
+        const id = e.target.closest('.mini-qty-plus').dataset.id;
+        changeCartQty(id, 1);
+        return;
+      }
+      if(e.target.closest('.mini-qty-minus')){
+        const id = e.target.closest('.mini-qty-minus').dataset.id;
+        changeCartQty(id, -1);
+        return;
+      }
+      if(e.target.closest('.remove-mini-item')){
+        const id = e.target.closest('.remove-mini-item').dataset.id;
+        removeFromCart(id);
+        return;
+      }
+    });
+
+    // Additionally, listen for manual changes on mini-qty-input to validate against max (debounced)
+    document.body.addEventListener('input', (e)=>{
+      if(e.target && e.target.classList && e.target.classList.contains('mini-qty-input')){
+        const input = e.target;
+        const id = input.dataset.id;
+        const item = state.cart.find(i=>i.id===id);
+        if(!item) return;
+        const p = state.products.find(x=>x.id===id) || {};
+        const currentQty = item.qty || 1;
+        const maxAllowed = Number(input.dataset.max) || currentQty;
+        let newQty = Math.max(1, Math.floor(Number(input.value) || 1));
+        const warnEl = document.querySelector('.mini-warning[data-id="'+id+'"]');
+        if(newQty > maxAllowed){
+          // clamp and show warning + toast
+          input.value = maxAllowed;
+          if(warnEl) { warnEl.style.display = 'block'; warnEl.textContent = `Only ${maxAllowed} available`; }
+          showToast(`Quantity adjusted to ${maxAllowed} (only ${maxAllowed} available)`, 'error');
+        } else {
+          if(warnEl) { warnEl.style.display = 'none'; }
+        }
+        // call debounced setCartQty
+        debouncedSetCartQty(id, Number(input.value));
+      }
+    });
+
+    // Change cart item qty (and reconcile product stock accordingly) - increments or decrements by delta
+    function changeCartQty(id, delta){
+      const item = state.cart.find(i=>i.id===id);
+      if(!item) return;
+      const p = state.products.find(x=>x.id===id);
+      if(delta > 0){
+        if(!p || p.stock <= 0){ showToast('No more stock available','error'); return; }
+        const add = Math.min(delta, p.stock);
+        item.qty += add;
+        p.stock -= add;
+      } else {
+        // decrease by 1 (ensure >=1)
+        if(item.qty <= 1) {
+          // removing entirely if user tries to reduce below 1
+          removeFromCart(id);
+          return;
+        }
+        const reduce = Math.min(item.qty - 1, -delta);
+        item.qty -= reduce;
+        if(p) p.stock += reduce;
+      }
+      saveCart();
+      updateBadges();
+      renderProducts();
+      renderDeals();
+      renderMiniCart();
+    }
+
+    // Set cart quantity directly (used when editing input). Reconciles product stock.
+    function setCartQty(id, newQty){
+      const item = state.cart.find(i=>i.id===id);
+      if(!item) return;
+      const p = state.products.find(x=>x.id===id);
+      const oldQty = item.qty;
+      newQty = Math.max(1, Math.floor(newQty || 1));
+      // compute available max = oldQty + p.stock
+      const maxAllowed = oldQty + (p ? p.stock : 0);
+      if(newQty > maxAllowed){
+        newQty = maxAllowed;
+      }
+      const delta = newQty - oldQty;
+      if(delta > 0){
+        // need to increase by delta - take from p.stock
+        const actualAdd = Math.min(delta, p ? p.stock : 0);
+        item.qty = oldQty + actualAdd;
+        if(p) p.stock -= actualAdd;
+        if(actualAdd < delta){
+          // inform user we clamped
+          showToast(`Quantity adjusted to ${item.qty} (only ${item.qty} available)`, 'error');
+        }
+      } else if(delta < 0){
+        // reduce and restore stock
+        const restore = Math.min(-delta, oldQty - 1 + 0); // amount to restore
+        item.qty = oldQty - (-delta);
+        // actually set to newQty
+        item.qty = newQty;
+        if(p) p.stock += (oldQty - item.qty);
+      }
+      // if qty becomes zero (unexpected), remove
+      if(item.qty <= 0){
+        const idx = state.cart.indexOf(item); if(idx !== -1) state.cart.splice(idx,1);
+      }
+      saveCart();
+      updateBadges();
+      renderProducts();
+      renderDeals();
+      renderMiniCart();
+    }
+
+    function removeFromCart(id){
+      const idx = state.cart.findIndex(i=>i.id===id);
+      if(idx === -1) return;
+      const item = state.cart[idx];
+      const p = state.products.find(x=>x.id===id);
+      // restore stock
+      if(p) p.stock += item.qty;
+      state.cart.splice(idx,1);
+      saveCart();
+      updateBadges();
+      renderProducts();
+      renderDeals();
+      renderMiniCart();
+      showToast('Removed from cart');
+    }
+
+    // Newsletter validation (use showToast instead of alert)
+    $('#subscribeBtn').addEventListener('click', ()=>{
+      const email = $('#newsletterEmail').value.trim();
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!email){ showToast('Email is required','error'); return; }
+      if(!re.test(email)){ showToast('Please enter a valid email','error'); return; }
+      $('#newsletterEmail').value = '';
+      showToast('Subscribed! Check your email for offers (demo).');
+    });
+
+    // Chat support modal
+    const chatModal = new bootstrap.Modal($('#chatModal'), {keyboard:true});
+    $('#openChat').addEventListener('click', ()=>{ chatModal.show(); });
+    $('#chatForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = $('#chatName'); const email = $('#chatEmail'); const msg = $('#chatMessage');
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!name.value.trim()){ name.classList.add('is-invalid'); return; } else name.classList.remove('is-invalid');
+      if(!re.test(email.value)){ email.classList.add('is-invalid'); return; } else email.classList.remove('is-invalid');
+      if(!msg.value.trim()){ msg.classList.add('is-invalid'); return; } else msg.classList.remove('is-invalid');
+      $('#chatSuccess').style.display='block';
+      setTimeout(()=>{ $('#chatSuccess').style.display='none'; chatModal.hide(); $('#chatForm').reset(); }, 1200);
+    });
+
+    // City selector
+    $$('.city-select').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const c = e.target.textContent.trim();
+        state.currentCity = c;
+        localStorage.setItem(STORAGE.CITY, c);
+        updateCityText();
+      });
+    });
+    function updateCityText(){
+      $('#cityText').innerHTML = `Delivering to <strong>${state.currentCity}</strong>`;
+    }
+
+    // Cookie banner (accept now shows toast)
+    function checkCookieBanner(){
+      const accepted = localStorage.getItem(STORAGE.COOKIE);
+      if(!accepted){
+        $('#cookieBanner').style.display = 'flex';
+      }
+    }
+    $('#acceptCookies').addEventListener('click', ()=>{
+      localStorage.setItem(STORAGE.COOKIE, 'yes');
+      $('#cookieBanner').style.display = 'none';
+      showToast('Thanks — cookies accepted (you can manage them in settings)');
+    });
+    $('#learnCookies').addEventListener('click', ()=>{ window.scrollTo({top:document.querySelector('footer').offsetTop,behavior:'smooth'}); });
+
+    // New user signup modal (show once after ~3s)
+    const newUserModal = new bootstrap.Modal($('#newUserModal'), {keyboard:true});
+    function maybeShowNewUser(){
+      const shown = localStorage.getItem(STORAGE.NEWUSER);
+      if(!shown){
+        setTimeout(()=>{ newUserModal.show(); localStorage.setItem(STORAGE.NEWUSER,'1'); }, 3000);
+      }
+    }
+    $('#newUserForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = $('#newName').value.trim();
+      const email = $('#newEmail').value.trim();
+      const pwd = $('#newPassword').value;
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!name || !re.test(email) || pwd.length < 6){ showToast('Please follow validation rules','error'); return; }
+      newUserModal.hide();
+      showToast(`Welcome ${name}! Account created (demo)`);
+      // mark shown already set earlier but ensure stored
+      localStorage.setItem(STORAGE.NEWUSER, '1');
+      $('#newUserForm').reset();
+    });
+
+    // Auth modal toggle
+    $('#showSignup').addEventListener('click', ()=>{
+      $('#loginForm').style.display='none'; $('#signupForm').style.display='block';
+    });
+    $('#showLogin').addEventListener('click', ()=>{
+      $('#signupForm').style.display='none'; $('#loginForm').style.display='block';
+    });
+    $('#loginForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const em = $('#loginEmail').value.trim();
+      const pw = $('#loginPassword').value;
+      if(!em || !pw){ showToast('Enter email & password','error'); return; }
+      const authModal = bootstrap.Modal.getInstance($('#authModal'));
+      authModal.hide();
+      showToast('Logged in (demo)');
+    });
+    $('#signupForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const nm = $('#signupName').value.trim();
+      const em = $('#signupEmail').value.trim();
+      const pw = $('#signupPassword').value;
+      if(!nm || !em || pw.length < 6){ showToast('Please fill all fields','error'); return; }
+      const authModal = bootstrap.Modal.getInstance($('#authModal'));
+      authModal.hide();
+      showToast('Account created (demo)');
+    });
+
+    // Admin login
+    $('#adminForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const u = $('#adminUser').value.trim(); const p = $('#adminPass').value;
+      if(!u || !p){ showToast('Enter credentials','error'); return; }
+      const adminModalInst = bootstrap.Modal.getInstance($('#adminModal'));
+      adminModalInst.hide();
+      showToast('Admin login demo only');
+    });
+
+    // Offcanvas instance for mini-cart + persist open state
+    const miniEl = $('#miniCartOffcanvas');
+    const miniInstance = new bootstrap.Offcanvas(miniEl);
+
+    // When offcanvas shows -> mark in localStorage and animate children (CSS handles fade-in)
+    miniEl.addEventListener('shown.bs.offcanvas', ()=>{
+      try { localStorage.setItem(STORAGE.MINI_OPEN, '1'); } catch(e){}
+      // small re-render to ensure inputs have correct 'max' attributes
+      renderMiniCart();
+      // focus first input for accessibility
+      const firstInput = $('#miniCartItems .mini-qty-input');
+      if(firstInput) firstInput.focus({preventScroll:true});
+    });
+    miniEl.addEventListener('hidden.bs.offcanvas', ()=>{
+      try { localStorage.removeItem(STORAGE.MINI_OPEN); } catch(e){}
+    });
+
+    // mobile cart behaviour: open mini cart offcanvas
+    $('#mobileCart').addEventListener('click', ()=> {
+      miniInstance.show();
+    });
+
+    // Boot sequence
+    function boot(){
+      updateCityText();
+      initStorage();
+      renderDeals();
+      startCountdown();
+      state.shown = state.perPage;
+      renderProducts();
+      // renderRecommended was referenced previously; if not defined, ignore safely
+      if(typeof renderRecommended === 'function') renderRecommended();
+      checkCookieBanner();
+      maybeShowNewUser();
+
+      // If the mini-cart was left open earlier, reopen it
+      const wasOpen = localStorage.getItem(STORAGE.MINI_OPEN);
+      if(wasOpen){
+        // slight delay to ensure boot UI ready
+        setTimeout(()=> miniInstance.show(), 300);
+      }
+    }
+
+    // Event: wishlist & cart badges restore on load
+    document.addEventListener('DOMContentLoaded', boot);
+
+    // Provide persistence: when page unload, save cart/wishlist (already saved on changes)
+    window.addEventListener('beforeunload', ()=>{ saveCart(); saveWishlist(); });
+
+    // Additional small UI interactions
+    // Clicking hero shop scrolls to products
+    $('#heroShopBtn').addEventListener('click', ()=>{ window.scrollTo({top:document.querySelector('main').offsetTop-20,behavior:'smooth'}) });
+
+    // Search category combining demonstration: ensure search input keyup triggers
+    $('#search-input').addEventListener('keyup', (e)=>{ /* handled by debounced input above */ });
+
+    // Make wishlist button show the wishlist modal (for demo, we'll just show toast)
+    $('#wishlistBtn').addEventListener('click', () => {
+      showToast('Wishlist opened (demo)');
+    });
+
+    // Secondary nav anchors scroll smoothly
+    $$('.secondary-nav a').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const href = a.getAttribute('href');
+        if(href && href.startsWith('#')){
+          const el = document.querySelector(href);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      });
+    });
+
+    // Ensure keyboard accessibility for category cards
+    $$('.category-card').forEach(c=>{
+      c.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); }
+      });
+    });
+
+    // Init some micro-animations on load
+    window.addEventListener('load', ()=>{ $$('.fade-in').forEach((el,i)=> el.style.animationDelay = (i*80)+'ms'); });
+
+    // Show cookie banner only if not accepted
+    checkCookieBanner();
+
+    // Debug helpers (could be removed)
+    // console.log('Zentro demo loaded', state);
+
+  </script>
+</body>
+</html>

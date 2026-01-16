@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Account | ZENTRO</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #fdfcfb, #f3f1ed);
+      min-height: 100vh;
+    }
+
+    .account-wrapper {
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+
+    /* Sidebar */
+    .account-sidebar {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      padding: 20px;
+      height: 100%;
+    }
+
+    .account-sidebar h6 {
+      font-weight: 700;
+      color: #6b4f2c;
+      margin-bottom: 16px;
+    }
+
+    .account-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #333;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 6px;
+      transition: all .2s ease;
+    }
+
+    .account-nav a:hover,
+    .account-nav a.active {
+      background: #fff3e0;
+      color: #b45309;
+      font-weight: 600;
+    }
+
+    /* Main card */
+    .account-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+      padding: 28px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-header h5 {
+      margin: 0;
+      font-weight: 700;
+    }
+
+    .profile-header small {
+      color: #777;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .form-control:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 0.15rem rgba(245, 158, 11, 0.25);
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 20px;
+    }
+
+    .btn-save:hover {
+      opacity: .95;
+    }
+
+    .security-box {
+      background: #fff7ed;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #92400e;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container account-wrapper">
+  <div class="row g-4">
+
+    <!-- 🔹 SIDEBAR -->
+    <div class="col-lg-3">
+      <div class="account-sidebar">
+        <h6>👤 My Account</h6>
+
+        <div class="account-nav">
+          <a class="active" href="{{ url_for('user.account') }}">👤 My Profile</a>
+          <a href="{{ url_for('user.orders') }}">📦 My Orders</a>
+          <a href="{{ url_for('user.wishlist') }}">❤️ Wishlist</a>
+          <a href="{{ url_for('user.addresses') }}">📍 Your Addresses</a>
+          <a href="{{ url_for('user.change_password') }}">🔐 Change Password</a>
+          <a href="{{ url_for('auth.logout') }}" class="text-danger">🚪 Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 MAIN CONTENT -->
+    <div class="col-lg-9">
+      <div class="account-card">
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- PROFILE HEADER -->
+        <div class="profile-header">
+          <div class="avatar">
+            {{ current_user.username[0]|upper }}
+          </div>
+          <div>
+            <h5>{{ current_user.username }}</h5>
+            <small>📧 {{ current_user.email }}</small><br>
+            <small>🕒 Member since {{ current_user.created_at.strftime('%b %Y') }}</small>
+          </div>
+        </div>
+
+        <!-- PROFILE FORM -->
+        <form method="POST">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label>Full Name</label>
+              <input type="text"
+                     class="form-control"
+                     name="username"
+                     value="{{ current_user.username }}"
+                     placeholder="👤 Enter your full name">
+            </div>
+
+            <div class="col-md-6">
+              <label>Email (Read Only)</label>
+              <input type="email"
+                     class="form-control"
+                     value="{{ current_user.email }}"
+                     readonly>
+            </div>
+
+            <div class="col-md-6">
+              <label>Phone Number</label>
+              <input type="text"
+                     class="form-control"
+                     name="phone"
+                     placeholder="📱 Enter phone number">
+            </div>
+
+            <div class="col-md-6">
+              <label>Gender (Optional)</label>
+              <select class="form-control">
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-save">
+              💾 Save Changes
+            </button>
+          </div>
+        </form>
+
+        <!-- SECURITY INFO -->
+        <div class="security-box">
+          🔐 <b>Security Info:</b><br>
+          • Last login tracked automatically<br>
+          • Password changes are logged<br>
+          • Suspicious logins are blocked
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

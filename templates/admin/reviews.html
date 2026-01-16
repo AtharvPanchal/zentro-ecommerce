@@ -1,0 +1,129 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Review Moderation{% endblock %}
+{% block page_title %}Review Moderation{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_reviews.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- FILTER BAR -->
+<form method="GET" class="review-toolbar">
+  <input type="text" name="search"
+         placeholder="Search by email / product"
+         value="{{ search }}">
+
+  <select name="sort">
+    <option value="">Sort</option>
+    <option value="rating_high" {% if sort=='rating_high' %}selected{% endif %}>
+      Rating: High → Low
+    </option>
+    <option value="rating_low" {% if sort=='rating_low' %}selected{% endif %}>
+      Rating: Low → High
+    </option>
+  </select>
+
+  <select name="filter">
+    <option value="all" {% if active_filter=='all' %}selected{% endif %}>All</option>
+    <option value="pending" {% if active_filter=='pending' %}selected{% endif %}>Pending</option>
+    <option value="reported" {% if active_filter=='reported' %}selected{% endif %}>Reported</option>
+  </select>
+
+  <button class="btn">Apply</button>
+</form>
+
+
+<!------------------------------------------------->
+<!--- PENDING REVIEWS / HIDE / REPORTED REVIEWS---->
+<!------------------------------------------------->
+
+<div class="panel">
+  <h3 class="panel-title">Reviews</h3>
+
+  {% if reviews %}
+  <table class="review-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Product</th>
+        <th>Rating</th>
+        <th>Status</th>
+        <th>Review</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for r in reviews %}
+      <tr>
+        <td>#{{ r.id }}</td>
+        <td>{{ r.user.email }}</td>
+        <td>{{ r.product.name }}</td>
+        <td>{{ r.rating }}/5</td>
+
+        <td>
+          {% if r.is_reported %}
+            <span class="badge badge-reported">Reported</span>
+          {% elif not r.is_active %}
+            <span class="badge badge-pending">Pending</span>
+          {% else %}
+            <span class="badge badge-approved">Approved</span>
+          {% endif %}
+        </td>
+
+        <td class="review-text">{{ r.review_text }}</td>
+        <td>
+  {{ r.created_at.strftime("%d %b %Y") }}<br>
+  <small class="muted">
+    {{ r.created_at.strftime("%I:%M %p") }}
+    ({{ r.created_at | timeago }})
+  </small>
+</td>
+
+
+
+        <td class="actions">
+          {% if not r.is_active %}
+          <form method="POST" action="{{ url_for('admin.approve_review', review_id=r.id) }}">
+            <button class="btn success">Approve</button>
+          </form>
+          {% endif %}
+
+          {% if r.is_active %}
+          <form method="POST" action="{{ url_for('admin.hide_review', review_id=r.id) }}">
+            <button class="btn warning">Hide</button>
+          </form>
+          {% endif %}
+
+          <form method="POST" action="{{ url_for('admin.delete_review_admin', review_id=r.id) }}">
+            <button class="btn danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- PAGINATION -->
+  <div class="pagination">
+    {% if pagination.has_prev %}
+      <a href="?page={{ pagination.prev_num }}">Previous</a>
+    {% endif %}
+
+    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+
+    {% if pagination.has_next %}
+      <a href="?page={{ pagination.next_num }}">Next</a>
+    {% endif %}
+  </div>
+
+  {% else %}
+    <p class="empty-state">No reviews found.</p>
+  {% endif %}
+</div>
+
+{% endblock %}

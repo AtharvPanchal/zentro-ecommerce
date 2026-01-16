@@ -1,0 +1,783 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Admin Activity Logs{% endblock %}
+{% block page_title %}Admin Activity Logs{% endblock %}
+{% set archived = request.args.get('archived', '0') %}
+
+{% block content %}
+
+<div class="container-fluid px-4 py-3">
+
+
+  <!-- PAGE HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- AUDIT LOG TABS -->
+<div class="mb-3">
+  <ul class="nav nav-tabs align-items-center">
+
+  <!-- ACTIVE LOGS -->
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if archived != '1' and not request.path.endswith('audit-analytics') }}"
+       href="{{ url_for('admin.admin_audit_logs') }}">
+      Active Logs
+    </a>
+  </li>
+
+  <!-- ARCHIVED LOGS -->
+  {% if session.get('is_super_admin') %}
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if archived == '1' }}"
+       href="{{ url_for('admin.admin_audit_logs', archived=1) }}">
+      Archived Logs
+    </a>
+  </li>
+  {% endif %}
+
+  <!-- AUDIT ANALYTICS -->
+  {% if session.get('is_super_admin') %}
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if request.path.endswith('audit-analytics') }}"
+       href="{{ url_for('admin.audit_analytics') }}">
+      Audit Analytics
+    </a>
+  </li>
+  {% endif %}
+
+</ul>
+</div>
+    <div>
+      <h4 class="fw-bold mb-1">Admin Activity Logs</h4>
+      <small class="text-muted">
+        Security Audit Trail of All Administrative Actions
+      </small>
+    </div>
+
+    <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill">
+      {{ pagination.total }} Records
+
+      {% if request.args.get('archived') == '1' %}
+  <span class="badge bg-dark ms-2">Archived View</span>
+{% else %}
+  <span class="badge bg-success ms-2">Active Logs</span>
+{% endif %}
+
+    </span>
+  </div>
+
+  <!-- CARD -->
+  <div class="card shadow-sm border-0">
+
+    <!-- FILTER BAR -->
+    <div class="card-body pb-2">
+      <form method="get" class="audit-filter-bar">
+
+        <!-- LEFT -->
+        <div class="filter-left">
+          <input type="text"
+                 name="q"
+                 class="form-control"
+                 placeholder="Search Admin ID or User Email"
+                 value="{{ request.args.get('q','') }}">
+
+          <select name="action" class="form-select">
+            <option value="">All Actions</option>
+            <option value="Enabled" {{ 'selected' if request.args.get('action')=='Enabled' }}>Enabled</option>
+            <option value="Disabled" {{ 'selected' if request.args.get('action')=='Disabled' }}>Disabled</option>
+            <option value="Locked" {{ 'selected' if request.args.get('action')=='Locked' }}>Locked</option>
+            <option value="Unlocked" {{ 'selected' if request.args.get('action')=='Unlocked' }}>Unlocked</option>
+          </select>
+
+          <!-- ✅ STEP 2.3 – SEVERITY FILTER -->
+          <select name="severity" class="form-select">
+            <option value="">All Severity</option>
+            <option value="HIGH" {{ 'selected' if request.args.get('severity')=='HIGH' }}>HIGH</option>
+            <option value="MEDIUM" {{ 'selected' if request.args.get('severity')=='MEDIUM' }}>MEDIUM</option>
+            <option value="LOW" {{ 'selected' if request.args.get('severity')=='LOW' }}>LOW</option>
+          </select>
+
+          <select name="archived" class="form-select">
+  <option value="0"
+    {{ 'selected' if request.args.get('archived','0') == '0' }}>
+    Active Logs
+  </option>
+
+  <option value="1"
+    {{ 'selected' if request.args.get('archived') == '1' }}>
+    Archived Logs
+  </option>
+
+</select>
+
+
+          <input type="date" name="from_date" class="form-control">
+        </div>
+
+        <!-- RIGHT -->
+        <div class="filter-right">
+          <button class="btn btn-primary">
+            <i class="bi bi-funnel"></i> Apply
+          </button>
+
+          <a href="{{ url_for('admin.admin_audit_logs') }}"
+             class="btn btn-outline-secondary btn-reset">
+            <i class="bi bi-arrow-clockwise"></i> Reset
+          </a>
+
+          <a href="{{ url_for('admin.export_audit_logs') }}"
+             class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-spreadsheet"></i> CSV
+          </a>
+        </div>
+
+      </form>
+    </div>
+
+    {% if session.get('is_super_admin') and archived == '0' %}
+<div class="px-3 pb-2">
+  <button
+    type="button"
+    class="btn btn-sm btn-outline-danger"
+    onclick="confirmBulkArchive()">
+    <i class="bi bi-archive"></i>
+    Archive Selected
+  </button>
+</div>
+{% endif %}
+
+
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+      <table class="table align-middle mb-0 admin-activity-table">
+
+        <thead class="table-light text-muted small">
+         <tr>
+
+  {% if session.get('is_super_admin') and archived == '0' %}
+    <th style="width:40px">
+      <input type="checkbox" id="selectAll">
+    </th>
+  {% endif %}
+
+  <th style="width:160px">Date</th>
+  <th style="width:160px">Time</th>
+  <th>Admin</th>
+  <th>Action</th>
+  <th style="width:120px">Severity</th>
+  <th style="width:260px">Target User</th>
+  <th style="width:100px" class="text-end">Actions</th>
+</tr>
+
+        </thead>
+
+        <tbody>
+
+        {% if logs|length == 0 %}
+          <tr>
+            <!-- ✅ STEP 2.3 – COLSPAN FIX -->
+            <td colspan="7" class="text-center text-muted py-4">
+              {% if archived == '1' %}
+              No archived audit logs found
+             {% else %}
+             No active audit logs found
+             {% endif %}
+
+            </td>
+          </tr>
+        {% endif %}
+
+        {% for log in logs %}
+<tr class="activity-row">
+
+  {% if session.get('is_super_admin') and archived == '0' %}
+<td>
+  <input
+    type="checkbox"
+    class="log-checkbox"
+    value="{{ log.id }}">
+</td>
+{% endif %}
+
+
+  <!-- DATE -->
+  <td class="fw-semibold">
+    {{ log.ist_time.strftime("%d %b %Y") }}
+  </td>
+
+  <!-- TIME -->
+  <td class="text-muted small">
+    {{ log.ist_time.strftime("%I:%M %p") }}
+  </td>
+
+  <!-- ADMIN -->
+<td>
+  <div class="d-flex align-items-center gap-2">
+
+    <div class="admin-avatar">
+      {% if log.admin %}
+        {{ log.admin.email[0]|upper }}
+      {% else %}
+        S
+      {% endif %}
+    </div>
+
+    <div>
+      {% if log.admin %}
+        <div class="fw-semibold">{{ log.admin.email }}</div>
+        <div class="text-muted small">Administrator</div>
+      {% else %}
+        <div class="fw-semibold">SYSTEM</div>
+        <div class="text-muted small">Automated Action</div>
+      {% endif %}
+    </div>
+
+  </div>
+</td>
+
+
+  <!-- ACTION -->
+  <td>
+  <span class="action-pill">
+    <i data-lucide="shield-check" class="icon"></i>
+    {{ log.action }}
+  </span>
+
+  {% if log.is_archived %}
+    <span class="badge bg-dark ms-1">ARCHIVED</span>
+  {% endif %}
+
+  {% if log.actor_type == "system" %}
+    <span class="badge bg-info ms-1">SYSTEM</span>
+  {% endif %}
+
+  {% if log.is_bulk %}
+    <span class="badge bg-warning ms-1">BULK</span>
+  {% endif %}
+
+  <!-- ✅ AUTO ARCHIVE / CLEANUP BADGE -->
+  {% if log.actor_type == "system"
+        and log.is_bulk
+        and "cleanup" in log.action|lower %}
+    <span class="badge bg-secondary ms-1">
+      AUTO
+    </span>
+  {% endif %}
+</td>
+
+
+  <!-- SEVERITY -->
+  <td>
+    {% if log.severity == "HIGH" %}
+      <span class="severity-pill severity-high">HIGH</span>
+    {% elif log.severity == "MEDIUM" %}
+      <span class="severity-pill severity-medium">MEDIUM</span>
+    {% else %}
+      <span class="severity-pill severity-low">LOW</span>
+    {% endif %}
+  </td>
+
+  <!-- TARGET USER -->
+  <td>
+    {% if log.user %}
+      <div class="d-flex align-items-center gap-2">
+        <i data-lucide="user" class="icon-muted"></i>
+        <a href="{{ url_for('admin.admin_users', q=log.user.email) }}"
+           class="text-decoration-none fw-semibold">
+          {{ log.user.email }}
+        </a>
+      </div>
+    {% else %}
+      <span class="text-muted">—</span>
+    {% endif %}
+  </td>
+
+  <!-- ACTIONS -->
+  <td class="text-end">
+  {% if session.get('is_super_admin') %}
+
+           <!-- VIEW DETAILS -->
+           <button
+           type="button"
+           class="btn btn-sm btn-outline-secondary me-1"
+           title="View log details"
+           onclick="viewLogDetails({{ log.id }})">
+           <i class="bi bi-eye"></i>
+           </button>
+
+
+    {% if request.args.get('archived','0') == '0' %}
+      <!-- ACTIVE VIEW → ARCHIVE -->
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-danger"
+        title="Archive log"
+        onclick="confirmArchive({{ log.id }})">
+        <i class="bi bi-archive"></i>
+      </button>
+
+    {% else %}
+      <!-- ARCHIVED VIEW → RESTORE -->
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-success"
+        title="Restore log"
+        onclick="confirmUnarchive({{ log.id }})">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </button>
+    {% endif %}
+
+
+  {% endif %}
+</td>
+
+
+</tr>
+
+
+<!-- HIDDEN LOG DATA -->
+<script type="application/json" id="log-data-{{ log.id }}">
+{
+  "log_ref": "{{ log.log_ref }}",
+  "admin": "{{ log.admin.email if log.admin else 'SYSTEM' }}",
+  "action": "{{ log.action }}",
+  "severity": "{{ log.severity }}",
+  "actor_type": "{{ log.actor_type }}",
+  "target_user": "{{ log.user.email if log.user else '-' }}",
+  "ip_address": "{{ log.ip_address or '-' }}",
+  "user_agent": "{{ log.user_agent or '-' }}",
+  "reason": "{{ log.reason or '-' }}",
+  "created_at": "{{ log.ist_time.strftime('%d %b %Y %I:%M %p') }}"
+}
+</script>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="card-footer bg-white border-top">
+      <nav>
+        <ul class="pagination pagination-sm mb-0 justify-content-end">
+
+          <!-- PREVIOUS -->
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for(
+                 'admin.admin_audit_logs',
+                 page=pagination.prev_num,
+                 q=request.args.get('q'),
+                 action=request.args.get('action'),
+                 severity=request.args.get('severity'),
+                 from_date=request.args.get('from_date'),
+                 archived=request.args.get('archived','0')
+
+               ) }}">
+              Previous
+            </a>
+          </li>
+
+          <!-- PAGE NUMBERS -->
+          {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link"
+                   href="{{ url_for(
+                     'admin.admin_audit_logs',
+                     page=p,
+                     q=request.args.get('q'),
+                     action=request.args.get('action'),
+                     severity=request.args.get('severity'),
+                     from_date=request.args.get('from_date'),
+                     archived=request.args.get('archived','0')
+
+                   ) }}">
+                  {{ p }}
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">…</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          <!-- NEXT -->
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for(
+                 'admin.admin_audit_logs',
+                 page=pagination.next_num,
+                 q=request.args.get('q'),
+                 action=request.args.get('action'),
+                 severity=request.args.get('severity'),
+                 from_date=request.args.get('from_date'),
+                 archived=request.args.get('archived','0')
+
+               ) }}">
+              Next
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<style>
+/* ===============================
+   ADMIN ACTIVITY LOGS – PRO
+   =============================== */
+
+.audit-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filter-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.filter-left .form-control,
+.filter-left .form-select {
+  height: 38px;
+  font-size: 0.85rem;
+}
+
+.filter-left input[type="text"] {
+  min-width: 280px;
+}
+
+.filter-left select,
+.filter-left input[type="date"] {
+  min-width: 160px;
+}
+
+.filter-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-right .btn {
+  min-width: 85px;
+  font-size: 0.85rem;
+  justify-content: center;
+}
+
+.admin-activity-table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+}
+
+.activity-row:hover {
+  background: #f9fafb;
+}
+
+.admin-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+/* SEVERITY BADGES */
+.severity-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.severity-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.severity-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.severity-low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+  .admin-activity-table .btn {
+  padding: 4px 8px;
+}
+
+  .badge.bg-secondary {
+  background: #e5e7eb !important;
+  color: #374151;
+  font-weight: 600;
+}
+
+</style>
+<!-- CONFIRM ARCHIVE / UNARCHIVE MODAL -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirm Action</h5>
+        <button type="button" class="btn-close btn-close-white"
+                data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p id="confirmMessage" class="mb-0"></p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                data-bs-dismiss="modal">Cancel</button>
+        <button id="confirmBtn"
+        type="button"
+        class="btn btn-danger">Confirm</button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- VIEW LOG DETAILS MODAL -->
+<div class="modal fade" id="viewLogModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Audit Log Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <table class="table table-sm table-borderless mb-0">
+          <tbody>
+            <tr><th>Log Ref</th><td id="v-log-ref"></td></tr>
+            <tr><th>Admin</th><td id="v-admin"></td></tr>
+            <tr><th>Action</th><td id="v-action"></td></tr>
+            <tr><th>Severity</th><td id="v-severity"></td></tr>
+            <tr><th>Actor Type</th><td id="v-actor"></td></tr>
+            <tr><th>Target User</th><td id="v-target"></td></tr>
+            <tr><th>IP Address</th><td id="v-ip"></td></tr>
+            <tr><th>User Agent</th><td id="v-agent"></td></tr>
+            <tr><th>Reason</th><td id="v-reason"></td></tr>
+            <tr><th>Created At</th><td id="v-time"></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let currentLogId = null;
+let currentAction = null;
+
+function confirmArchive(logId) {
+  currentLogId = logId;
+  currentAction = "archive";
+
+  document.getElementById("confirmMessage").innerText =
+    "Are you sure you want to archive this audit log?";
+
+  document.getElementById("confirmBtn").className =
+    "btn btn-danger";
+
+  new bootstrap.Modal(
+    document.getElementById("confirmActionModal")
+  ).show();
+}
+
+function confirmUnarchive(logId) {
+  currentLogId = logId;
+  currentAction = "unarchive";
+
+  document.getElementById("confirmMessage").innerText =
+    "Are you sure you want to restore this audit log?";
+
+  document.getElementById("confirmBtn").className =
+    "btn btn-success";
+
+  new bootstrap.Modal(
+    document.getElementById("confirmActionModal")
+  ).show();
+}
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  if (typeof bootstrap === "undefined") {
+    console.error("Bootstrap JS not loaded");
+    return;
+  }
+
+  let currentLogId = null;
+  let currentAction = null;
+
+  const confirmBtn = document.getElementById("confirmBtn");
+  const confirmModalEl = document.getElementById("confirmActionModal");
+  const confirmModal = new bootstrap.Modal(confirmModalEl);
+
+  confirmModalEl.addEventListener("hidden.bs.modal", () => {
+    confirmBtn.disabled = false;
+    confirmBtn.innerText = "Confirm";
+  });
+
+  window.confirmArchive = function (logId) {
+    currentLogId = logId;
+    currentAction = "archive";
+
+    document.getElementById("confirmMessage").innerText =
+      "Are you sure you want to archive this audit log?";
+
+    confirmBtn.className = "btn btn-danger";
+    confirmModal.show();
+  };
+
+  window.confirmUnarchive = function (logId) {
+    currentLogId = logId;
+    currentAction = "unarchive";
+
+    document.getElementById("confirmMessage").innerText =
+      "Are you sure you want to restore this audit log?";
+
+    confirmBtn.className = "btn btn-success";
+    confirmModal.show();
+  };
+
+  window.confirmBulkArchive = function () {
+    const selectedIds = Array
+      .from(document.querySelectorAll(".log-checkbox:checked"))
+      .map(cb => parseInt(cb.value));
+
+    if (selectedIds.length === 0) {
+      alert("Please select at least one log.");
+      return;
+    }
+
+    currentLogId = selectedIds;
+    currentAction = "bulk-archive";
+
+    document.getElementById("confirmMessage").innerText =
+      `Are you sure you want to archive ${selectedIds.length} audit logs?`;
+
+    confirmBtn.className = "btn btn-danger";
+    confirmModal.show();
+  };
+
+  confirmBtn.addEventListener("click", function () {
+
+    confirmBtn.disabled = true;
+    confirmBtn.innerText = "Processing...";
+
+    let url = "";
+    let payload = null;
+
+    if (currentAction === "archive") {
+      url = `/admin/audit-logs/archive/${currentLogId}`;
+    } else if (currentAction === "unarchive") {
+      url = `/admin/audit-logs/unarchive/${currentLogId}`;
+    } else if (currentAction === "bulk-archive") {
+      url = `/admin/audit-logs/archive-bulk`;
+      payload = JSON.stringify({ log_ids: currentLogId });
+    }
+
+    const csrfToken = document
+      .querySelector('meta[name="csrf-token"]')
+      .getAttribute("content");
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: payload
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Request failed");
+      return res.json();
+    })
+    .then(() => window.location.reload())
+    .catch(err => {
+      console.error(err);
+      alert("Action failed. Please refresh and try again.");
+      confirmBtn.disabled = false;
+      confirmBtn.innerText = "Confirm";
+    });
+  });
+
+});
+</script>
+
+
+<script>
+function viewLogDetails(logId) {
+
+  const raw = document.getElementById(`log-data-${logId}`);
+  if (!raw) return;
+
+  const data = JSON.parse(raw.textContent);
+
+  document.getElementById("v-log-ref").innerText = data.log_ref;
+  document.getElementById("v-admin").innerText = data.admin;
+  document.getElementById("v-action").innerText = data.action;
+  document.getElementById("v-severity").innerText = data.severity;
+  document.getElementById("v-actor").innerText = data.actor_type;
+  document.getElementById("v-target").innerText = data.target_user;
+  document.getElementById("v-ip").innerText = data.ip_address;
+  document.getElementById("v-agent").innerText = data.user_agent;
+  document.getElementById("v-reason").innerText = data.reason;
+  document.getElementById("v-time").innerText = data.created_at;
+
+  new bootstrap.Modal(
+    document.getElementById("viewLogModal")
+  ).show();
+}
+</script>
+
+<script>
+  lucide.createIcons();
+</script>
+<script>
+document.getElementById("selectAll")?.addEventListener("change", function () {
+  document
+    .querySelectorAll(".log-checkbox")
+    .forEach(cb => cb.checked = this.checked);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="card-cta fade-in">
+          <h1>ZENTRO — Everything at Your Center.</h1>
+          <p class="lead">
+            Discover Top Brands, Daily Deals and Fast Delivery Across Categories —
+            Electronics, Fashion, Home & More.
+          </p>
+          <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-cta btn-lg" id="heroShopBtn">
+              Shop Now <i class="fa fa-arrow-right ms-2"></i>
+            </button>
+            <button class="btn btn-outline-light btn-lg">
+              Explore Collections
+            </button>
+          </div>
+          <div class="mt-3 text-white-50 small">
+            Free Delivery on orders over ₹999 · 30-day Returns
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 text-center fade-in">
+        <img
+          src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1000&q=60"
+          class="img-fluid rounded"
+          style="max-height:320px;object-fit:cover"
+          alt="Zentro Hero"
+        />
+      </div>
+    </div>
+
+    <!-- PROMO CARDS -->
+    <div class="row mt-4 promo-cards g-3">
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h6>Fashion Sale</h6>
+          <small class="text-muted">Up to 60% off</small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h6>Electronics Deals</h6>
+          <small class="text-muted">Latest gadgets</small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h6>Home Essentials</h6>
+          <small class="text-muted">Comfort & style</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORY STRIP -->
+<section class="container categories-strip mt-n4 p-3">
+  <div class="row gx-2 gy-2">
+    {% for cat in [
+      ('Electronics','tv'),
+      ('Mobiles','mobile'),
+      ('Fashion','shirt'),
+      ('Men','mars'),
+      ('Women','venus'),
+      ('Kitchen','utensils'),
+      ('Appliances','blender'),
+      ('Grocery','basket-shopping'),
+      ('Beauty','magic'),
+      ('Sports','basketball'),
+      ('Toys','puzzle-piece'),
+      ('Automotive','car-side')
+    ] %}
+    <div class="col-auto">
+      <div class="category-card text-center" tabindex="0">
+        <i class="fa fa-{{ cat[1] }} fa-2x"></i>
+        <div class="small">{{ cat[0] }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- DEALS -->
+<section class="container mt-4 deals">
+  <div class="d-flex justify-content-between mb-3">
+    <h4>Deals of the Day</h4>
+    <div class="small text-muted">Ends Soon</div>
+  </div>
+  <div id="dealsRow" class="d-flex gap-3 overflow-auto"></div>
+</section>
+
+<!-- FEATURED COLLECTIONS -->
+<section class="container featured mt-4">
+  <div class="row g-3">
+    {% for title in ['Top Brands','Premium Electronics','Fashion Festival','Home Essentials'] %}
+    <div class="col-md-6 col-lg-3">
+      <div class="card p-4 text-white" style="background:#0b1b2b">
+        <h5>{{ title }}</h5>
+        <button class="btn btn-light btn-sm mt-2">Explore</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- MAIN PRODUCT GRID -->
+<main id="main-content" class="container mt-4">
+  <div class="row">
+    <!-- FILTERS -->
+    <aside class="col-lg-3 pe-lg-4">
+      <div class="card p-3 mb-3">
+        <h6>Filters</h6>
+        <input id="minPrice" class="form-control form-control-sm mb-2" placeholder="Min Price">
+<input id="maxPrice" class="form-control form-control-sm mb-2" placeholder="Max Price">
+<button class="btn btn-sm btn-primary w-100 filters-apply-btn">Apply</button>
+
+        <hr>
+<h6>Category</h6>
+
+<div class="form-check">
+  <input class="form-check-input category-filter" type="checkbox" value="Electronics">
+  <label class="form-check-label">Electronics</label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input category-filter" type="checkbox" value="Fashion">
+  <label class="form-check-label">Fashion</label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input category-filter" type="checkbox" value="Home">
+  <label class="form-check-label">Home</label>
+</div>
+<hr>
+<h6>Brands</h6>
+
+<div class="form-check">
+  <input class="form-check-input brand-filter" type="checkbox" value="Samsung">
+  <label class="form-check-label">Samsung</label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input brand-filter" type="checkbox" value="Apple">
+  <label class="form-check-label">Apple</label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input brand-filter" type="checkbox" value="Sony">
+  <label class="form-check-label">Sony</label>
+</div>
+<hr>
+<h6>Rating</h6>
+
+<div class="form-check">
+  <input class="form-check-input rating-filter" type="radio" name="rating" value="4">
+  <label class="form-check-label">4★ & above</label>
+</div>
+
+<div class="form-check">
+  <input class="form-check-input rating-filter" type="radio" name="rating" value="3">
+  <label class="form-check-label">3★ & above</label>
+</div>
+<hr>
+<div class="form-check">
+  <input id="stockOnly" class="form-check-input" type="checkbox">
+  <label class="form-check-label">In Stock Only</label>
+</div>
+
+<button id="applyFilterBtn" class="btn btn-sm btn-primary w-100 mt-3">
+  Apply Filters
+</button>
+
+      </div>
+    </aside>
+
+    <!-- PRODUCTS -->
+    <div id="activeFilters" class="d-flex flex-wrap gap-2 mb-3"></div>
+
+    <section class="col-lg-9">
+      <div class="d-flex justify-content-between mb-3">
+        <h5>Products</h5>
+        <small class="text-muted">
+          Showing <span id="shownCount">0</span> of
+          <span id="totalCount">0</span>
+        </small>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+  <label class="small text-muted mb-0">Sort by</label>
+  <select id="sortSelect" class="form-select form-select-sm" style="width:180px">
+    <option value="">Relevance</option>
+    <option value="price_low">Price: Low → High</option>
+    <option value="price_high">Price: High → Low</option>
+    <option value="rating">Customer Rating</option>
+    <option value="newest">Newest First</option>
+  </select>
+</div>
+
+
+      <!-- Skeleton Loader -->
+<div id="productSkeleton" class="row g-3">
+  {% for i in range(8) %}
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-btn"></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+
+      <div id="productsGrid" class="row g-3">
+  {% for product in products %}
+    <div class="col-12 col-sm-6 col-lg-3">
+      {% include "components/_product_card.html" %}
+    </div>
+  {% endfor %}
+</div>
+
+
+      <div id="noProducts" class="text-center my-5" style="display:none">
+        <i class="fa fa-search fa-2x text-muted"></i>
+        <p class="text-muted">No products found</p>
+      </div>
+
+      <div class="text-center mt-4">
+        <button id="loadMoreBtn" class="btn btn-outline-primary">
+          Load More
+        </button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- BRANDS -->
+<section class="container mt-4">
+  <h5>Brands You May Like</h5>
+  <div class="row g-3 mt-2">
+    {% for brand in ['Samsung','Sony','Apple','Adidas','Puma','LG','Titan','Philips'] %}
+    <div class="col-6 col-md-3">
+      <div class="brand-card">{{ brand }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="container mt-4">
+  <h5>Customer Reviews</h5>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="review-card">
+        <strong>Rohit S.</strong>
+        <p class="small text-muted">Fast delivery & great prices.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="review-card">
+        <strong>Neha K.</strong>
+        <p class="small text-muted">Loved the fashion quality.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="review-card">
+        <strong>Ali P.</strong>
+        <p class="small text-muted">Electronics packaging was perfect.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="container mt-4">
+  <div class="newsletter p-4 d-flex flex-column flex-md-row justify-content-between">
+    <div>
+      <h5>Stay Updated</h5>
+      <p class="small text-muted mb-0">
+        Get exclusive offers & updates
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <input
+        type="email"
+        class="form-control"
+        placeholder="Enter your email"
+      />
+      <button class="btn btn-primary">Subscribe</button>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Products | ZENTRO{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Products</h4>
+
+    <select id="sortSelect" class="form-select w-auto">
+      <option value="">Sort</option>
+      <option value="price_asc">Price: Low → High</option>
+      <option value="price_desc">Price: High → Low</option>
+    </select>
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div id="productsGrid" class="row g-3"></div>
+
+  <!-- LOAD MORE -->
+  <div class="text-center mt-4">
+    <button id="loadMoreBtn" class="btn btn-outline-primary">Load More</button>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/product_list.js') }}"></script>
+{% endblock %}

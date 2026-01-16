@@ -1,0 +1,197 @@
+/* ================================
+   PRODUCT DETAIL – BASE
+================================ */
+img.img-fluid {
+  max-width: 100%;
+}
+
+.product-detail .qty-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-detail .qty-input {
+  width: 60px;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 4px;
+}
+
+.product-detail .qty-group .btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.product-detail .badge {
+  font-size: 13px;
+}
+
+/* ================================
+   STAR RATING – DISPLAY (AVG)
+================================ */
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.rating-display .star {
+  font-size: 18px;
+  color: #e5e7eb; /* empty */
+}
+
+.rating-display .star.full,
+.rating-display .star.half {
+  color: #facc15; /* gold */
+}
+
+.rating-text {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* ================================
+   STAR RATING – USER INPUT
+================================ */
+.user-rating {
+  margin-top: 10px;
+}
+
+.star-input {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.star-input input {
+  display: none;
+}
+
+.star-input label {
+  cursor: pointer;
+  font-size: 22px;
+  color: #d1d5db;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.star-input label:hover,
+.star-input label:hover ~ label {
+  color: #facc15;
+  transform: scale(1.1);
+}
+
+.star-input input:checked ~ label {
+  color: #facc15;
+}
+
+/* ================================
+   REVIEWS SECTION
+================================ */
+.reviews-section {
+  margin-top: 32px;
+}
+
+.review-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #374151;
+}
+
+.review-text {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.muted {
+  color: #9ca3af;
+}
+
+/* ================================
+   STAR RATING – POLISH EFFECTS
+================================ */
+
+/* Glow on hover */
+.star-input label:hover i,
+.star-input label:hover ~ label i {
+  color: #facc15;
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.7);
+}
+
+/* Click animation */
+.star-input input:checked ~ label i {
+  animation: starPop 0.3s ease;
+}
+
+@keyframes starPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* Tooltip */
+.star-input label {
+  position: relative;
+}
+
+.star-input label::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 135%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.star-input label:hover::after {
+  opacity: 1;
+}
+
+/* =========================
+   REVIEW STAR DISPLAY
+========================= */
+
+.review-stars {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.review-stars .star {
+  font-size: 14px;
+  color: #e5e7eb; /* light gray */
+}
+
+.review-stars .star.filled {
+  color: #f59e0b; /* gold */
+}

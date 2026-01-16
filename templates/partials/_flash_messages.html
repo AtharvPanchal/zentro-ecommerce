@@ -1,0 +1,28 @@
+{# templates/partials/_flash_messages.html #}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+
+  {% for category, message in messages %}
+  <div class="flash-toast flash-{{ category }}">
+
+    <div class="flash-icon">
+      {% if category == "success" %}✅{% endif %}
+      {% if category == "danger" %}❌{% endif %}
+      {% if category == "warning" %}⚠️{% endif %}
+      {% if category == "info" %}ℹ️{% endif %}
+    </div>
+
+    <div class="flash-text">
+      {{ message }}
+    </div>
+
+    <button class="flash-close" aria-label="Close">&times;</button>
+
+  </div>
+  {% endfor %}
+
+</div>
+{% endif %}
+{% endwith %}

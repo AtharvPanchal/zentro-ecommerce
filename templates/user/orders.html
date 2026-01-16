@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold">📦 My Orders</h4>
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-sm">
+      ⬅ Continue Shopping
+    </a>
+  </div>
+
+  {% include "partials/_flash_messages.html" %}
+
+  {% if orders %}
+
+  <div class="card shadow-sm border-0 rounded-4">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#Order ID</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          {% for order in orders %}
+          <tr>
+            <td>
+              <strong>{{ order.order_number }}</strong>
+            </td>
+
+            <td>
+              {{ order.created_at.strftime("%d %b %Y") }}
+            </td>
+
+            <td>
+              ₹{{ "%.2f"|format(order.total_amount) }}
+            </td>
+
+            <td>
+              {% if order.status == "delivered" %}
+                <span class="badge bg-success">Delivered</span>
+              {% elif order.status == "shipped" %}
+                <span class="badge bg-info">Shipped</span>
+              {% elif order.status == "cancelled" %}
+                <span class="badge bg-danger">Cancelled</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if order.payment_status == "paid" %}
+                <span class="badge bg-success">Paid</span>
+              {% else %}
+                <span class="badge bg-secondary">Unpaid</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+
+  <!-- EMPTY STATE -->
+  <div class="card shadow-sm border-0 rounded-4 p-5 text-center">
+    <h5 class="mb-2">😔 No orders yet</h5>
+    <p class="text-muted mb-3">
+      Looks like you haven’t placed any orders.
+    </p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-warning">
+      🛒 Start Shopping
+    </a>
+  </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

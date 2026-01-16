@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4" style="max-width:720px;">
+  <h4 class="mb-3">✏️ Edit Address</h4>
+
+  <form method="POST" class="card p-4 shadow-sm">
+
+    <input name="full_name" class="form-control mb-2"
+           value="{{ address.full_name }}" required>
+
+    <input name="phone" class="form-control mb-2"
+           value="{{ address.phone }}" required>
+
+    <input name="house_no" class="form-control mb-2"
+           value="{{ address.house_no }}" required>
+
+    <input name="area" class="form-control mb-2"
+           value="{{ address.area }}" required>
+
+    <input name="landmark" class="form-control mb-2"
+           value="{{ address.landmark or '' }}">
+
+    <input name="pincode" class="form-control mb-2"
+           value="{{ address.pincode }}" required>
+
+    <select name="state" class="form-select mb-2" required>
+      <option selected>{{ address.state }}</option>
+      <option>Maharashtra</option>
+      <option>Delhi</option>
+      <option>Karnataka</option>
+      <option>Tamil Nadu</option>
+    </select>
+
+    <select name="city" class="form-select mb-2" required>
+      <option selected>{{ address.city }}</option>
+      <option>Mumbai</option>
+      <option>Pune</option>
+      <option>Delhi</option>
+      <option>Bengaluru</option>
+    </select>
+
+    <select name="address_type" class="form-select mb-3">
+      <option {{ 'selected' if address.address_type=='Home' }}>Home</option>
+      <option {{ 'selected' if address.address_type=='Office' }}>Office</option>
+    </select>
+
+    <button class="btn btn-warning w-100">💾 Update Address</button>
+  </form>
+</div>
+
+{% endblock %}

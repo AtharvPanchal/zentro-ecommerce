@@ -1,0 +1,107 @@
+{% extends "admin/admin_base.html" %}
+{% block page_title %}Categories{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Categories</h2>
+      <p class="text-muted mb-0">Manage product categories used across your store</p>
+    </div>
+
+    <a href="{{ url_for('admin.category.add_category') }}"
+   class="btn btn-primary">
+  + Add Category
+</a>
+
+  </div>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Category Table Card -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+
+      {% if categories %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Name</th>
+              <th>Slug</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in categories %}
+            <tr>
+              <td class="ps-4 fw-semibold">{{ c.id }}</td>
+
+              <td>
+                <div class="fw-semibold">{{ c.name }}</div>
+                <small class="text-muted">
+                  Created {{ c.created_at|timeago }}
+                </small>
+              </td>
+
+              <td>
+                <span class="badge bg-light text-dark border">
+                  {{ c.slug }}
+                </span>
+              </td>
+
+              <td>
+                {% if c.status == "ACTIVE" %}
+                  <span class="badge bg-success">ACTIVE</span>
+                {% else %}
+                  <span class="badge bg-secondary">INACTIVE</span>
+                {% endif %}
+              </td>
+
+              <td class="text-end pe-4">
+                <a href="{{ url_for('admin.category.edit_category', category_id=c.id) }}"
+   class="btn btn-sm btn-warning">
+  Edit
+</a>
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <!-- Empty State -->
+      <div class="text-center py-5">
+        <h5 class="fw-semibold">No categories found</h5>
+        <p class="text-muted mb-3">
+          Categories help organize your products efficiently.
+        </p>
+        <a href="{{ url_for('admin_categories.add_category') }}"
+           class="btn btn-primary">
+          Create First Category
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

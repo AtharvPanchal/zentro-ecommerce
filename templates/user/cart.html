@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}My Cart | ZENTRO{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container cart-container my-5">
+  <h2 class="mb-4">My Cart</h2>
+
+  <!-- EMPTY CART -->
+  <div id="emptyCart" class="empty-cart d-none">
+    <p>Your cart is empty.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary">Continue Shopping</a>
+  </div>
+
+  <!-- CART TABLE -->
+  <div id="cartSection" class="row g-4">
+    <div class="col-lg-8">
+      <div class="cart-card">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="text-center">Qty</th>
+              <th class="text-end">Price</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cartItems"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="col-lg-4">
+      <div class="summary-card">
+        <h5>Order Summary</h5>
+        <div class="d-flex justify-content-between">
+          <span>Subtotal</span>
+          <strong id="cartSubtotal">₹0</strong>
+        </div>
+          <button id="placeOrderBtn" class="btn btn-dark w-100 mt-3">
+  Place Order (Cash on Delivery)
+</button>
+
+        <hr>
+        <button class="btn btn-dark w-100 mt-3" disabled>
+          Checkout (Next Step)
+        </button>
+        <small class="text-muted d-block mt-2">
+          * Payment will be enabled in next module
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}

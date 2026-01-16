@@ -1,0 +1,91 @@
+{% extends "admin/admin_base.html" %}
+{% block content %}
+
+<h2 class="mb-4">Security Health Overview</h2>
+
+<div class="row">
+
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6>Admin Activity</h6>
+        <p>{{ health.admin_activity.count }} actions</p>
+        <span class="badge bg-info">
+          {{ health.admin_activity.status }}
+        </span>
+       <div class="mt-2">
+  <span class="badge bg-light text-dark">
+    Confidence: {{ health.admin_activity.confidence }}%
+  </span>
+</div>
+<div class="mt-1">
+  <span class="badge bg-primary">
+    {{ health.admin_activity.governance }}
+  </span>
+</div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6>Bulk Operations</h6>
+        <p>{{ health.bulk_activity.count }} events</p>
+        <span class="badge bg-warning">
+          {{ health.bulk_activity.status }}
+        </span>
+        <div class="mt-2">
+  <span class="badge bg-light text-dark">
+    Confidence: {{ health.bulk_activity.confidence }}%
+  </span>
+</div>
+<div class="mt-1">
+  <span class="badge bg-warning text-dark">
+    {{ health.bulk_activity.governance }}
+  </span>
+</div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6>Automation</h6>
+        <p>{{ health.automation.events }} events</p>
+        <span class="badge bg-secondary">
+          {{ health.automation.status }}
+        </span>
+        <div class="mt-2">
+  <span class="badge bg-light text-dark">
+    Confidence: {{ health.automation.confidence }}%
+  </span>
+</div>
+<div class="mt-1">
+ <span class="badge bg-secondary">
+    {{ health.automation.governance }}
+  </span>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h6>Overall Health</h6>
+        <span class="badge bg-success fs-6">
+          {{ health.overall_health }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

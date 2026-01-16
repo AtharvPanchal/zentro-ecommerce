@@ -1,0 +1,14 @@
+/* order detail */
+.card p, .card div{margin-bottom:.5rem}
+
+table th, table td {
+  vertical-align: middle;
+}
+
+.card {
+  border-radius: 14px;
+}
+
+.badge {
+  font-size: 0.85rem;
+}

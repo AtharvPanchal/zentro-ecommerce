@@ -1,0 +1,131 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- KPI STRIP -->
+<div class="kpi-grid">
+  <div class="kpi-card blue">
+    <div class="label">Total Users</div>
+<div class="value">{{ dashboard.users.total }}</div>
+<div class="trend">▲ {{ dashboard.users.new_today }} today</div>
+
+  </div>
+
+  <div class="kpi-card green">
+    <span>Orders Today</span>
+    <h3>{{ dashboard.orders.today }}</h3>
+    <small>Total: {{ dashboard.orders.total }}</small>
+  </div>
+
+  <div class="kpi-card orange">
+    <span>Revenue</span>
+    <h3>₹ {{ dashboard.revenue.total }}</h3>
+    <small>Today ₹ {{ dashboard.revenue.today }}</small>
+  </div>
+
+  <div class="kpi-card red">
+    <span>Low Stock</span>
+    <h3>{{ dashboard.products.low_stock_count }}</h3>
+    <small>Inventory alerts</small>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<h3 class="section-title">Admin Actions</h3>
+
+<div class="action-grid">
+  <a href="{{ url_for('admin.review_moderation') }}" class="action-card gradient-purple">
+    <span class="action-label">Reviews</span>
+    <h4>Moderation</h4>
+    <small>Pending / Reported</small>
+  </a>
+
+  <a href="{{ url_for('admin.admin_users') }}" class="action-card gradient-blue">
+  <span class="action-label">Users</span>
+  <h4>User Management</h4>
+  <small>Active / Locked / Logs</small>
+</a>
+
+
+  <a href="#" class="action-card gradient-green">
+    <span class="action-label">Products</span>
+    <h4>Inventory</h4>
+    <small>Stock / Status</small>
+  </a>
+
+  <a href="#" class="action-card gradient-orange">
+    <span class="action-label">Orders</span>
+    <h4>Order Flow</h4>
+    <small>Pending / Delivered</small>
+  </a>
+</div>
+
+
+
+
+
+
+<!-- CHARTS -->
+<div class="chart-grid">
+  <div class="card">
+    <h4>Revenue & Orders (7 Days)</h4>
+    <canvas id="salesChart"></canvas>
+  </div>
+
+  <div class="card">
+    <h4>Order Status Breakdown</h4>
+    <canvas id="statusChart"></canvas>
+  </div>
+</div>
+
+<!-- ACTIVITY + ALERTS -->
+<div class="split-grid">
+  <div class="card">
+    <h4>Recent Orders</h4>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Customer</th><th>Amount</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for o in dashboard.recent_orders %}
+        <tr>
+          <td>#{{ o.order_number }}</td>
+          <td>{{ o.customer_name }}</td>
+          <td>₹ {{ o.total_amount }}</td>
+          <td>{{ o.status }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty">No recent orders</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h4>Action Required</h4>
+    {% if dashboard.alerts.locked_admins or dashboard.alerts.low_stock_products %}
+      <ul class="alerts">
+        {% for a in dashboard.alerts.locked_admins %}
+        <li class="danger">Locked Admin: {{ a.email }}</li>
+        {% endfor %}
+        {% for p in dashboard.alerts.low_stock_products %}
+        <li class="warning">Low Stock: {{ p.name }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No critical alerts 🎉</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
+{% endblock %}

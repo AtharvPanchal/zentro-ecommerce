@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Order Success · ZENTRO{% endblock %}
+{% block content %}
+<div class="container mt-5 text-center">
+  <h2>Thank you — your order is confirmed!</h2>
+  <p class="text-muted">Order #{{ order.id }} has been placed successfully. We will send updates to {{ order.email }}</p>
+  <a href="{{ url_for('user.order_history') }}" class="btn btn-primary mt-3">View Order History</a>
+</div>
+{% endblock %}

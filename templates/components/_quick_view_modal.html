@@ -1,0 +1,90 @@
+<!-- QUICK VIEW MODAL -->
+<div class="modal fade"
+     id="quickViewModal"
+     tabindex="-1"
+     aria-labelledby="quickViewTitle"
+     aria-hidden="true"
+     role="dialog"
+     aria-modal="true">
+
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 id="quickViewTitle" class="modal-title">Product</h5>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close quick view"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-3">
+
+          <!-- LEFT : PRODUCT IMAGE -->
+          <div class="col-md-6 text-center">
+            <img id="quickImage"
+                 src=""
+                 alt=""
+                 class="img-fluid rounded">
+          </div>
+
+          <!-- RIGHT : PRODUCT DETAILS -->
+          <div class="col-md-6">
+
+            <h5 id="quickName"></h5>
+
+            <div id="quickRating" class="mb-2"></div>
+
+            <div class="mb-2">
+              <span id="quickPrice" style="font-weight:800"></span>
+              <span id="quickOld" class="old-price"></span>
+              <span id="quickDiscount" class="discount"></span>
+            </div>
+
+            <div id="quickStock" class="mb-2 small"></div>
+
+            <div id="quickTags" class="mb-2 small text-muted"></div>
+
+            <!-- QTY + ACTIONS -->
+            <div class="d-flex gap-2 align-items-center mb-2">
+
+              <div class="input-group input-group-sm qty-group" style="width:120px">
+                <button class="btn btn-outline-secondary qty-minus"
+                        type="button"
+                        aria-label="Decrease quantity">-</button>
+
+                <input type="number"
+                       min="1"
+                       value="1"
+                       class="form-control qty-input"
+                       id="quickQty"
+                       aria-label="Quantity">
+
+                <button class="btn btn-outline-secondary qty-plus"
+                        type="button"
+                        aria-label="Increase quantity">+</button>
+              </div>
+
+              <button class="btn btn-primary" id="quickAddCart">
+                Add to Cart
+              </button>
+
+              <button class="btn btn-outline-danger" id="quickWishlistBtn">
+                <i class="fa-regular fa-heart"></i> Wishlist
+              </button>
+
+            </div>
+
+            <!-- STOCK WARNING -->
+            <div id="quickWarning"
+                 class="mini-warning"
+                 style="display:none"></div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,317 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}
+{% if mode == "edit" %}Edit Product{% else %}Add Product{% endif %} | Admin
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<style>
+/* ===== PAGE ===== */
+.product-page {
+    padding: 32px 40px;
+    max-width: 1400px;
+}
+
+/* ===== GRID ===== */
+.product-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+}
+
+/* ===== LEFT PANEL ===== */
+.product-side {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+}
+
+.product-side h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.image-box {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 14px;
+    overflow: hidden;
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.status-pill {
+    margin-top: 16px;
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-active {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.status-inactive {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* ===== RIGHT PANEL ===== */
+.product-form {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px 36px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+
+.form-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.form-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 28px;
+}
+
+/* ===== FORM GRID ===== */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 22px;
+}
+
+.col-6 { grid-column: span 6; }
+.col-12 { grid-column: span 12; }
+
+/* ===== INPUTS ===== */
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #111827;
+    box-shadow: 0 0 0 2px rgba(17,24,39,0.1);
+    outline: none;
+}
+
+/* ===== FILE ===== */
+.file-input {
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+}
+
+/* ===== FOOTER ===== */
+.form-footer {
+    margin-top: 32px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ===== BUTTON ===== */
+.btn-primary-clean {
+    background: #111827;
+    color: #ffffff;
+    padding: 12px 34px;
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+}
+
+.btn-primary-clean:hover {
+    background: #000000;
+}
+</style>
+
+<div class="product-page">
+
+    <!-- FLASH -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="product-layout">
+
+        <!-- LEFT -->
+        <aside class="product-side">
+            <h4>Product Preview</h4>
+
+           <div class="image-box">
+    {% if product and product.image_list and product.image_list|length > 0 %}
+        <img src="{{ product.image_list[0] }}" alt="Product Image">
+    {% else %}
+        No image selected
+    {% endif %}
+</div>
+
+
+
+            <div class="mt-3">
+                {% if product and product.status == "INACTIVE" %}
+                    <span class="status-pill status-inactive">INACTIVE</span>
+                {% else %}
+                    <span class="status-pill status-active">ACTIVE</span>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- RIGHT -->
+        <section class="product-form">
+
+            <div class="form-title">
+                {% if mode == "edit" %}Edit Product{% else %}Add Product{% endif %}
+            </div>
+            <div class="form-subtitle">
+                {% if mode == "edit" %}
+                    Modify existing product information
+                {% else %}
+                    Create a new product in your catalogue
+                {% endif %}
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+                <div class="form-grid">
+
+                    <div class="form-group col-6">
+                        <label>Product Name *</label>
+                        <input type="text" name="name" class="form-control"
+                               value="{{ product.name if product else '' }}" required>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label>SKU *</label>
+                        <input type="text" name="sku" class="form-control"
+                               value="{{ product.sku if product else '' }}"
+                               {% if mode == "edit" %}readonly{% endif %} required>
+                    </div>
+
+                    <div class="form-group col-6">
+    <label>
+        Category <span class="text-danger">*</span>
+    </label>
+
+    <select name="category_id" class="form-select" required>
+        <option value="">-- Select Category --</option>
+
+        {% for cat in categories %}
+            <option value="{{ cat.id }}"
+                {% if product and product.category_id == cat.id %}selected{% endif %}>
+                {{ cat.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <small class="text-muted">
+        Product must belong to a category
+    </small>
+</div>
+
+
+                    <div class="form-group col-6">
+                        <label>Price (₹) *</label>
+                        <input type="number" step="0.01" name="price" class="form-control"
+                               value="{{ product.price if product else '' }}" required>
+                    </div>
+
+                    <div class="form-group col-12">
+                        <label>Description</label>
+                        <textarea name="description" rows="4"
+                                  class="form-control">{{ product.description if product else '' }}</textarea>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label>Product Image</label>
+                        <input type="file" name="image" class="file-input" accept="image/*">
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label>Status</label>
+                        <select name="status" class="form-select">
+                            <option value="ACTIVE" {% if product and product.status=="ACTIVE" %}selected{% endif %}>ACTIVE</option>
+                            <option value="INACTIVE" {% if product and product.status=="INACTIVE" %}selected{% endif %}>INACTIVE</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="btn-primary-clean">
+                        {% if mode == "edit" %}Update Product{% else %}Create Product{% endif %}
+                    </button>
+                </div>
+
+            </form>
+
+        </section>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.querySelector('input[name="image"]');
+    const previewBox = document.querySelector(".image-box");
+
+    if (!fileInput || !previewBox) return;
+
+    fileInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            previewBox.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+
+{% endblock %}

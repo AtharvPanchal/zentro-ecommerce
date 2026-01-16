@@ -1,0 +1,56 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Advanced Analytics{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="chart-grid">
+  <div class="card">
+    <h4>Monthly Revenue</h4>
+    <canvas id="monthlyRevenue"></canvas>
+  </div>
+
+  <div class="card">
+    <h4>Conversion Funnel</h4>
+    <canvas id="conversionChart"></canvas>
+  </div>
+
+  <div class="card full">
+    <h4>Traffic vs Orders</h4>
+    <canvas id="trafficChart"></canvas>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_js %}
+<script>
+new Chart(document.getElementById('monthlyRevenue'), {
+  type: 'line',
+  data: {
+    labels: ['Jan','Feb','Mar','Apr','May'],
+    datasets: [{
+      label: 'Revenue',
+      data: [12000,18000,15000,22000,30000],
+      borderColor: '#4f46e5',
+      fill: false
+    }]
+  }
+});
+
+new Chart(document.getElementById('conversionChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Visited','Cart','Checkout','Paid'],
+    datasets: [{
+      data: [1000, 420, 210, 160],
+      backgroundColor: '#22c55e'
+    }]
+  }
+});
+</script>
+{% endblock %}

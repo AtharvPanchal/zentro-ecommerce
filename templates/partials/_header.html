@@ -1,0 +1,147 @@
+<!-- Skip link -->
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<!-- NAVBAR -->
+<header class="main-nav py-2">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+
+      <!-- LEFT: Logo (SAFE) -->
+      <div class="d-flex align-items-center me-2">
+        <a href="{{ url_for('main.index') }}" class="brand-logo" aria-label="Zentro homepage">
+          <div class="logo-icon" aria-hidden="true">Z</div>
+          <div>
+            <div style="font-size:14px;opacity:.9">ZENTRO</div>
+            <small style="font-size:11px;color:rgba(255,255,255,.8);">
+              Everything at Your Center.
+            </small>
+          </div>
+        </a>
+      </div>
+
+      <!-- CENTER: Search (UI only – backend later) -->
+      <div class="flex-grow-1 ms-2 me-2">
+        <div class="search-box d-flex align-items-center" role="search" aria-label="Site search">
+          <select id="search-category"
+                  class="form-select form-select-sm w-auto"
+                  aria-label="Search category"
+                  style="max-width:170px">
+            <option value="All">All</option>
+            <option>Electronics</option>
+            <option>Fashion</option>
+            <option>Beauty</option>
+            <option>Sports</option>
+            <option>Grocery</option>
+            <option>Home</option>
+          </select>
+
+          <input id="search-input"
+                 type="search"
+                 class="form-control form-control-sm"
+                 placeholder="Search products, brands and more"
+                 aria-label="Search products">
+
+          <button class="btn btn-search btn-sm"
+                  id="search-btn"
+                  aria-label="Start search">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Controls -->
+      <div class="d-flex align-items-center gap-2">
+
+        <!-- City Selector (UI only) -->
+        <div class="dropdown me-1">
+          <button class="btn btn-sm btn-light"
+                  id="cityBtn"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  aria-label="Select city">
+            <i class="fa fa-location-dot"></i>
+            <span id="cityText">
+              Delivering to <strong>Delhi</strong>
+            </span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="cityBtn">
+            <li><button class="dropdown-item city-select">Delhi</button></li>
+            <li><button class="dropdown-item city-select">Mumbai</button></li>
+            <li><button class="dropdown-item city-select">Bengaluru</button></li>
+            <li><button class="dropdown-item city-select">Chennai</button></li>
+            <li><button class="dropdown-item city-select">Kolkata</button></li>
+          </ul>
+        </div>
+
+       <!-- Wishlist -->
+<a href="{{ url_for('user.wishlist') }}"
+   class="btn btn-outline-light btn-sm position-relative"
+   aria-label="Wishlist">
+  <i class="fa-regular fa-heart"></i>
+</a>
+
+
+        <!-- Cart (UI only) -->
+        <button class="btn btn-outline-light btn-sm position-relative"
+                id="cartBtn"
+                aria-label="Cart">
+          <i class="fa fa-shopping-cart"></i>
+        </button>
+
+        <!-- ========================= -->
+        <!-- USER / AUTH (SAFE PART) -->
+        <!-- ========================= -->
+
+        {#
+
+        {% if current_user.is_authenticated %}
+          <a class="btn btn-sm btn-light"
+             href="{{ url_for('account.profile') }}">
+            Hi, {{ current_user.name or current_user.email }}
+          </a>
+        {% endif %}
+        #}
+
+        <!-- Login / Signup (WORKING) -->
+        {% if current_user.is_authenticated %}
+<div class="dropdown">
+  <button class="btn btn-sm btn-warning dropdown-toggle"
+          data-bs-toggle="dropdown">
+    👤 {{ current_user.username }}
+  </button>
+
+  <ul class="dropdown-menu dropdown-menu-end shadow">
+    <li><a class="dropdown-item" href="{{ url_for('user.account') }}">👤 My Profile</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('user.orders') }}">📦 My Orders</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('user.wishlist') }}">❤️ Wishlist</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('user.addresses') }}">📍 Your Addresses</a></li>
+    <li><a class="dropdown-item" href="{{ url_for('user.change_password') }}">🔐 Change Password</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">🚪 Logout</a></li>
+  </ul>
+</div>
+{% else %}
+<a class="btn btn-sm btn-warning"
+   href="{{ url_for('auth.login') }}">
+   👤 Signup / Login
+</a>
+{% endif %}
+
+
+
+        <!-- ========================= -->
+        <!-- ADMIN (TEMP COMMENTED) -->
+        <!-- ========================= -->
+
+        {#
+        {% if current_user.is_authenticated and current_user.is_admin %}
+          <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+        {% else %}
+          <a href="{{ url_for('admin.login') }}">Admin Login</a>
+        {% endif %}
+        #}
+
+      </div>
+    </div>
+  </div>
+</header>

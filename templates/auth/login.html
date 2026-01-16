@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ZENTRO | Login or Create Account</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://www.google.com/recaptcha/api.js?render={{ config.RECAPTCHA_SITE_KEY }}"></script>
+
+<style>
+body{
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(135deg,#0b1b2b,#12263f);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.auth-card{
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 25px 60px rgba(0,0,0,.25);
+  max-width:760px;
+  width:100%;
+  overflow:hidden;
+}
+.auth-left{
+  background:linear-gradient(160deg,#0b1b2b,#e29b26);
+  color:#fff;
+  padding:50px 35px;
+}
+.auth-right{padding:40px 35px;}
+.brand-logo{font-size:24px;font-weight:800;}
+.brand-logo span{color:#e29b26;}
+.form-control{border-radius:10px;padding:12px 42px;font-size:14px;}
+.btn-primary{background:#0b1b2b;border:none;border-radius:10px;padding:12px;font-weight:600;}
+.icon-input{position:relative;}
+.icon-input i.left{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#888;}
+.icon-input i.right{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#888;}
+.toggle-link{cursor:pointer;font-weight:600;color:#0b1b2b;}
+.password-rules small{display:block;}
+.progress{height:6px;border-radius:6px;}
+.resend-link{font-size:13px;color:#6b7280;}
+.resend-link span{cursor:pointer;font-weight:600;color:#0b1b2b;}
+@media(max-width:768px){.auth-left{display:none;}}
+</style>
+</head>
+
+<body>
+
+<div class="auth-card row g-0">
+
+<div class="col-md-5 auth-left d-flex flex-column justify-content-center">
+  <div class="brand-logo mb-2">
+    <i class="fa-solid fa-bag-shopping me-2"></i>ZENT<span>RO</span>
+  </div>
+  <h4 class="fw-bold">Welcome to ZENTRO</h4>
+  <p class="opacity-75">Smart Shopping Starts With a Secure Account</p>
+</div>
+
+<div class="col-md-7 auth-right">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show">
+  {{ message }}
+  <button class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endwith %}
+
+{% if lock_active %}
+<div class="alert alert-danger text-center">
+  🔒 <strong>Account locked</strong><br>
+  You can try again in:
+  <span id="lock-timer" data-seconds="{{ lock_seconds }}"></span>
+</div>
+{% endif %}
+
+<!-- ================= LOGIN FORM ================= -->
+<form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="form_type" value="login">
+
+
+<h5 class="fw-bold mb-3">Sign In To Your Account</h5>
+
+<div class="mb-3 icon-input">
+  <i class="fa-solid fa-envelope left"></i>
+  <input type="email" class="form-control" name="email" id="loginEmail" placeholder="Email Address" required>
+</div>
+
+<div class="mb-2 icon-input">
+  <i class="fa-solid fa-lock left"></i>
+  <input type="password" class="form-control" name="password" placeholder="Password" required>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" name="remember">
+    <label class="form-check-label small">Remember Me</label>
+  </div>
+  <a href="{{ url_for('auth.forgot_password') }}" class="fw-semibold small">Forgot password?</a>
+</div>
+
+<div class="resend-link mb-3">
+  Didn’t receive verification email?
+  <span onclick="resendVerification()">Resend</span>
+</div>
+
+<button type="button"
+        class="btn btn-primary w-100 mb-3"
+        onclick="executeRecaptcha(event)">
+
+  <i class="fa-solid fa-right-to-bracket me-1"></i> Login
+</button>
+
+<p class="text-center small">
+  New to ZENTRO?
+  <span class="toggle-link" onclick="toggleForms()">Create Account</span>
+</p>
+</form>
+
+<form id="resendForm" method="POST" action="{{ url_for('auth.resend_verification') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="email" id="resendEmail">
+</form>
+
+
+<!-- ================= SIGNUP FORM ================= -->
+<form id="signupForm" method="POST" action="{{ url_for('auth.signup') }}" style="display:none;">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="form_type" value="signup">
+
+<h5 class="fw-bold mb-3">Create Your ZENTRO Account</h5>
+
+<div class="mb-3 icon-input">
+  <i class="fa-solid fa-user left"></i>
+  <input type="text" class="form-control" name="username" placeholder="Username" required>
+</div>
+
+<div class="mb-3 icon-input">
+  <i class="fa-solid fa-envelope left"></i>
+  <input type="email" class="form-control" name="email" placeholder="Email Address" required>
+</div>
+
+<div class="mb-2 icon-input">
+  <i class="fa-solid fa-lock left"></i>
+  <input type="password" class="form-control" id="signupPass" name="password"
+         placeholder="Create Password" oninput="checkStrength()" required>
+</div>
+
+<div class="progress mb-2">
+  <div id="strengthBar" class="progress-bar bg-danger" style="width:0%"></div>
+</div>
+
+<div class="password-rules mb-3">
+  <small id="r1" class="text-danger">• At least 8 characters</small>
+  <small id="r2" class="text-danger">• One uppercase letter</small>
+  <small id="r3" class="text-danger">• One number</small>
+</div>
+
+<div class="mb-3 icon-input">
+  <i class="fa-solid fa-lock left"></i>
+  <input type="password" class="form-control" name="confirm_password"
+         placeholder="Confirm Password" required>
+</div>
+
+<button class="btn btn-primary w-100 mb-3">
+  <i class="fa-solid fa-user-plus me-1"></i> Create Account
+</button>
+
+<p class="text-center small">
+  Already have an account?
+  <span class="toggle-link" onclick="toggleForms()">Login</span>
+</p>
+</form>
+
+</div>
+</div>
+
+<script>
+/* TOGGLE */
+function toggleForms(){
+  loginForm.style.display = loginForm.style.display==="none"?"block":"none";
+  signupForm.style.display = signupForm.style.display==="none"?"block":"none";
+}
+
+/* PASSWORD STRENGTH */
+function checkStrength(){
+  const v=signupPass.value;let s=0;
+  if(v.length>=8){r1.className="text-success";s++;}else r1.className="text-danger";
+  if(/[A-Z]/.test(v)){r2.className="text-success";s++;}else r2.className="text-danger";
+  if(/[0-9]/.test(v)){r3.className="text-success";s++;}else r3.className="text-danger";
+  strengthBar.style.width=(s/3*100)+"%";
+  strengthBar.className="progress-bar "+(s===3?"bg-success":s===2?"bg-warning":"bg-danger");
+}
+
+/* LOCK TIMER */
+const timer = document.getElementById("lock-timer");
+
+if (timer) {
+  let remaining = parseInt(timer.dataset.seconds, 10);
+
+  function formatTime(seconds) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hrs > 0) {
+      return `${hrs}h ${mins}m ${secs}s`;
+    } else {
+      return `${mins}m ${secs}s`;
+    }
+  }
+
+  function updateTimer() {
+    if (remaining <= 0) {
+      timer.textContent = "You can try again now";
+      return;
+    }
+    timer.textContent = formatTime(remaining);
+    remaining--;
+    setTimeout(updateTimer, 1000);
+  }
+
+  updateTimer();
+}
+
+
+/* RESEND */
+function resendVerification(){
+  if(!loginEmail.value)return alert("Enter email first");
+  resendEmail.value=loginEmail.value;
+  resendForm.submit();
+}
+
+/* RECAPTCHA */
+function executeRecaptcha(e){
+  e.preventDefault();
+  grecaptcha.ready(()=>{
+    grecaptcha.execute("{{ config.RECAPTCHA_SITE_KEY }}",{action:"login"})
+    .then(t=>{
+      const i=document.createElement("input");
+      i.type="hidden";i.name="g-recaptcha-response";i.value=t;
+      loginForm.appendChild(i);loginForm.submit();
+    });
+  });
+}
+</script>
+
+</body>
+</html>

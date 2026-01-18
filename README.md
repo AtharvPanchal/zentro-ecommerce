@@ -64,14 +64,14 @@ This project is under **active development** and follows a **real-world incremen
 
 ### 🧑‍💼 Admin Side (In Progress)
 - Product management (Add / Edit / Delete)
-- Product listing & pagination
+- Product listing & Pagination
 - Category management
 - Inventory & stock tracking
 - User management dashboard
 - Order management workflow
 - Reviews moderation
-- Revenue & order analytics
-- Sales & performance dashboards
+- Revenue & Order analytics
+- Sales & Performance Dashboards
 
 ---
 
@@ -81,7 +81,7 @@ This project is under **active development** and follows a **real-world incremen
 - Product filters & search
 - Product reviews & ratings (partial)
 - Checkout flow
-- Payment gateway integration with Razorpay
+- Payment Gateway Integration with Razorpay
 - Order placement & tracking
 
 ---
@@ -251,4 +251,5 @@ Focused on real-world systems, security & scalability  <br>
 
 
 ---
+
 

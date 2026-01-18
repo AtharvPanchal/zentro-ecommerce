@@ -11,17 +11,17 @@ This project is under **active development** and follows a **real-world incremen
 - 🔐 **Enterprise-grade authentication system**
 - 🧑‍💼 **Dedicated Admin Panel with security controls**
 - 📧 Email-based OTP & verification flows
-- 🛡️ Security-first design (rate limiting, account lock, Suspicious activity, audit logs)
+- 🛡️ Security-first Design (rate limiting, account lock, Suspicious activity, audit logs)
 - 🧱 Scalable & modular Flask architecture
 - 🧪 Database-driven with structured relational schema
-- 🔒 Planned secure Payment Gateway Integration with Razorpay (In Progress)
+- 🔒 Planned Secure Payment Gateway Integration with Razorpay (In Progress)
   
 ---
 
 ## 📌 Project Status
 
 > ⚠️ **This project is a WORK IN PROGRESS (WIP)**  
-> Core authentication & security layers are complete.  
+> Core Authentication & Security layers are complete.  
 > Commerce features are under active development.
 
 ---
@@ -251,3 +251,4 @@ Focused on real-world systems, security & scalability  <br>
 
 
 ---
+

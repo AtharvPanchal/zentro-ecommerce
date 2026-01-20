@@ -245,11 +245,15 @@ Atharv Dattaram Panchal  <br>
 Engineering Student | Backend Developer   <br>
 Focused on real-world systems, security & scalability  <br>
 
+📧 Email: atharvpanchal2006@gmail.com  
+🔗 GitHub: https://github.com/AtharvPanchal  
+
 🔹 Tech Stack: Flask, SQLAlchemy, MySQL, HTML/CSS, JavaScript  
 🔹 Interests: Backend Engineering, Security, System Design  
 🔹 Learning: Payments, Distributed Systems, Production Deployment, Generative AI 
 
 
 ---
+
 
 

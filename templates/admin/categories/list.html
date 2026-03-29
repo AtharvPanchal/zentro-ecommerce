@@ -13,10 +13,9 @@
     </div>
 
     <a href="{{ url_for('admin.category.add_category') }}"
-   class="btn btn-primary">
-  + Add Category
-</a>
-
+       class="btn btn-primary">
+      + Add Category
+    </a>
   </div>
 
   <!-- Flash Messages -->
@@ -33,66 +32,219 @@
 
   <!-- Category Table Card -->
   <div class="card shadow-sm border-0">
+
+    <!-- 🔍 FILTER BAR -->
+    <div class="p-3 border-bottom">
+      <form method="GET" class="row g-2 align-items-center">
+
+        <div class="col-md-4">
+          <input type="text"
+                 name="search"
+                 value="{{ search }}"
+                 class="form-control"
+                 placeholder="Search category name">
+        </div>
+
+        <div class="col-md-2">
+          <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="ACTIVE" {% if status=="ACTIVE" %}selected{% endif %}>Active</option>
+            <option value="INACTIVE" {% if status=="INACTIVE" %}selected{% endif %}>Inactive</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <select name="sort" class="form-select">
+            <option value="newest" {% if sort=="newest" %}selected{% endif %}>Newest</option>
+            <option value="oldest" {% if sort=="oldest" %}selected{% endif %}>Oldest</option>
+            <option value="name_asc" {% if sort=="name_asc" %}selected{% endif %}>Name A-Z</option>
+          </select>
+        </div>
+
+        <div class="col-md-4 d-flex gap-2 justify-content-end">
+          <button class="btn btn-primary">
+            <i class="bi bi-funnel me-1"></i> Apply
+          </button>
+
+          <a href="{{ url_for('admin.category.list_categories') }}"
+             class="btn btn-outline-secondary">
+            Reset
+          </a>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- TABLE -->
     <div class="card-body p-0">
 
       {% if categories %}
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
+
           <thead class="table-light">
-            <tr>
-              <th class="ps-4">ID</th>
-              <th>Name</th>
-              <th>Slug</th>
-              <th>Status</th>
+            <tr class="align-middle">
+              <th class="ps-4 text-start">ID</th>
+<th class="text-center">Image</th>
+<th class="text-start ps-2">Name</th>
+              <th class="text-start ps-2">Slug</th>
+              <th class="text-center">Status</th>
               <th class="text-end pe-4">Action</th>
             </tr>
           </thead>
+
           <tbody>
             {% for c in categories %}
-            <tr>
-              <td class="ps-4 fw-semibold">{{ c.id }}</td>
+            <tr class="align-middle">
 
-              <td>
-                <div class="fw-semibold">{{ c.name }}</div>
-                <small class="text-muted">
-                  Created {{ c.created_at|timeago }}
+             <!-- ID -->
+<td class="ps-4">
+  <span class="id-badge">{{ c.id }}</span>
+</td>
+
+<!-- IMAGE -->
+<td class="text-center">
+  <img src="{{ url_for('static', filename=c.image if c.image else 'img/placeholders/placeholder.png') }}"
+       class="img-thumbnail"
+       style="height:80px; width:100px; object-fit:contain; background:#f8f9fa;">
+</td>
+              <!-- NAME -->
+              <td class="text-start ps-2">
+                <div class="fw-semibold fs-6 d-flex align-items-center gap-2">
+                  <i class="bi bi-folder-fill text-warning"></i>
+                  {{ c.name }}
+
+                  {% if c.created_at and (loop.index == 1 and pagination and pagination.page == 1) %}
+                  <span class="badge bg-primary px-2 py-1" style="font-size: 11px;">
+                    NEW
+                  </span>
+                  {% endif %}
+                </div>
+
+                <small class="text-muted d-block">
+                  {{ c.created_at.strftime("%d %b %Y") }}, {{ c.created_at|timeago }}
                 </small>
               </td>
 
-              <td>
-                <span class="badge bg-light text-dark border">
+              <!-- SLUG -->
+              <td class="text-start ps-2">
+                <span class="badge bg-secondary-subtle text-dark border px-3 py-2">
                   {{ c.slug }}
                 </span>
               </td>
 
-              <td>
+              <!-- STATUS -->
+              <td class="text-center">
                 {% if c.status == "ACTIVE" %}
-                  <span class="badge bg-success">ACTIVE</span>
+                  <span class="badge rounded-pill bg-success px-3 py-1">ACTIVE</span>
                 {% else %}
                   <span class="badge bg-secondary">INACTIVE</span>
                 {% endif %}
               </td>
 
+              <!-- ACTION -->
               <td class="text-end pe-4">
-                <a href="{{ url_for('admin.category.edit_category', category_id=c.id) }}"
-   class="btn btn-sm btn-warning">
-  Edit
-</a>
+                <div class="d-flex justify-content-end align-items-center gap-2">
 
+                  <!-- EDIT -->
+                  <a href="{{ url_for('admin.category.edit_category', category_id=c.id) }}"
+                     class="btn btn-sm btn-outline-dark">
+                    Edit
+                  </a>
+
+                  <!-- TOGGLE -->
+                  <form method="POST"
+                        action="{{ url_for('admin.category.toggle_category', category_id=c.id) }}"
+                        onsubmit="return confirm('Are you sure?');"
+                        class="d-inline">
+
+                    <button type="submit"
+                      class="btn btn-sm {% if c.status == 'ACTIVE' %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+
+                      {% if c.status == "ACTIVE" %}
+                        Deactivate
+                      {% else %}
+                        Activate
+                      {% endif %}
+
+                    </button>
+
+                  </form>
+
+                </div>
               </td>
+
             </tr>
             {% endfor %}
           </tbody>
+
         </table>
       </div>
+
+      <!-- PAGINATION -->
+      <div class="p-3">
+        <nav>
+          <ul class="pagination pagination-modern justify-content-end mb-0 align-items-center">
+
+            {% if pagination and pagination.has_prev %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('admin.category.list_categories',
+                 page=pagination.prev_num,
+                 search=search,
+                 status=status,
+                 sort=sort) }}">
+                Previous
+              </a>
+            </li>
+            {% endif %}
+
+            {% if pagination %}
+            {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+              {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link"
+                   href="{{ url_for('admin.category.list_categories',
+                   page=p,
+                   search=search,
+                   status=status,
+                   sort=sort) }}">
+                  {{ p }}
+                </a>
+              </li>
+              {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">...</span>
+              </li>
+              {% endif %}
+            {% endfor %}
+            {% endif %}
+
+            {% if pagination and pagination.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('admin.category.list_categories',
+                 page=pagination.next_num,
+                 search=search,
+                 status=status,
+                 sort=sort) }}">
+                Next
+              </a>
+            </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+      </div>
+
       {% else %}
       <!-- Empty State -->
       <div class="text-center py-5">
-        <h5 class="fw-semibold">No categories found</h5>
+        <h5 class="fw-semibold">No Categories Found</h5>
         <p class="text-muted mb-3">
-          Categories help organize your products efficiently.
+          Categories Help Organize Your Products Efficiently.
         </p>
-        <a href="{{ url_for('admin_categories.add_category') }}"
+        <a href="{{ url_for('admin.category.add_category') }}"
            class="btn btn-primary">
           Create First Category
         </a>

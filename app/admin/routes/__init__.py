@@ -6,4 +6,4 @@ from .activity_routes import *
 from .audit_insight_routes import *
 from .security_health_routes import *
 from .product_routes import *
-
+from .attributes_routes import *

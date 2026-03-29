@@ -187,6 +187,7 @@
 
         <!-- PROFILE FORM -->
         <form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="row g-3">
 
             <div class="col-md-6">
@@ -208,20 +209,21 @@
 
             <div class="col-md-6">
               <label>Phone Number</label>
-              <input type="text"
-                     class="form-control"
-                     name="phone"
-                     placeholder="📱 Enter phone number">
+             <input type="text"
+       class="form-control"
+       name="phone"
+       value="{{ current_user.phone or '' }}"
+       placeholder="📱 Enter phone number">
             </div>
 
             <div class="col-md-6">
               <label>Gender (Optional)</label>
-              <select class="form-control">
-                <option value="">Select</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-              </select>
+              <select class="form-control" name="gender">
+  <option value="">Select</option>
+  <option value="Male" {% if current_user.gender == 'Male' %}selected{% endif %}>Male</option>
+  <option value="Female" {% if current_user.gender == 'Female' %}selected{% endif %}>Female</option>
+  <option value="Other" {% if current_user.gender == 'Other' %}selected{% endif %}>Other</option>
+</select>
             </div>
           </div>
 

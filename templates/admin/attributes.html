@@ -1,0 +1,247 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Attributes{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+```
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">Attribute Management</h3>
+</div>
+
+
+<div class="row">
+
+    <!-- ========================= -->
+    <!-- ATTRIBUTE CREATE FORM -->
+    <!-- ========================= -->
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-dark text-white">
+                <strong>Create Attribute</strong>
+            </div>
+
+            <div class="card-body">
+
+                <form method="POST" action="{{ url_for('admin.create_attribute') }}">
+
+                    <!-- ATTRIBUTE NAME -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Attribute Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            placeholder="Example: RAM"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- ATTRIBUTE SLUG -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Attribute Slug
+                        </label>
+
+                        <input
+                            type="text"
+                            name="slug"
+                            class="form-control"
+                            placeholder="Example: ram"
+                            required
+                        >
+
+                        <small class="text-muted">
+                            Used in filter URLs
+                        </small>
+
+                    </div>
+
+
+                    <!-- CATEGORY -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Category
+                        </label>
+
+                        <select
+                            name="category_id"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select Category
+                            </option>
+
+                            {% for c in categories %}
+
+                            <option value="{{ c.id }}">
+                                {{ c.name }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SUBMIT -->
+
+                    <button class="btn btn-dark w-100">
+
+                        Create Attribute
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- ATTRIBUTE LIST TABLE -->
+    <!-- ========================= -->
+
+    <div class="col-md-8">
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-header bg-dark text-white">
+                <strong>Attribute List</strong>
+            </div>
+
+            <div class="card-body p-0">
+
+                <table class="table table-hover mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Category</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for a in attributes %}
+
+                        <tr>
+
+                            <td>{{ a.id }}</td>
+
+                            <td>
+                                <strong>{{ a.name }}</strong>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ a.slug }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ a.category_name }}
+                            </td>
+
+                            <td class="text-end">
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('admin.delete_attribute', attribute_id=a.id) }}"
+                                    onsubmit="return confirm('Delete this attribute?')"
+                                    style="display:inline"
+                                >
+
+                                    <button class="btn btn-sm btn-danger">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+
+                            <td colspan="5" class="text-center text-muted py-4">
+
+                                No attributes found
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<!-- ========================= -->
+
+<!-- AUTO SLUG GENERATOR -->
+
+<!-- ========================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const nameInput = document.querySelector('input[name="name"]')
+    const slugInput = document.querySelector('input[name="slug"]')
+
+    nameInput.addEventListener("input", function(){
+
+        let slug = nameInput.value
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g,"-")
+            .replace(/(^-|-$)/g,"")
+
+        slugInput.value = slug
+
+    })
+
+})
+
+</script>
+
+{% endblock %}

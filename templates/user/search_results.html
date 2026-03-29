@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ========================= -->
+<!-- BREADCRUMB -->
+<!-- ========================= -->
+
+<div class="container-fluid mt-3">
+
+<nav class="breadcrumb-box">
+
+<a href="{{ url_for('main.index') }}">Home</a>
+
+<span class="breadcrumb-sep">›</span>
+
+<span>Search</span>
+
+{% if query %}
+<span class="breadcrumb-sep">›</span>
+<span>"{{ query }}"</span>
+{% endif %}
+
+</nav>
+
+</div>
+
+
+<div class="container-fluid mt-3">
+
+<div class="row">
+
+<!-- ========================= -->
+<!-- LEFT FILTER PANEL -->
+<!-- ========================= -->
+
+<div class="col-md-3">
+
+<form method="GET" action="{{ url_for('main.search_page') }}">
+
+<input type="hidden" name="q" value="{{ query }}">
+
+<div class="filter-box">
+
+<h5>Filters</h5>
+<hr>
+
+<!-- CATEGORY FILTER -->
+
+<h6>Category</h6>
+
+<select name="category" class="form-control mb-3">
+
+<option value="">All Categories</option>
+
+{% for c in categories %}
+
+<option value="{{ c.id }}">
+{{ c.name }}
+</option>
+
+{% endfor %}
+
+</select>
+
+
+<!-- BRAND FILTER -->
+
+<h6>Brand</h6>
+
+<input
+type="text"
+name="brand"
+placeholder="Brand name"
+class="form-control mb-3"
+>
+
+  <!-- DYNAMIC ATTRIBUTE FILTERS -->
+
+{% for attribute in attributes %}
+
+<h6>{{ attribute.name }}</h6>
+
+<select name="{{ attribute.slug }}" class="form-control mb-3">
+
+<option value="">All</option>
+
+{% for value in attribute.values %}
+
+<option value="{{ value }}">{{ value }}</option>
+
+{% endfor %}
+
+</select>
+
+{% endfor %}
+
+    
+
+
+
+<!-- PRICE FILTER -->
+
+<h6>Price</h6>
+
+<input name="min_price" type="number" placeholder="Min"
+class="form-control mb-2">
+
+<input name="max_price" type="number" placeholder="Max"
+class="form-control mb-2">
+
+
+<!-- RATING FILTER -->
+
+<h6>Rating</h6>
+
+<label>
+<input type="radio" name="rating" value="4"> 4★ & above
+</label><br>
+
+<label>
+<input type="radio" name="rating" value="3"> 3★ & above
+</label><br>
+
+<label>
+<input type="radio" name="rating" value="2"> 2★ & above
+</label>
+
+
+<hr>
+
+
+<!-- STOCK FILTER -->
+
+<h6>Availability</h6>
+
+<label>
+<input type="checkbox" name="stock" value="1"> In Stock
+</label>
+
+
+<button class="btn btn-dark w-100 mt-3">
+Apply
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- PRODUCT LIST -->
+<!-- ========================= -->
+
+<div class="col-md-9">
+
+
+<!-- RESULT COUNT -->
+
+<div class="search-header">
+
+<div class="search-title">
+
+<span class="result-count">
+{{ total }} results
+</span>
+
+for
+
+<strong>"{{ query }}"</strong>
+
+</div>
+
+</div>
+
+
+<!-- SORT BAR -->
+
+
+<div class="sort-bar">
+
+<form method="GET">
+
+<input type="hidden" name="q" value="{{ query }}">
+<input type="hidden" name="category" value="{{ request.args.get('category','') }}">
+<input type="hidden" name="brand" value="{{ request.args.get('brand','') }}">
+<input type="hidden" name="min_price" value="{{ request.args.get('min_price','') }}">
+<input type="hidden" name="max_price" value="{{ request.args.get('max_price','') }}">
+<input type="hidden" name="rating" value="{{ request.args.get('rating','') }}">
+<input type="hidden" name="stock" value="{{ request.args.get('stock','') }}">
+
+
+
+<select name="sort"
+class="form-select w-auto"
+onchange="this.form.submit()">
+
+<option value="">Sort By</option>
+
+<option value="popularity"
+{% if current_sort == "popularity" %}selected{% endif %}>
+Popularity
+</option>
+
+<option value="price_low"
+{% if current_sort == "price_low" %}selected{% endif %}>
+Price Low → High
+</option>
+
+<option value="price_high"
+{% if current_sort == "price_high" %}selected{% endif %}>
+Price High → Low
+</option>
+
+<option value="rating"
+{% if current_sort == "rating" %}selected{% endif %}>
+Rating
+</option>
+
+<option value="newest"
+{% if current_sort == "newest" %}selected{% endif %}>
+Newest
+</option>
+
+</select>
+
+</form>
+
+</div>
+
+
+<!-- PRODUCTS -->
+
+{% for p in products %}
+
+<a href="{{ url_for('main.product_detail', product_id=p.id) }}" class="product-row">
+
+<div class="row product-item">
+
+<!-- IMAGE -->
+
+<div class="col-md-3">
+
+<img
+src="{{ url_for('static', filename=p.image_list[0]) if p.image_list else url_for('static', filename='img/placeholders/product.png') }}"
+class="product-img img-fluid">
+
+</div>
+
+
+<!-- DESCRIPTION -->
+
+<div class="col-md-6">
+
+<h5 class="product-title">
+{{ p.name }}
+</h5>
+
+
+<!-- PHASE 2 RATING -->
+
+<div class="rating-box">
+
+{% if p.show_rating %}
+
+<span class="rating-score">
+{{ p.avg_rating }} ★
+</span>
+
+<span class="rating-count">
+{{ p.rating_count }} reviews
+</span>
+
+{% else %}
+
+<span class="rating-count text-muted">
+No reviews yet
+</span>
+
+{% endif %}
+
+</div>
+
+
+<ul class="product-features">
+
+<li>Premium build quality</li>
+<li>Fast delivery available</li>
+<li>Bank offers available</li>
+
+</ul>
+
+</div>
+
+
+<!-- PRICE -->
+
+<div class="col-md-3 price-box">
+
+<h4 class="price">
+₹{{ p.display_price }}
+</h4>
+
+
+{% if p.is_in_stock %}
+
+<div class="delivery text-success">
+In Stock • Free Delivery
+</div>
+
+{% else %}
+
+<div class="delivery text-danger">
+Out of Stock
+</div>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</a>
+
+{% endfor %}
+
+
+
+<!-- PAGINATION -->
+
+<div class="mt-4">
+
+<nav>
+
+<ul class="pagination">
+
+{% if pagination.has_prev %}
+
+<li class="page-item">
+<a class="page-link"
+href="{{ url_for('main.search_page', q=query, page=pagination.prev_num) }}">
+Prev
+</a>
+</li>
+
+{% endif %}
+
+{% for p in pagination.iter_pages() %}
+
+{% if p %}
+
+<li class="page-item
+{% if p == pagination.page %}active{% endif %}">
+
+<a class="page-link"
+href="{{ url_for('main.search_page', q=query, page=p) }}">
+{{ p }}
+</a>
+
+</li>
+
+{% endif %}
+
+{% endfor %}
+
+{% if pagination.has_next %}
+
+<li class="page-item">
+<a class="page-link"
+href="{{ url_for('main.search_page', q=query, page=pagination.next_num) }}">
+Next
+</a>
+</li>
+
+{% endif %}
+
+</ul>
+
+</nav>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

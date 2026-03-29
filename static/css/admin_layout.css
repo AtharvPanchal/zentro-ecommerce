@@ -1,17 +1,6 @@
-.chart-box {
-  position: relative;
-  height: 320px;  
-  width: 100%;
-}
-
-.analytics-card {
-  height: auto;      /* ensure card doesn’t stretch */
-}
-
-/* DO NOT BREAK BOOTSTRAP */
-table {
-  width: 100%;
-}
+/* =========================
+   BASE LAYOUT
+========================= */
 
 body.admin-body {
   font-family: Inter, sans-serif;
@@ -23,6 +12,21 @@ body.admin-body {
   display: flex;
   height: 100vh;
 }
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-content {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
 
 .admin-sidebar {
   width: 260px;
@@ -57,7 +61,8 @@ body.admin-body {
   text-decoration: none;
 }
 
-.menu a.active, .menu a:hover {
+.menu a.active,
+.menu a:hover {
   background: rgba(255,255,255,.08);
   color: #fff;
 }
@@ -67,11 +72,9 @@ body.admin-body {
   padding: 20px;
 }
 
-.admin-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+/* =========================
+   TOPBAR
+========================= */
 
 .admin-topbar {
   background: #fff;
@@ -81,23 +84,9 @@ body.admin-body {
   justify-content: space-between;
 }
 
-.admin-content {
-  padding: 24px;
-  overflow-y: auto;
-}
-
-.badge-danger {
-  background: #dc3545;
-  color: white;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  float: right;
-}
-
-/* -----------------------------
-   Sidebar Dropdown
------------------------------- */
+/* =========================
+   DROPDOWN
+========================= */
 
 .menu-dropdown {
   display: flex;
@@ -129,16 +118,160 @@ body.admin-body {
   color: #cbd5e1;
 }
 
-.menu-dropdown .submenu a.active {
-  color: #ffffff;
-  font-weight: 600;
-}
-
-/* OPEN STATE */
 .menu-dropdown.open .submenu {
   display: flex;
 }
 
 .menu-dropdown.open .dropdown-icon {
   transform: rotate(180deg);
+}
+
+/* =========================
+   COMMON UI
+========================= */
+
+.form-control,
+.form-select {
+  border-radius: 8px;
+}
+
+.card .border-bottom {
+  background: #fafbfc;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.id-badge {
+  display: inline-block;
+  min-width: 38px;
+  text-align: center;
+  padding: 6px 10px;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 8px;
+  background: #f1f3f5;
+  border: 1px solid #e0e0e0;
+}
+
+/* =========================
+   TABLE (SAFE SCOPED)
+========================= */
+
+.admin-content .table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* HEADINGS */
+.admin-content .table thead {
+  background: #fafbfc;
+}
+
+.admin-content .table thead th {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  vertical-align: middle;
+}
+
+/* CELLS */
+.admin-content .table td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+/* GRID */
+.admin-content .table th,
+.admin-content .table td {
+  border-right: 1px solid rgba(0,0,0,0.04);
+}
+
+.admin-content .table th:last-child,
+.admin-content .table td:last-child {
+  border-right: none;
+}
+
+.admin-content .table tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+/* HOVER */
+.admin-content .table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* ALIGNMENTS FIX */
+.admin-content .table th {
+  text-align: left;
+}
+
+.admin-content .table th:last-child,
+.admin-content .table td:last-child {
+  text-align: right;
+}
+
+/* =========================
+   PAGINATION
+========================= */
+
+.pagination-modern {
+  gap: 6px;
+}
+
+.pagination-modern .page-link {
+  border: none;
+  background: #f1f3f5;
+  color: #333;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 0 4px;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+}
+
+.pagination-modern .page-link:hover {
+  background: #e2e6ea;
+}
+
+.pagination-modern .active .page-link {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.pagination-modern .disabled .page-link {
+  background: transparent;
+  color: #999;
+}
+
+
+/* =========================
+   AUDIT DETAILS FINAL FIX
+========================= */
+
+.audit-details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.audit-details-table th {
+  width: 180px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  padding: 10px 12px;
+}
+
+.audit-details-table td {
+  text-align: left;
+  padding: 10px 12px;
+  color: #212529;
+  word-break: break-word;
+}
+
+/* FORCE REMOVE GLOBAL TABLE EFFECT */
+.audit-details-table th,
+.audit-details-table td {
+  border: none !important;
 }

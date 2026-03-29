@@ -1,102 +1,207 @@
 {% extends "admin/admin_base.html" %}
 {% block page_title %}
-  {% if mode == "add" %}Add Category{% else %}Edit Category{% endif %}
+{% if mode == "add" %}Add Category{% else %}Edit Category{% endif %}
 {% endblock %}
 
 {% block content %}
 
 <div class="container-fluid px-4">
 
-  <!-- Page Header -->
-  <div class="mb-4">
-    <h2 class="fw-bold mb-1">
-      {% if mode == "add" %}Add Category{% else %}Edit Category{% endif %}
-    </h2>
-    <p class="text-muted mb-0">
-      {% if mode == "add" %}
-        Create a new category for your products
-      {% else %}
-        Update existing category information
-      {% endif %}
-    </p>
+<!-- Page Header -->
+<div class="mb-4">
+<h2 class="fw-bold mb-1">
+{% if mode == "add" %}Add Category{% else %}Edit Category{% endif %}
+</h2>
+<p class="text-muted mb-0">
+{% if mode == "add" %}
+Create a new category for your products
+{% else %}
+Update existing category information
+{% endif %}
+</p>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+{{ message }}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- Form Card -->
+<div class="card shadow-sm border-0">
+<div class="card-body p-4">
+
+<form method="post" enctype="multipart/form-data" novalidate>
+
+<div class="row g-4 align-items-start">
+
+  <!-- Category Name -->
+  <div class="col-lg-6">
+    <label class="form-label fw-semibold">
+      Category Name <span class="text-danger">*</span>
+    </label>
+
+    <input type="text"
+           name="name"
+           id="categoryName"
+           class="form-control form-control-lg"
+           placeholder="Example: Electronics"
+           value="{{ category.name if category else '' }}"
+           required>
+
+    <div class="form-text">
+      URL slug preview:
+      <span id="slugPreview" class="fw-semibold text-primary"></span>
+    </div>
+
+    <small class="text-muted">
+      This name will be visible to customers
+    </small>
   </div>
 
-  <!-- Flash Messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+  <!-- Category Image -->
+  <div class="col-lg-3">
+    <label class="form-label fw-semibold">
+      Category Image
+    </label>
 
-  <!-- Form Card -->
-  <div class="card shadow-sm border-0">
-    <div class="card-body p-4">
+    <input type="file"
+       name="image"
+       id="imageInput"
+       class="form-control"
+       accept="image/*">
 
-      <form method="post" novalidate>
+    <small class="text-muted">
+      Allowed: JPG, PNG, WEBP | Max size: 2MB
+    </small>
 
-        <div class="row g-4">
+    <div class="mt-3">
+      <p class="mb-1 fw-semibold">Preview:</p>
 
-          <!-- Category Name -->
-          <div class="col-lg-6">
-            <label class="form-label fw-semibold">
-              Category Name <span class="text-danger">*</span>
-            </label>
-            <input type="text"
-                   name="name"
-                   class="form-control form-control-lg"
-                   placeholder="Eg. Electronics, Fashion, Accessories"
-                   value="{{ category.name if category else '' }}"
-                   required>
-            <small class="text-muted">
-              This name will be visible to customers
-            </small>
-          </div>
-
-          <!-- Status -->
-          <div class="col-lg-4">
-            <label class="form-label fw-semibold">Status</label>
-            <select name="status"
-                    class="form-select form-select-lg">
-              <option value="ACTIVE"
-                {% if category and category.status == "ACTIVE" %}selected{% endif %}>
-                ACTIVE
-              </option>
-              <option value="INACTIVE"
-                {% if category and category.status == "INACTIVE" %}selected{% endif %}>
-                INACTIVE
-              </option>
-            </select>
-          </div>
-
-        </div>
-
-        <!-- Divider -->
-        <hr class="my-4">
-
-        <!-- Actions -->
-        <div class="d-flex justify-content-end gap-2">
-          <a href="{{ url_for('admin.category.list_categories') }}"
-   class="btn btn-secondary ms-2">
-  Cancel
-</a>
-
-          <button type="submit"
-                  class="btn btn-success px-5">
-            <i class="bi bi-check-circle me-1"></i>
-            Save Category
-          </button>
-        </div>
-
-      </form>
-
+      <img id="imagePreview"
+     src="{{ url_for('static', filename=category.image if category and category.image else 'img/placeholders/placeholder.png') }}"
+     class="img-thumbnail"
+     style="height:170px; width:350px; object-fit:contain; border-radius:10px;">
     </div>
+
+
+  <a id="viewImageBtn"
+   href="{% if category and category.image %}{{ url_for('static', filename=category.image) }}{% else %}#{% endif %}"
+   target="_blank"
+   class="btn btn-primary btn-sm mt-2 w-100"
+   style="{% if not (category and category.image) %}display:none;{% endif %}">
+   View Image
+</a>
+  </div>
+
+  <!-- Status -->
+  <div class="col-lg-3">
+    <label class="form-label fw-semibold">Status</label>
+
+    <select name="status" class="form-select form-select-lg">
+      <option value="ACTIVE"
+        {% if category and category.status == "ACTIVE" %}selected{% endif %}>
+        ACTIVE
+      </option>
+      <option value="INACTIVE"
+        {% if category and category.status == "INACTIVE" %}selected{% endif %}>
+        INACTIVE
+      </option>
+    </select>
   </div>
 
 </div>
+
+<!-- Divider -->
+<hr class="my-4">
+
+<!-- Actions -->
+<div class="d-flex justify-content-end gap-2">
+<a href="{{ url_for('admin.category.list_categories') }}"
+class="btn btn-secondary ms-2">
+Cancel
+</a>
+
+<button type="submit"
+class="btn btn-success px-5">
+<i class="bi bi-check-circle me-1"></i>
+Save Category
+</button>
+</div>
+
+</form>
+
+</div>
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block page_js %}
+
+<script>
+
+const nameInput = document.getElementById("categoryName");
+const slugPreview = document.getElementById("slugPreview");
+
+function slugify(text){
+return text.toLowerCase()
+.replace(/\s+/g,'-')
+.replace(/[^\w\-]+/g,'')
+.replace(/\-\-+/g,'-');
+}
+
+if(nameInput){
+nameInput.addEventListener("input",function(){
+slugPreview.textContent = slugify(this.value);
+});
+}
+
+
+
+const imageInput = document.getElementById("imageInput");
+const imagePreview = document.getElementById("imagePreview");
+  const viewBtn = document.getElementById("viewImageBtn");
+
+if(imageInput){
+  imageInput.addEventListener("change", function(e){
+    const file = e.target.files[0];
+
+    if(file){
+      const reader = new FileReader();
+
+      reader.onload = function(e){
+        imagePreview.src = e.target.result;
+
+        // ✅ update button link
+        if(viewBtn){
+  viewBtn.style.display = "block";
+
+  viewBtn.onclick = function(){
+    const win = window.open();
+    win.document.write('<img src="' + e.target.result + '" style="width:100%">');
+  }
+}
+      }
+
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+
+
+</script>
 
 {% endblock %}

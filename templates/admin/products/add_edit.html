@@ -7,311 +7,376 @@
 {% block content %}
 
 <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
 <style>
+
 /* ===== PAGE ===== */
 .product-page {
-    padding: 32px 40px;
-    max-width: 1400px;
+    padding: 40px;
+    background: #f5f7fb;
 }
 
 /* ===== GRID ===== */
 .product-layout {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 28px;
+    grid-template-columns: 360px 1fr;
+    gap: 32px;
 }
 
 /* ===== LEFT PANEL ===== */
 .product-side {
-    background: #ffffff;
-    border-radius: 14px;
+    background: linear-gradient(180deg,#ffffff,#f9fafc);
+    border-radius: 18px;
     padding: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
 }
 
 .product-side h4 {
-    font-size: 16px;
     font-weight: 600;
     margin-bottom: 14px;
 }
 
+/* IMAGE */
 .image-box {
-    width: 100%;
-    height: 200px;
-    border-radius: 12px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    font-size: 14px;
-    overflow: hidden;
+    height: 260px;
+    border-radius: 16px;
+    border: 2px dashed #d1d5db;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    background:#fafafa;
+    transition:.3s;
+}
+
+.image-box:hover {
+    border-color:#6366f1;
+    background:#eef2ff;
 }
 
 .image-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    padding:12px;
 }
 
+/* STATUS */
 .status-pill {
-    margin-top: 16px;
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+    margin-top:16px;
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
 }
 
-.status-active {
-    background: #ecfdf5;
-    color: #047857;
-}
+.status-active {background:#ecfdf5;color:#047857;}
+.status-inactive {background:#fef2f2;color:#b91c1c;}
 
-.status-inactive {
-    background: #fef2f2;
-    color: #b91c1c;
-}
-
-/* ===== RIGHT PANEL ===== */
+/* ===== FORM ===== */
 .product-form {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 32px 36px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+    background:#ffffff;
+    border-radius:20px;
+    padding:36px;
+    box-shadow:0 25px 50px rgba(0,0,0,0.06);
 }
 
+/* HEADER */
 .form-title {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-size:28px;
+    font-weight:700;
 }
 
 .form-subtitle {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 28px;
+    color:#6b7280;
+    margin-bottom:30px;
 }
 
-/* ===== FORM GRID ===== */
+/* GRID */
 .form-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 22px;
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:24px;
 }
 
-.col-6 { grid-column: span 6; }
-.col-12 { grid-column: span 12; }
+.col-6 {grid-column:span 6;}
+.col-12 {grid-column:span 12;}
 
-/* ===== INPUTS ===== */
-.form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: block;
+/* INPUT */
+.input-wrapper {
+    position:relative;
+}
+
+.input-wrapper i {
+    position:absolute;
+    top:50%;
+    left:12px;
+    transform:translateY(-50%);
+    color:#9ca3af;
 }
 
 .form-control,
 .form-select {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
+    width:100%;
+    padding:12px 14px 12px 36px;
+    border-radius:12px;
+    border:1px solid #e5e7eb;
+    transition:.2s;
+    background:#fafafa;
 }
 
 .form-control:focus,
 .form-select:focus {
-    border-color: #111827;
-    box-shadow: 0 0 0 2px rgba(17,24,39,0.1);
-    outline: none;
+    border-color:#6366f1;
+    box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+    background:#fff;
 }
 
-/* ===== FILE ===== */
-.file-input {
-    border: 1px dashed #d1d5db;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 14px;
+/* FILE */
+.file-box {
+    border:2px dashed #d1d5db;
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+    cursor:pointer;
 }
 
-/* ===== FOOTER ===== */
+.file-box:hover {
+    border-color:#6366f1;
+    background:#eef2ff;
+}
+
+/* BUTTON */
 .form-footer {
-    margin-top: 32px;
-    display: flex;
-    justify-content: flex-end;
+    margin-top:32px;
+    display:flex;
+    justify-content:flex-end;
 }
 
-/* ===== BUTTON ===== */
 .btn-primary-clean {
-    background: #111827;
-    color: #ffffff;
-    padding: 12px 34px;
-    border-radius: 10px;
-    font-weight: 600;
-    border: none;
+    background:linear-gradient(135deg,#6366f1,#4f46e5);
+    color:#fff;
+    padding:12px 32px;
+    border-radius:12px;
+    border:none;
+    font-weight:600;
 }
 
-.btn-primary-clean:hover {
-    background: #000000;
-}
 </style>
 
 <div class="product-page">
 
-    <!-- FLASH -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+<div class="product-layout">
 
-    <div class="product-layout">
+<!-- LEFT -->
+<aside class="product-side">
+<h4><i class="fa-solid fa-image me-2"></i>Preview</h4>
 
-        <!-- LEFT -->
-        <aside class="product-side">
-            <h4>Product Preview</h4>
-
-           <div class="image-box">
-    {% if product and product.image_list and product.image_list|length > 0 %}
-        <img src="{{ product.image_list[0] }}" alt="Product Image">
-    {% else %}
-        No image selected
-    {% endif %}
+<div class="image-box" id="previewBox">
+{% if product and product.image_list %}
+<img src="{{ url_for('static', filename=product.image_list[0]) }}">
+{% else %}
+<span>Upload Image</span>
+{% endif %}
 </div>
 
-
-
-            <div class="mt-3">
-                {% if product and product.status == "INACTIVE" %}
-                    <span class="status-pill status-inactive">INACTIVE</span>
-                {% else %}
-                    <span class="status-pill status-active">ACTIVE</span>
-                {% endif %}
-            </div>
-        </aside>
-
-        <!-- RIGHT -->
-        <section class="product-form">
-
-            <div class="form-title">
-                {% if mode == "edit" %}Edit Product{% else %}Add Product{% endif %}
-            </div>
-            <div class="form-subtitle">
-                {% if mode == "edit" %}
-                    Modify existing product information
-                {% else %}
-                    Create a new product in your catalogue
-                {% endif %}
-            </div>
-
-            <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-
-                <div class="form-grid">
-
-                    <div class="form-group col-6">
-                        <label>Product Name *</label>
-                        <input type="text" name="name" class="form-control"
-                               value="{{ product.name if product else '' }}" required>
-                    </div>
-
-                    <div class="form-group col-6">
-                        <label>SKU *</label>
-                        <input type="text" name="sku" class="form-control"
-                               value="{{ product.sku if product else '' }}"
-                               {% if mode == "edit" %}readonly{% endif %} required>
-                    </div>
-
-                    <div class="form-group col-6">
-    <label>
-        Category <span class="text-danger">*</span>
-    </label>
-
-    <select name="category_id" class="form-select" required>
-        <option value="">-- Select Category --</option>
-
-        {% for cat in categories %}
-            <option value="{{ cat.id }}"
-                {% if product and product.category_id == cat.id %}selected{% endif %}>
-                {{ cat.name }}
-            </option>
-        {% endfor %}
-    </select>
-
-    <small class="text-muted">
-        Product must belong to a category
-    </small>
+<div>
+{% if product and product.status=="INACTIVE" %}
+<span class="status-pill status-inactive">INACTIVE</span>
+{% else %}
+<span class="status-pill status-active">ACTIVE</span>
+{% endif %}
 </div>
 
+</aside>
 
-                    <div class="form-group col-6">
-                        <label>Price (₹) *</label>
-                        <input type="number" step="0.01" name="price" class="form-control"
-                               value="{{ product.price if product else '' }}" required>
-                    </div>
+<!-- RIGHT -->
+<section class="product-form">
 
-                    <div class="form-group col-12">
-                        <label>Description</label>
-                        <textarea name="description" rows="4"
-                                  class="form-control">{{ product.description if product else '' }}</textarea>
-                    </div>
+<div class="form-title">
+<i class="fa-solid fa-box me-2"></i>
+{% if mode=="edit" %}Edit Product{% else %}Add Product{% endif %}
+</div>
 
-                    <div class="form-group col-6">
-                        <label>Product Image</label>
-                        <input type="file" name="image" class="file-input" accept="image/*">
-                    </div>
+<div class="form-subtitle">
+Manage product details professionally
+</div>
 
-                    <div class="form-group col-6">
-                        <label>Status</label>
-                        <select name="status" class="form-select">
-                            <option value="ACTIVE" {% if product and product.status=="ACTIVE" %}selected{% endif %}>ACTIVE</option>
-                            <option value="INACTIVE" {% if product and product.status=="INACTIVE" %}selected{% endif %}>INACTIVE</option>
-                        </select>
-                    </div>
+<form method="POST" enctype="multipart/form-data">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                </div>
+<div class="form-grid">
 
-                <div class="form-footer">
-                    <button type="submit" class="btn-primary-clean">
-                        {% if mode == "edit" %}Update Product{% else %}Create Product{% endif %}
-                    </button>
-                </div>
+<!-- NAME -->
+<div class="form-group col-6">
+<div class="input-wrapper">
+<i class="fa-solid fa-tag"></i>
+<input type="text" name="name" class="form-control"
+value="{{ product.name if product else '' }}" required>
+</div>
+</div>
 
-            </form>
+<!-- SKU -->
+<div class="form-group col-6">
+<div class="input-wrapper">
+<i class="fa-solid fa-barcode"></i>
+<input type="text" name="sku" class="form-control"
+value="{{ product.sku if product else '' }}"
+{% if mode=="edit" %}readonly{% endif %} required>
+</div>
+</div>
 
-        </section>
+<!-- CATEGORY -->
+<div class="form-group col-6">
+<div class="input-wrapper">
+<i class="fa-solid fa-layer-group"></i>
+<select name="category_id" class="form-select" required>
+<option value="">Categories</option>
+{% for cat in categories %}
+<option value="{{ cat.id }}"
+{% if product and product.category_id==cat.id %}selected{% endif %}>
+{{ cat.name }}
+</option>
+{% endfor %}
+</select>
+</div>
+</div>
 
-    </div>
+<!-- STOCK -->
+<div class="form-group col-6">
+<div class="input-wrapper">
+<i class="fa-solid fa-boxes-stacked"></i>
+<input type="number" name="stock" class="form-control"
+value="{{ product.stock if product else 0 }}" min="0" required>
+</div>
+</div>
+
+<!-- PRICE -->
+<div class="form-group col-6">
+<div class="input-wrapper">
+<i class="fa-solid fa-indian-rupee-sign"></i>
+<input type="number" step="0.01" name="price"
+class="form-control" id="priceInput"
+max="10000000" min="1"
+value="{{ product.price if product else '' }}" required>
+
+<small id="priceError" style="color:red;display:none;"></small>
+</div>
+</div>
+
+<!-- DESCRIPTION -->
+<div class="form-group col-12">
+<textarea name="description" rows="4" class="form-control">
+{{ product.description if product else '' }}
+</textarea>
+</div>
+
+<!-- IMAGE -->
+<div class="form-group col-6">
+<div class="file-box" id="fileBox">
+<i class="fa-solid fa-cloud-arrow-up"></i><br>
+Upload Image
+<input type="file" name="image" id="fileInput" hidden>
+</div>
+</div>
+
+<!-- STATUS -->
+<div class="form-group col-6">
+<select name="status" class="form-select">
+<option value="ACTIVE" {% if product and product.status=="ACTIVE" %}selected{% endif %}>ACTIVE</option>
+<option value="INACTIVE" {% if product and product.status=="INACTIVE" %}selected{% endif %}>INACTIVE</option>
+</select>
+</div>
+
+</div>
+
+<div class="form-footer">
+<button type="submit" class="btn-primary-clean">
+<i class="fa-solid fa-check me-2"></i>
+Save Product
+</button>
+</div>
+
+</form>
+
+</section>
+
+</div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const fileInput = document.querySelector('input[name="image"]');
-    const previewBox = document.querySelector(".image-box");
 
-    if (!fileInput || !previewBox) return;
+const fileInput = document.getElementById("fileInput");
+const previewBox = document.getElementById("previewBox");
+const fileBox = document.getElementById("fileBox");
+const priceInput = document.getElementById("priceInput");
+const priceError = document.getElementById("priceError");
+const submitBtn = document.querySelector("button[type='submit']");
 
-    fileInput.addEventListener("change", function () {
-        const file = this.files[0];
-        if (!file) return;
+previewBox.onclick = () => fileInput.click();
+fileBox.onclick = () => fileInput.click();
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            previewBox.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-        };
-        reader.readAsDataURL(file);
-    });
+/* IMAGE VALIDATION */
+fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+        alert("Image must be less than 2MB");
+        fileInput.value = "";
+        previewBox.innerHTML = "<span>Upload Image</span>";
+        return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+        alert("Only image files allowed");
+        fileInput.value = "";
+        previewBox.innerHTML = "<span>Upload Image</span>";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        previewBox.innerHTML = `<img src="${e.target.result}">`;
+    };
+    reader.readAsDataURL(file);
+};
+
+/* PRICE VALIDATION */
+priceInput.addEventListener("input", () => {
+
+    if (priceInput.value <= 0) {
+        priceError.innerText = "Price must be greater than 0";
+        priceError.style.display = "block";
+        submitBtn.disabled = true;
+        return;
+    }
+
+    if (priceInput.value > 10000000) {
+        priceError.innerText = "Max ₹1 Cr allowed";
+        priceError.style.display = "block";
+        submitBtn.disabled = true;
+    } else {
+        priceError.style.display = "none";
+        submitBtn.disabled = false;
+    }
+
 });
+
+/* NAME VALIDATION */
+document.querySelector("form").addEventListener("submit", function(e){
+    const name = document.querySelector("input[name='name']");
+    if(name.value.trim() === ""){
+        alert("Product name cannot be empty");
+        e.preventDefault();
+    }
+
+    submitBtn.innerHTML = "Saving...";
+    submitBtn.disabled = true;
+});
+
 </script>
 
 {% endblock %}

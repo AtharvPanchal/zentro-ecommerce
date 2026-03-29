@@ -24,9 +24,11 @@
           <!-- LEFT : PRODUCT IMAGE -->
           <div class="col-md-6 text-center">
             <img id="quickImage"
-                 src=""
-                 alt=""
-                 class="img-fluid rounded">
+     src="/static/img/placeholders/product.png"
+     alt="Product"
+     class="img-fluid rounded"
+     style="max-height:300px;object-fit:contain">
+
           </div>
 
           <!-- RIGHT : PRODUCT DETAILS -->
@@ -54,24 +56,31 @@
                         type="button"
                         aria-label="Decrease quantity">-</button>
 
-                <input type="number"
-                       min="1"
-                       value="1"
-                       class="form-control qty-input"
-                       id="quickQty"
-                       aria-label="Quantity">
+               <input type="number"
+                 min="1"
+                      max="99"
+                 value="1"
+                 class="form-control qty-input"
+                 data-context="quick-view"
+                 aria-label="Quantity">
 
                 <button class="btn btn-outline-secondary qty-plus"
                         type="button"
                         aria-label="Increase quantity">+</button>
               </div>
 
-              <button class="btn btn-primary" id="quickAddCart">
-                Add to Cart
+              <button class="btn btn-primary add-cart"
+                  id="quickAddCart"
+                  data-product-id=""
+                  aria-label="Add product to cart">
+                  Add to Cart
               </button>
 
-              <button class="btn btn-outline-danger" id="quickWishlistBtn">
-                <i class="fa-regular fa-heart"></i> Wishlist
+              <button class="btn btn-outline-danger wishlist-btn"
+                 id="quickWishlistBtn"
+                 data-id=""
+                 aria-label="Add product to wishlist">
+                 <i class="fa-regular fa-heart"></i> Wishlist
               </button>
 
             </div>

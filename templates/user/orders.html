@@ -1,89 +1,218 @@
 {% extends "base.html" %}
 {% block title %}My Orders{% endblock %}
 
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user/orders.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
+<div class="container-fluid py-4 orders-wrapper">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold">📦 My Orders</h4>
-    <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-sm">
-      ⬅ Continue Shopping
-    </a>
-  </div>
+  <!-- SEARCH -->
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+      <form method="GET" class="input-group shadow-sm">
+        <input type="text"
+               name="q"
+               value="{{ search or '' }}"
+               class="form-control"
+               placeholder="Search your orders by product name...">
 
-  {% include "partials/_flash_messages.html" %}
+        {% if status %}
+          <input type="hidden" name="status" value="{{ status }}">
+        {% endif %}
 
-  {% if orders %}
+        {% if date_range %}
+          <input type="hidden" name="date_range" value="{{ date_range }}">
+        {% endif %}
 
-  <div class="card shadow-sm border-0 rounded-4">
-    <div class="table-responsive">
-      <table class="table align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>#Order ID</th>
-            <th>Date</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Payment</th>
-          </tr>
-        </thead>
-        <tbody>
-
-          {% for order in orders %}
-          <tr>
-            <td>
-              <strong>{{ order.order_number }}</strong>
-            </td>
-
-            <td>
-              {{ order.created_at.strftime("%d %b %Y") }}
-            </td>
-
-            <td>
-              ₹{{ "%.2f"|format(order.total_amount) }}
-            </td>
-
-            <td>
-              {% if order.status == "delivered" %}
-                <span class="badge bg-success">Delivered</span>
-              {% elif order.status == "shipped" %}
-                <span class="badge bg-info">Shipped</span>
-              {% elif order.status == "cancelled" %}
-                <span class="badge bg-danger">Cancelled</span>
-              {% else %}
-                <span class="badge bg-warning text-dark">Pending</span>
-              {% endif %}
-            </td>
-
-            <td>
-              {% if order.payment_status == "paid" %}
-                <span class="badge bg-success">Paid</span>
-              {% else %}
-                <span class="badge bg-secondary">Unpaid</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-
-        </tbody>
-      </table>
+        <button class="btn btn-primary">
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
     </div>
   </div>
 
-  {% else %}
+  <div class="row">
 
-  <!-- EMPTY STATE -->
-  <div class="card shadow-sm border-0 rounded-4 p-5 text-center">
-    <h5 class="mb-2">😔 No orders yet</h5>
-    <p class="text-muted mb-3">
-      Looks like you haven’t placed any orders.
-    </p>
-    <a href="{{ url_for('main.index') }}" class="btn btn-warning">
-      🛒 Start Shopping
-    </a>
+    <!-- FILTERS -->
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm border-0 p-3 filter-card">
+
+        <h6 class="fw-bold mb-3">Filters</h6>
+
+        <!-- STATUS -->
+        <form method="GET">
+          <input type="hidden" name="q" value="{{ search }}">
+          <input type="hidden" name="date_range" value="{{ date_range }}">
+
+          <label class="fw-semibold">Order Status</label>
+          <select name="status" class="form-select mt-2" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="delivered" {% if status=='delivered' %}selected{% endif %}>Delivered</option>
+            <option value="shipped" {% if status=='shipped' %}selected{% endif %}>Shipped</option>
+            <option value="cancelled" {% if status=='cancelled' %}selected{% endif %}>Cancelled</option>
+            <option value="confirmed" {% if status=='confirmed' %}selected{% endif %}>Pending</option>
+          </select>
+        </form>
+
+        <!-- DATE -->
+        <form method="GET" class="mt-4">
+          <input type="hidden" name="q" value="{{ search }}">
+          <input type="hidden" name="status" value="{{ status }}">
+
+          <label class="fw-semibold">Order Time</label>
+          <select name="date_range" class="form-select mt-2" onchange="this.form.submit()">
+            <option value="">Any time</option>
+            <option value="30days" {% if date_range=='30days' %}selected{% endif %}>Last 30 days</option>
+            <option value="2026" {% if date_range=='2026' %}selected{% endif %}>2026</option>
+            <option value="2025" {% if date_range=='2025' %}selected{% endif %}>2025</option>
+          </select>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ORDERS LIST -->
+    <div class="col-lg-9">
+
+      {% if order_items.items %}
+
+        {% for item in order_items.items %}
+
+          <div class="card shadow-sm border-0 mb-4 order-card">
+    <div class="row align-items-center p-3">
+
+        <!-- IMAGE -->
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+    <div class="order-img-wrapper">
+        <img src="{{ url_for('static', filename=item.product.image_list[0]) if item.product.image_list and not item.product.image_list[0].startswith('http') else url_for('static', filename='img/placeholders/product.png') }}"
+     class="order-img">
+    </div>
+</div>
+        <!-- PRODUCT INFO -->
+        <div class="col-md-6">
+            <h6 class="fw-bold mb-1">{{ item.product.name }}</h6>
+            <small class="text-muted">
+                Ordered on {{ item.order.created_at.strftime("%d %b %Y") }}
+            </small>
+
+            <div class="mt-2">
+                ₹{{ "%.2f"|format(item.price_at_purchase) }}
+                × {{ item.quantity }}
+            </div>
+        </div>
+
+        <!-- STATUS -->
+        <div class="col-md-4 order-right">
+
+            <div class="order-status-line">
+
+                {% if item.order.status == "delivered" %}
+                    <span class="status-dot status-delivered"></span>
+                    <span class="text-success">Delivered</span>
+                    <div class="delivery-msg">
+                        Delivered on {{ item.order.created_at.strftime("%d %b %Y") }}
+                    </div>
+
+                {% elif item.order.status == "shipped" %}
+                    <span class="status-dot status-shipped"></span>
+                    <span class="text-primary">Shipped</span>
+                    <div class="delivery-msg">
+                        Your item is on the way
+                    </div>
+
+                {% elif item.order.status == "cancelled" %}
+                    <span class="status-dot status-cancelled"></span>
+                    <span class="text-danger">Cancelled</span>
+                    <div class="delivery-msg">
+                        Order was cancelled
+                    </div>
+
+                {% else %}
+                    <span class="status-dot status-pending"></span>
+                    <span class="text-warning">Order Confirmed</span>
+                    <div class="delivery-msg">
+                        Waiting for shipment
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <div class="mt-3 d-flex flex-column align-items-md-end gap-2">
+
+                {% if item.order.status == "delivered" %}
+                    <a href="#" class="btn btn-sm btn-outline-success">
+                        Rate & Review
+                    </a>
+                {% endif %}
+
+                <a href="{{ url_for('user.order_detail', order_id=item.order.id) }}"
+                   class="btn btn-sm btn-outline-primary">
+                    View Details
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+        {% endfor %}
+
+        <!-- PAGINATION -->
+        {% if order_items.pages > 1 %}
+        <nav class="mt-4">
+          <ul class="pagination justify-content-center">
+
+            {% if order_items.has_prev %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('user.orders',
+                                    page=order_items.prev_num,
+                                    q=search,
+                                    status=status,
+                                    date_range=date_range) }}">
+                  Previous
+                </a>
+              </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+              <span class="page-link">
+                Page {{ order_items.page }} of {{ order_items.pages }}
+              </span>
+            </li>
+
+            {% if order_items.has_next %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('user.orders',
+                                    page=order_items.next_num,
+                                    q=search,
+                                    status=status,
+                                    date_range=date_range) }}">
+                  Next
+                </a>
+              </li>
+            {% endif %}
+
+          </ul>
+        </nav>
+        {% endif %}
+
+      {% else %}
+
+        <div class="card shadow-sm border-0 rounded-4 p-5 text-center">
+          <h5>No orders found</h5>
+          <a href="{{ url_for('main.index') }}" class="btn btn-warning mt-3">
+            Start Shopping
+          </a>
+        </div>
+
+      {% endif %}
+
+    </div>
   </div>
-
-  {% endif %}
-
 </div>
 {% endblock %}

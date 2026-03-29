@@ -19,35 +19,40 @@
         </a>
       </div>
 
-      <!-- CENTER: Search (UI only – backend later) -->
-      <div class="flex-grow-1 ms-2 me-2">
-        <div class="search-box d-flex align-items-center" role="search" aria-label="Site search">
-          <select id="search-category"
-                  class="form-select form-select-sm w-auto"
-                  aria-label="Search category"
-                  style="max-width:170px">
-            <option value="All">All</option>
-            <option>Electronics</option>
-            <option>Fashion</option>
-            <option>Beauty</option>
-            <option>Sports</option>
-            <option>Grocery</option>
-            <option>Home</option>
-          </select>
+      <!-- CENTER: Search -->
+<div class="flex-grow-1 ms-2 me-2">
 
-          <input id="search-input"
-                 type="search"
-                 class="form-control form-control-sm"
-                 placeholder="Search products, brands and more"
-                 aria-label="Search products">
+  <div class="search-box d-flex align-items-center position-relative"
+       role="search"
+       aria-label="Site search">
 
-          <button class="btn btn-search btn-sm"
-                  id="search-btn"
-                  aria-label="Start search">
-            <i class="fa fa-search"></i>
-          </button>
-        </div>
-      </div>
+    <select id="search-category"
+            class="form-select form-select-sm w-auto"
+            aria-label="Search category"
+            style="max-width:170px">
+      <option value="All">All</option>
+      <option>Electronics</option>
+      <option>Fashion</option>
+      <option>Beauty</option>
+      <option>Sports</option>
+      <option>Grocery</option>
+      <option>Home</option>
+    </select>
+
+    <input id="search-input"
+           type="search"
+           class="form-control form-control-sm"
+           placeholder="Search For Products, Brands and More">
+
+    <button type="button" class="btn btn-search btn-sm" id="search-btn">
+      <i class="fa fa-search"></i>
+    </button>
+
+    <div id="search-suggestions" class="search-suggestions"></div>
+
+  </div>
+
+</div>
 
       <!-- RIGHT: Controls -->
       <div class="d-flex align-items-center gap-2">
@@ -73,20 +78,37 @@
           </ul>
         </div>
 
-       <!-- Wishlist -->
-<a href="{{ url_for('user.wishlist') }}"
+
+
+        <a href="{{ url_for('user.wishlist') }}"
    class="btn btn-outline-light btn-sm position-relative"
    aria-label="Wishlist">
-  <i class="fa-regular fa-heart"></i>
+
+  <i class="fa fa-heart"></i>
+
+  <span id="wishlistBadge"
+        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+    0
+  </span>
 </a>
 
+        <a href="{{ url_for('user.cart_page') }}"
+             class="btn btn-outline-light btn-sm position-relative"
+             aria-label="Cart"
+             data-cart-trigger="true">
 
-        <!-- Cart (UI only) -->
-        <button class="btn btn-outline-light btn-sm position-relative"
-                id="cartBtn"
-                aria-label="Cart">
           <i class="fa fa-shopping-cart"></i>
-        </button>
+          <span id="cartCount"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"
+          aria-live="polite">
+          0
+          </span>
+        </a>
+
+
+
+
+
 
         <!-- ========================= -->
         <!-- USER / AUTH (SAFE PART) -->

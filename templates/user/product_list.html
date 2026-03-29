@@ -15,17 +15,22 @@
     </select>
   </div>
 
-  <!-- PRODUCT GRID -->
-  <div id="productsGrid" class="row g-3"></div>
+  <!-- ✅ SERVER RENDERED PRODUCT GRID -->
+  <div id="productsGrid" class="row g-3">
 
-  <!-- LOAD MORE -->
-  <div class="text-center mt-4">
-    <button id="loadMoreBtn" class="btn btn-outline-primary">Load More</button>
+    {% if products and products|length > 0 %}
+      {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+          {% include "components/_product_card.html" %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12 text-center text-muted">
+        No products available
+      </div>
+    {% endif %}
+
   </div>
 
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/product_list.js') }}"></script>
 {% endblock %}

@@ -83,25 +83,41 @@
 
         <div class="submenu">
 
-          <a href="{{ url_for('admin.admin_products.product_list_ui') }}"
-             class="{{ 'active' if request.endpoint == 'admin.admin_products.product_list_ui' }}">
-            <i class="fa-solid fa-list"></i>
-            Product List
-          </a>
 
           <a href="{{ url_for('admin.admin_products.add_product_ui') }}"
-             class="{{ 'active' if request.endpoint == 'admin.admin_products.add_product_ui' }}">
-            <i class="fa-solid fa-plus"></i>
-            Add Product
-          </a>
+   class="{{ 'active' if request.endpoint == 'admin.admin_products.add_product_ui' }}">
+   <i class="fa-solid fa-plus"></i>
+   Add Product
+</a>
 
-        </div>
+
+<a href="{{ url_for('admin.category.list_categories') }}"
+   class="{{ 'active' if request.endpoint and request.endpoint.startswith('admin.category') }}">
+  <i class="fa-solid fa-layer-group"></i>
+  Categories
+</a>
+
+
+
+<a href="{{ url_for('admin.attributes_list') }}"
+   class="{{ 'active' if request.endpoint == 'admin.attributes_list' }}">
+   <i class="fa-solid fa-sliders"></i>
+   Attributes
+</a>
+
+<a href="{{ url_for('admin.admin_products.product_list_ui') }}"
+   class="{{ 'active' if request.endpoint == 'admin.admin_products.product_list_ui' }}">
+   <i class="fa-solid fa-list"></i>
+   Product List
+</a>
+
+
+
+
+</div>
       </div>
 
-      <!-- Categories (future) -->
-      <a href="#">
-        <i class="fa-solid fa-layer-group"></i> Categories
-      </a>
+
 
       <!-- Audit Logs -->
       <a href="{{ url_for('admin.admin_audit_logs') }}"

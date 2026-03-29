@@ -1,0 +1,85 @@
+/* ======================================
+   PDP STATIC RATING (NEW CLEAN VERSION)
+====================================== */
+
+.pdp-rating-summary {
+  margin-top: 15px;
+}
+
+/* Top line */
+.pdp-rating-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pdp-rating-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.pdp-stars i {
+  font-size: 14px;
+  color: #facc15;
+}
+
+.pdp-rating-count {
+  font-size: 13px;
+  color: #cccccc;
+}
+
+/* Bars wrapper */
+.pdp-bars {
+  max-width: 350px;
+}
+
+/* Each row */
+.pdp-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+/* Star label */
+.pdp-star-label {
+  width: 40px;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+/* Track */
+.pdp-bar-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* Fill */
+.pdp-bar-fill {
+  height: 100%;
+  background: #facc15;   /* premium yellow */
+  border-radius: 2px;    /* slightly square */
+  transition: width 0.6s ease-in-out;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+}
+
+
+/* Percent */
+.pdp-bar-percent {
+  width: 45px;
+  font-size: 13px;
+  text-align: right;
+  color: #ffffff;
+}
+@keyframes fillAnimation {
+  from { width: 0; }
+}
+
+.pdp-bar-fill {
+  animation: fillAnimation 1s ease-in-out;
+}

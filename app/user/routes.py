@@ -2,10 +2,9 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user, logout_user
 from app.extensions import db
 from . import user_bp
-from app.models import Order
-from app.models import UserAddress
-from app.models import Wishlist, Product
-
+from datetime import datetime, timedelta
+from app.models import Order, OrderItem, Product, Wishlist, UserAddress, CartItem
+from sqlalchemy.orm import joinedload
 
 
 
@@ -42,24 +41,76 @@ def account():
 
 # ============================
 # 📦 MY ORDERS
-# ============================
+# ===========================
 @user_bp.route("/orders")
 @login_required
 def orders():
-    from app.models import Order
 
-    orders = (
-        Order.query
-        .filter_by(customer_name=current_user.username)
-        .order_by(Order.created_at.desc())
-        .all()
+    search = request.args.get("q", "").strip()
+    status = request.args.get("status", "").strip()
+    date_range = request.args.get("date_range", "").strip()
+    page = request.args.get("page", 1, type=int)
+
+    # ---------------------------------------------------
+    # BASE QUERY → OrderItem LEVEL (Flipkart style)
+    # ---------------------------------------------------
+    query = (
+        db.session.query(OrderItem)
+        .options(
+            joinedload(OrderItem.product),
+            joinedload(OrderItem.order)
+        )
+        .join(Order, OrderItem.order_id == Order.id)
+        .join(Product, OrderItem.product_id == Product.id)
+        .filter(Order.user_id == current_user.id)
+    )
+
+    # ---------------------------------------------------
+    # 🔍 SEARCH BY PRODUCT NAME
+    # ---------------------------------------------------
+    if search:
+        query = query.filter(Product.name.ilike(f"%{search}%"))
+
+    # ---------------------------------------------------
+    # 📦 FILTER BY STATUS
+    # ---------------------------------------------------
+    if status:
+        query = query.filter(Order.status == status.lower())
+
+    # ---------------------------------------------------
+    # 📅 FILTER BY DATE
+    # ---------------------------------------------------
+    if date_range == "30days":
+        cutoff = datetime.utcnow() - timedelta(days=30)
+        query = query.filter(Order.created_at >= cutoff)
+
+    elif date_range.isdigit():
+        year = int(date_range)
+        query = query.filter(
+            db.extract("year", Order.created_at) == year
+        )
+
+    # ---------------------------------------------------
+    # SORTING (NEWEST FIRST)
+    # ---------------------------------------------------
+    query = query.order_by(Order.created_at.desc())
+
+    # ---------------------------------------------------
+    # PAGINATION (ITEM LEVEL)
+    # ---------------------------------------------------
+    order_items = query.paginate(
+        page=page,
+        per_page=6,
+        error_out=False
     )
 
     return render_template(
-        "user/order_history.html",
-        orders=orders
+        "user/orders.html",
+        order_items=order_items,
+        search=search,
+        status=status,
+        date_range=date_range
     )
-
 
 # ============================
 # 📄 ORDER DETAIL
@@ -69,8 +120,8 @@ def orders():
 def order_detail(order_id):
     order = Order.query.get_or_404(order_id)
 
-    # 🔐 Security: order belongs to current user
-    if order.customer_name != current_user.username:
+    # 🔐 Proper relational security check
+    if order.user_id != current_user.id:
         flash("❌ Unauthorized access", "danger")
         return redirect(url_for("user.orders"))
 
@@ -153,6 +204,68 @@ def toggle_wishlist(product_id):
 
     db.session.commit()
     return redirect(request.referrer or url_for("user.wishlist"))
+
+#======================================================
+# MOVE-TO-CART-PRODUCT
+#======================================================
+@user_bp.route("/wishlist/move-to-cart/<int:product_id>", methods=["POST"])
+@login_required
+def move_wishlist_to_cart(product_id):
+    from app.models import Wishlist, CartItem
+    from app.extensions import db
+
+    # 1. Wishlist item exists?
+    wishlist_item = Wishlist.query.filter_by(
+        user_id=current_user.id,
+        product_id=product_id
+    ).first()
+
+    if not wishlist_item:
+        flash("Wishlist item not found.", "danger")
+        return redirect(url_for("user.wishlist"))
+
+    # 2. Already in cart?
+    cart_item = CartItem.query.filter_by(
+        user_id=current_user.id,
+        product_id=product_id
+    ).first()
+
+    if cart_item:
+        cart_item.quantity += 1
+    else:
+        cart_item = CartItem(
+            user_id=current_user.id,
+            product_id=product_id,
+            quantity=1
+        )
+        db.session.add(cart_item)
+
+    # 3. Remove from wishlist
+    db.session.delete(wishlist_item)
+
+    db.session.commit()
+
+    flash("🛒 Product moved to cart successfully!", "success")
+    return redirect(url_for("user.wishlist"))
+
+#===========================================
+#   CART PAGE
+#===========================================
+@user_bp.route("/cart")
+@login_required
+def cart_page():
+
+    cart_items = (
+        CartItem.query
+        .options(joinedload(CartItem.product))
+        .filter(CartItem.user_id == current_user.id)
+        .all()
+    )
+
+    return render_template(
+        "user/cart.html",
+        cart_items=cart_items
+    )
 
 
 # ============================

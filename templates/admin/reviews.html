@@ -1,129 +1,282 @@
 {% extends "admin/admin_base.html" %}
-
 {% block title %}Review Moderation{% endblock %}
 {% block page_title %}Review Moderation{% endblock %}
 
-{% block page_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_reviews.css') }}">
-{% endblock %}
-
 {% block content %}
 
-<!-- FILTER BAR -->
-<form method="GET" class="review-toolbar">
-  <input type="text" name="search"
-         placeholder="Search by email / product"
-         value="{{ search }}">
+<div class="container-fluid px-4 py-3">
 
-  <select name="sort">
-    <option value="">Sort</option>
-    <option value="rating_high" {% if sort=='rating_high' %}selected{% endif %}>
-      Rating: High → Low
-    </option>
-    <option value="rating_low" {% if sort=='rating_low' %}selected{% endif %}>
-      Rating: Low → High
-    </option>
-  </select>
+  <!-- PAGE HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="fw-bold mb-1">Review Moderation</h4>
+      <small class="text-muted">
+        Moderate, approve or remove customer reviews
+      </small>
+    </div>
 
-  <select name="filter">
-    <option value="all" {% if active_filter=='all' %}selected{% endif %}>All</option>
-    <option value="pending" {% if active_filter=='pending' %}selected{% endif %}>Pending</option>
-    <option value="reported" {% if active_filter=='reported' %}selected{% endif %}>Reported</option>
-  </select>
-
-  <button class="btn">Apply</button>
-</form>
-
-
-<!------------------------------------------------->
-<!--- PENDING REVIEWS / HIDE / REPORTED REVIEWS---->
-<!------------------------------------------------->
-
-<div class="panel">
-  <h3 class="panel-title">Reviews</h3>
-
-  {% if reviews %}
-  <table class="review-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>User</th>
-        <th>Product</th>
-        <th>Rating</th>
-        <th>Status</th>
-        <th>Review</th>
-        <th>Date</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for r in reviews %}
-      <tr>
-        <td>#{{ r.id }}</td>
-        <td>{{ r.user.email }}</td>
-        <td>{{ r.product.name }}</td>
-        <td>{{ r.rating }}/5</td>
-
-        <td>
-          {% if r.is_reported %}
-            <span class="badge badge-reported">Reported</span>
-          {% elif not r.is_active %}
-            <span class="badge badge-pending">Pending</span>
-          {% else %}
-            <span class="badge badge-approved">Approved</span>
-          {% endif %}
-        </td>
-
-        <td class="review-text">{{ r.review_text }}</td>
-        <td>
-  {{ r.created_at.strftime("%d %b %Y") }}<br>
-  <small class="muted">
-    {{ r.created_at.strftime("%I:%M %p") }}
-    ({{ r.created_at | timeago }})
-  </small>
-</td>
-
-
-
-        <td class="actions">
-          {% if not r.is_active %}
-          <form method="POST" action="{{ url_for('admin.approve_review', review_id=r.id) }}">
-            <button class="btn success">Approve</button>
-          </form>
-          {% endif %}
-
-          {% if r.is_active %}
-          <form method="POST" action="{{ url_for('admin.hide_review', review_id=r.id) }}">
-            <button class="btn warning">Hide</button>
-          </form>
-          {% endif %}
-
-          <form method="POST" action="{{ url_for('admin.delete_review_admin', review_id=r.id) }}">
-            <button class="btn danger">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <!-- PAGINATION -->
-  <div class="pagination">
-    {% if pagination.has_prev %}
-      <a href="?page={{ pagination.prev_num }}">Previous</a>
-    {% endif %}
-
-    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
-
-    {% if pagination.has_next %}
-      <a href="?page={{ pagination.next_num }}">Next</a>
-    {% endif %}
+    <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill">
+      {{ pagination.total }} Reviews
+    </span>
   </div>
 
-  {% else %}
-    <p class="empty-state">No reviews found.</p>
-  {% endif %}
+  <!-- CARD -->
+  <div class="card shadow-sm border-0">
+
+    <!-- FILTER BAR -->
+    <div class="card-body pb-2">
+      <form method="GET" class="audit-filter-bar">
+
+        <div class="filter-left">
+          <input type="text"
+                 name="search"
+                 class="form-control"
+                 placeholder="Search by email or product"
+                 value="{{ search }}">
+
+         <select name="sort" class="form-select">
+              <option value="">Sort</option>
+              <option value="latest">Latest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+
+
+          <select name="filter" class="form-select">
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="reported">Reported</option>
+          </select>
+        </div>
+
+        <div class="filter-right">
+          <button class="btn btn-primary">
+            <i class="bi bi-funnel"></i> Apply
+          </button>
+
+          <a href="{{ url_for('admin.review_moderation') }}"
+             class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-clockwise"></i> Reset
+          </a>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+      <table class="table align-middle mb-0 admin-activity-table">
+
+        <thead class="table-light text-muted small">
+          <tr>
+            <th style="width:80px">ID</th>
+            <th>User</th>
+            <th>Product</th>
+
+            <th style="width:120px">Status</th>
+            <th>Review</th>
+            <th style="width:180px">Date</th>
+            <th style="width:120px" class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+        {% if reviews|length == 0 %}
+          <tr>
+           <td colspan="7" class="text-center text-muted py-4">
+
+              No reviews found
+            </td>
+          </tr>
+        {% endif %}
+
+        {% for r in reviews %}
+        <tr class="activity-row">
+
+          <!-- ID -->
+          <td class="fw-semibold">{{ r.id }}</td>
+
+          <!-- USER -->
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="admin-avatar">
+                {{ r.user.email[0]|upper }}
+              </div>
+              <div>
+                <div class="fw-semibold">{{ r.user.email }}</div>
+                <div class="text-muted small">Customer</div>
+              </div>
+            </div>
+          </td>
+
+          <!-- PRODUCT -->
+          <td class="fw-semibold">{{ r.product.name }}</td>
+
+
+          <!-- STATUS -->
+          <td>
+            {% if r.is_reported %}
+              <span class="severity-pill severity-high">REPORTED</span>
+            {% elif not r.is_active %}
+              <span class="severity-pill severity-medium">PENDING</span>
+            {% else %}
+              <span class="severity-pill severity-low">APPROVED</span>
+            {% endif %}
+          </td>
+
+          <!-- REVIEW -->
+          <td class="text-muted">
+            {{ r.review_text }}
+          </td>
+
+          <!-- DATE -->
+         <td class="text-muted small">
+         {{ r.created_at | to_ist | format_ist("%d %b %Y %I:%M %p") }}<br>
+<small class="text-muted">
+  ({{ r.created_at | timeago }})
+</small>
+
+        </td>
+
+
+          <!-- ACTIONS -->
+          <td class="text-end">
+            {% if not r.is_active %}
+            <form method="POST"
+                  action="{{ url_for('admin.approve_review', review_id=r.id) }}"
+                  class="d-inline">
+                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-success" title="Approve">
+                <i class="bi bi-check2"></i>
+              </button>
+            </form>
+            {% endif %}
+
+            {% if r.is_active %}
+            <form method="POST"
+                  action="{{ url_for('admin.hide_review', review_id=r.id) }}"
+                  class="d-inline">
+               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-warning" title="Hide">
+                <i class="bi bi-eye-slash"></i>
+              </button>
+            </form>
+            {% endif %}
+
+            <form method="POST"
+                  action="{{ url_for('admin.delete_review_admin', review_id=r.id) }}"
+                  class="d-inline">
+               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger" title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    {% if pagination.pages > 1 %}
+    <div class="card-footer bg-white border-top">
+      <nav>
+        <ul class="pagination pagination-sm mb-0 justify-content-end">
+
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="?page={{ pagination.prev_num }}">
+              Previous
+            </a>
+          </li>
+
+          {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <span class="page-link">…</span>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="?page={{ pagination.next_num }}">
+              Next
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+
+  </div>
 </div>
 
+<!-- INLINE STYLE (AUDIT LOG SYSTEM) -->
+<style>
+.audit-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.filter-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+.filter-left .form-control,
+.filter-left .form-select {
+  height: 38px;
+  font-size: .85rem;
+  min-width: 180px;
+}
+.filter-left input[type="text"] {
+  min-width: 280px;
+}
+.filter-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-activity-table thead th {
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: .7rem;
+}
+.activity-row:hover {
+  background: #f9fafb;
+}
+.severity-pill {
+  padding: 4px 10px;
+  font-size: .7rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+.severity-high { background:#fee2e2; color:#991b1b; }
+.severity-medium { background:#fef3c7; color:#92400e; }
+.severity-low { background:#dcfce7; color:#166534; }
+</style>
+
 {% endblock %}
+

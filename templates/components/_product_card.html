@@ -1,93 +1,218 @@
 <!-- PRODUCT CARD COMPONENT -->
-<div class="product-card" role="region" aria-label="{{ product.name }}">
-  <div class="product-image">
-  {% if product.images and product.images|length > 0 %}
-    <img src="{{ product.images[0] }}"
-         alt="{{ product.name }}"
-         style="max-height:160px;width:100%;object-fit:cover;border-radius:8px"
-         loading="lazy">
+<div class="product-card {% if product.stock == 0 %}out-of-stock{% endif %}"
+     role="article"
+     aria-labelledby="product-title-{{ product.id }}">
+
+
+ {% set images = product.image_list %}
+
+
+<div class="product-image">
+  {% if images|length > 0 %}
+    <a
+      href="{{ url_for('main.product_detail', product_id=product.id) }}"
+      aria-label="View details of {{ product.name }}"
+    >
+      <img
+  src="{{ url_for('static', filename=images[0]) }}"
+  alt="{{ product.name }} – Buy online at ZENTRO"
+  loading="lazy"
+  style="
+    max-height:160px;
+    max-width:100%;
+    object-fit:contain;
+    display:block;
+  "
+>
+
+    </a>
   {% else %}
-    <img src="{{ url_for('static', filename='img/placeholders/product.png') }}"
-         alt="No image"
-         style="max-height:160px;width:100%;object-fit:cover;border-radius:8px"
-         loading="lazy">
+    <img
+      src="{{ url_for('static', filename='img/placeholders/product.png') }}"
+      alt="No image"
+      loading="lazy"
+    >
   {% endif %}
 </div>
 
 
-  <div style="margin-top:.6rem">
-    <!-- PRODUCT NAME -->
-    <div style="font-weight:700;height:36px;overflow:hidden">
-      {{ product.name }}
-    </div>
 
-    <!-- RATING -->
-    <div class="small text-muted">
-      <i class="fa fa-star text-warning"></i> {{ product.rating or "—" }}
-    </div>
+  <div style="margin-top:.6rem">
+
+    <!-- PRODUCT NAME -->
+    <h3
+  id="product-title-{{ product.id }}"
+  style="font-size:14px;font-weight:700;height:36px;overflow:hidden"
+>
+
+  <a
+    href="{{ url_for('main.product_detail', product_id=product.id) }}"
+    class="text-dark text-decoration-none"
+    aria-label="Open product page for {{ product.name }}"
+  >
+    {{ product.name }}
+  </a>
+</h3>
+
+
+  <!-- RATING SECTION -->
+   {% if product.rating_count > 0 %}
+
+{% set rounded = product.avg_rating|round(1) %}
+{% set full = rounded|int %}
+{% set decimal = rounded - full %}
+{% set half = 1 if decimal >= 0.5 else 0 %}
+{% set empty = 5 - full - half %}
+
+<div class="rating-card d-flex align-items-center gap-1 mt-1">
+
+  <!-- Rating Number -->
+  <span class="rating-number">
+    {{ "%.1f"|format(rounded) }}
+  </span>
+
+  <!-- Stars -->
+  <div class="rating-stars">
+
+
+
+    {% for i in range(full) %}
+      <i class="fa-solid fa-star star-filled"></i>
+    {% endfor %}
+
+    {% if half %}
+      <i class="fa-solid fa-star-half-stroke star-filled"></i>
+    {% endif %}
+
+    {% for i in range(empty) %}
+      <i class="fa-regular fa-star star-empty"></i>
+    {% endfor %}
+
+  </div>
+
+  <!-- Review Count -->
+  <a href="{{ url_for('main.product_detail', product_id=product.id) }}#reviews"
+     class="rating-count-link">
+    ({{ product.rating_count }})
+  </a>
+
+</div>
+
+{% else %}
+<span class="text-muted small">No ratings yet</span>
+{% endif %}
+
+
 
     <!-- PRICE -->
-    <div class="mt-1">
-      <span style="font-weight:800">₹{{ product.price }}</span>
-      {% if product.old_price is defined %}
-  <span class="old-price">₹{{ product.old_price }}</span>
-{% endif %}
+   <div class="mt-1 d-flex align-items-center gap-2 flex-wrap">
 
-{% if product.discount is defined %}
-  <span class="discount">-{{ product.discount }}%</span>
-{% endif %}
+  <!-- FINAL PRICE -->
+  <span
+  class="fw-bold fs-6 text-dark"
+  aria-label="Price ₹{{ product.price }}"
+>
+  ₹{{ product.price }}
+</span>
 
-    </div>
+
+  <!-- OLD PRICE -->
+  {% if product.old_price %}
+    <span class="text-muted text-decoration-line-through small">
+      ₹{{ product.old_price }}
+    </span>
+  {% endif %}
+
+  <!-- DISCOUNT BADGE -->
+  {% if product.discount %}
+    <span class="badge bg-success small">
+      {{ product.discount }}% OFF
+    </span>
+  {% endif %}
+
+</div>
+
 
     <!-- STOCK -->
     <div class="mt-1">
       {% if product.stock is defined and product.stock > 0 %}
         <span class="in-stock">In stock: {{ product.stock }}</span>
       {% else %}
-        <span class="out-stock">Out of stock</span>
+
+        <span
+  class="out-stock"
+  role="status"
+  aria-live="polite"
+>
+  Out of stock
+</span>
+
       {% endif %}
     </div>
 
     <!-- QTY + ADD TO CART -->
     <div class="d-flex gap-2 mt-2 align-items-center">
       <div class="input-group input-group-sm qty-group" style="width:120px">
-        <button class="btn btn-outline-secondary qty-minus" type="button" aria-label="Decrease quantity">-</button>
+        <button
+  class="btn btn-outline-secondary qty-minus"
+  type="button"
+  {% if product.stock == 0 %}disabled{% endif %}
+>-</button>
 
-        <input type="number"
-               min="1"
-               value="1"
-               class="form-control qty-input"
-               data-prod="{{ product.id }}"
-               aria-label="Quantity">
+<input
+  type="number"
+  min="1"
+   max="{{ product.stock or 99 }}"
+  value="1"
+  class="form-control qty-input"
+  data-product-id="{{ product.id }}"
+  data-stock="{{ product.stock or 0 }}"
+>
 
-        <button class="btn btn-outline-secondary qty-plus" type="button" aria-label="Increase quantity">+</button>
+
+
+        <button
+  class="btn btn-outline-secondary qty-plus"
+  type="button"
+  {% if product.stock == 0 %}disabled{% endif %}
+>+</button>
+
       </div>
 
-      <button class="btn btn-sm btn-primary add-cart"
-        data-id="{{ product.id }}"
-        {% if product.stock is defined and product.stock == 0 %}disabled{% endif %}>
 
-        {% if product.stock is defined and product.stock == 0 %}
-  Out of stock
-{% else %}
-  Add to Cart
-{% endif %}
+ <button
+  class="btn btn-sm btn-primary add-cart"
+  data-id="{{ product.id }}"
+  data-product-id="{{ product.id }}"
+  aria-label="Add {{ product.name }} to cart"
+  {% if product.stock is defined and product.stock == 0 %}disabled{% endif %}
+>
+  {% if product.stock is defined and product.stock == 0 %}
+    Out of stock
+  {% else %}
+    Add to Cart
+  {% endif %}
+</button>
 
-      </button>
     </div>
 
     <!-- WISHLIST + QUICK VIEW -->
     <div class="d-flex gap-2 mt-2">
-      <button class="btn btn-sm {% if wishlist is defined and product.id in wishlist %}
-btn-danger{% else %}btn-outline-danger{% endif %} wishlist-toggle"
-              data-id="{{ product.id }}"
-              aria-pressed="{{ wishlist is defined and product.id in wishlist }}">
-       <i class="{% if wishlist is defined and product.id in wishlist %}
-fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
-      </button>
+    <button
+  class="btn btn-sm btn-outline-danger wishlist-btn"
+  data-id="{{ product.id }}"
+  data-product-id="{{ product.id }}"
+>
 
-      <button class="btn btn-sm btn-outline-secondary quick-view-btn"
-              data-id="{{ product.id }}">
+  <i class="fa-regular fa-heart"></i>
+</button>
+
+     <button
+  class="btn btn-sm btn-outline-secondary quick-view-btn"
+  data-id="{{ product.id }}"
+  data-product-id="{{ product.id }}"
+>
+
         Quick View
       </button>
     </div>

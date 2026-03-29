@@ -3,10 +3,11 @@ from sqlalchemy import func
 from sqlalchemy import or_
 from flask import render_template, redirect, url_for, flash
 from flask import request
+from flask_login import current_user
 from app.admin import admin_bp
 from app.admin.decorators import admin_required
 from app.extensions import db
-from app.models import User, Order, Product, Admin, ProductReview
+from app.models import User, Order, Product, Admin, ProductReview, OrderStatus
 
 
 # ==================================================
@@ -34,11 +35,17 @@ def dashboard():
     total_orders = db.session.query(func.count(Order.id)).scalar()
     today_orders = db.session.query(func.count(Order.id)).filter(Order.created_at >= today_start).scalar()
 
-    pending_orders = db.session.query(func.count(Order.id)).filter(Order.status == "pending").scalar()
-    packed_orders = db.session.query(func.count(Order.id)).filter(Order.status == "packed").scalar()
-    shipped_orders = db.session.query(func.count(Order.id)).filter(Order.status == "shipped").scalar()
-    delivered_orders = db.session.query(func.count(Order.id)).filter(Order.status == "delivered").scalar()
-    cancelled_orders = db.session.query(func.count(Order.id)).filter(Order.status == "cancelled").scalar()
+    pending_orders = db.session.query(func.count(Order.id)) \
+        .filter(Order.status == OrderStatus.CONFIRMED.value).scalar()
+
+    shipped_orders = db.session.query(func.count(Order.id)) \
+        .filter(Order.status == OrderStatus.SHIPPED.value).scalar()
+
+    delivered_orders = db.session.query(func.count(Order.id)) \
+        .filter(Order.status == OrderStatus.DELIVERED.value).scalar()
+
+    cancelled_orders = db.session.query(func.count(Order.id)) \
+        .filter(Order.status == OrderStatus.CANCELLED.value).scalar()
 
     # -----------------------------
     # REVENUE
@@ -94,8 +101,7 @@ def dashboard():
     for order in recent_orders_query:
         recent_orders.append({
             "order_id": order.id,
-            "order_number": order.order_number,
-            "customer_name": order.customer_name,
+            "customer_name": order.user.username if order.user else "—",
             "total_amount": order.total_amount,
             "status": order.status,
             "created_at": order.created_at
@@ -117,13 +123,27 @@ def dashboard():
     # -----------------------------
     # REVIEW MODERATION COUNTS ✅
     # -----------------------------
-    pending_review_count = db.session.query(
-        func.count(ProductReview.id)
-    ).filter(ProductReview.is_active == False).scalar()
+    pending_review_count = (
+        db.session.query(func.count(ProductReview.id))
+        .filter(
+            ProductReview.is_active == False,
+            ProductReview.is_reported == False,
+            ProductReview.is_deleted == False,
+            ProductReview.review_text.isnot(None)
 
-    reported_review_count = db.session.query(
-        func.count(ProductReview.id)
-    ).filter(ProductReview.is_reported == True).scalar()
+        )
+        .scalar()
+    )
+
+    reported_review_count = (
+        db.session.query(func.count(ProductReview.id))
+        .filter(
+            ProductReview.is_reported == True,
+            ProductReview.is_deleted == False,
+            ProductReview.review_text.isnot(None)
+        )
+        .scalar()
+    )
 
     # -----------------------------
     # FINAL DASHBOARD DATA
@@ -139,11 +159,11 @@ def dashboard():
             "total": total_orders,
             "today": today_orders,
             "pending": pending_orders,
-            "packed": packed_orders,
             "shipped": shipped_orders,
             "delivered": delivered_orders,
             "cancelled": cancelled_orders
         },
+
         "revenue": {
             "total": total_revenue,
             "today": today_revenue,
@@ -186,6 +206,10 @@ def review_moderation():
 
     query = (
         ProductReview.query
+        .filter(
+            ProductReview.is_deleted == False,
+            ProductReview.review_text.isnot(None)
+        )
         .join(User)
         .join(Product)
     )
@@ -212,12 +236,11 @@ def review_moderation():
         )
 
     # ---------------- SORT ----------------
-    if sort == "rating_high":
-        query = query.order_by(ProductReview.rating.desc())
-    elif sort == "rating_low":
-        query = query.order_by(ProductReview.rating.asc())
-    else:
+    if sort == "oldest":
+        query = query.order_by(ProductReview.created_at.asc())
+    else:  # latest (default)
         query = query.order_by(ProductReview.created_at.desc())
+
 
     # ---------------- PAGINATION ----------------
     pagination = query.paginate(
@@ -244,13 +267,49 @@ def review_moderation():
 @admin_required
 def approve_review(review_id):
     review = ProductReview.query.get_or_404(review_id)
+
+    if review.is_active:
+        flash("Review already approved", "info")
+        return redirect(url_for("admin.review_moderation"))
+
+    if review.is_deleted:
+        flash("Deleted review cannot be modified", "danger")
+        return redirect(url_for("admin.review_moderation"))
+
+    # 🚫 BLOCK AUTO-FLAGGED REVIEWS
+    if review.is_reported and review.report_reason == "Auto-flagged content":
+        flash(
+            "This review contains abusive or restricted content and cannot be approved ❌",
+            "danger"
+        )
+        return redirect(url_for("admin.review_moderation"))
+
+    # ✅ SAFE APPROVAL
+
+    if review.review_text is None:
+        flash("Rating-only entries do not require approval", "info")
+        return redirect(url_for("admin.review_moderation"))
+
     review.is_active = True
     review.is_reported = False
     review.report_reason = None
+
+    # PHASE-3 AUDIT
+    review.action_reason = "Approved by admin"
+    review.action_by_admin = current_user.id if isinstance(current_user, Admin) else None
+    review.action_at = datetime.utcnow()
+
+    # 🔁 UPDATE PRODUCT RATING (PHASE-3 CORE)
+    product = Product.query.get(review.product_id)
+    if product:
+        product.update_avg_rating()
+
     db.session.commit()
 
-    flash("Review approved ✅", "success")
+    flash("Review Approved ✅", "success")
     return redirect(url_for("admin.review_moderation"))
+
+
 
 # ==================================================
 # ADMIN REVIEW HIDE
@@ -259,11 +318,32 @@ def approve_review(review_id):
 @admin_required
 def hide_review(review_id):
     review = ProductReview.query.get_or_404(review_id)
+
+    if review.is_deleted:
+        flash("Deleted review cannot be modified", "danger")
+        return redirect(url_for("admin.review_moderation"))
+
+    if not review.is_active:
+        flash("Review already hidden", "info")
+        return redirect(url_for("admin.review_moderation"))
+
     review.is_active = False
+
+    review.action_reason = "Hidden by admin"
+    review.action_by_admin = current_user.id if isinstance(current_user, Admin) else None
+    review.action_at = datetime.utcnow()
+
+    product = Product.query.get(review.product_id)
+    if product:
+        product.update_avg_rating()
+
     db.session.commit()
 
-    flash("Review hidden ❌", "warning")
+    flash("Review Hidden ❌", "warning")
     return redirect(url_for("admin.review_moderation"))
+
+
+
 
 # ==================================================
 # ADMIN REVIEW DELETE
@@ -272,8 +352,23 @@ def hide_review(review_id):
 @admin_required
 def delete_review_admin(review_id):
     review = ProductReview.query.get_or_404(review_id)
-    db.session.delete(review)
+
+    #  SOFT DELETE
+    review.is_deleted = True
+    review.is_active = False
+
+    # AUDIT
+    review.action_reason = "Soft deleted by admin"
+    review.action_by_admin = current_user.id
+    review.action_at = datetime.utcnow()
+
+    product = Product.query.get(review.product_id)
+    if product:
+        product.update_avg_rating()
+
     db.session.commit()
 
-    flash("Review deleted permanently 🗑️", "danger")
+    flash("Review Deleted (soft) 🗑️", "danger")
     return redirect(url_for("admin.review_moderation"))
+
+

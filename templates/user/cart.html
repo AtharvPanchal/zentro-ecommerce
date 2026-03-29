@@ -2,8 +2,10 @@
 
 {% block title %}My Cart | ZENTRO{% endblock %}
 
+{% block body_class %}cart-page{% endblock %}
+
 {% block styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user/cart.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -11,8 +13,9 @@
   <h2 class="mb-4">My Cart</h2>
 
   <!-- EMPTY CART -->
-  <div id="emptyCart" class="empty-cart d-none">
-    <p>Your cart is empty.</p>
+  <div id="emptyCart" class="empty-cart {% if cart_items %}d-none{% endif %}">
+    <h5>Your cart is empty</h5>
+<p>Looks like you haven't added anything yet.</p>
     <a href="{{ url_for('main.index') }}" class="btn btn-primary">Continue Shopping</a>
   </div>
 
@@ -29,27 +32,136 @@
               <th></th>
             </tr>
           </thead>
-          <tbody id="cartItems"></tbody>
+          <tbody id="cartItems">
+
+{% if cart_items %}
+  {% for item in cart_items %}
+  <tr>
+    <td>
+      <div class="cart-product">
+        <img src="{{ url_for('static', filename=item.product.image_list[0]) }}"
+     class="cart-img">
+        <div>
+          <strong>{{ item.product.name }}</strong>
+        </div>
+      </div>
+    </td>
+
+    <td class="text-center">
+  <div class="qty-control">
+
+    <button class="qty-btn minus"
+      data-id="{{ item.id }}">
+      -
+    </button>
+
+    <span class="qty-value">
+      {{ item.quantity }}
+    </span>
+
+    <button class="qty-btn plus"
+      data-id="{{ item.id }}">
+      +
+    </button>
+
+  </div>
+</td>
+
+    <td class="text-end">
+      ₹{{ item.price_at_add }}
+    </td>
+
+    <td class="text-end">
+
+  <span class="remove-btn"
+      data-id="{{ item.id }}">
+  Remove
+</span>
+
+<br>
+
+<span class="save-later text-primary"
+      data-id="{{ item.id }}"
+      style="cursor:pointer;font-size:13px;">
+  Save for later
+</span>
+
+</td>
+
+  </tr>
+  {% endfor %}
+{% endif %}
+
+</tbody>
         </table>
       </div>
     </div>
 
+
+
+      <!-- SAVED FOR LATER -->
+<div class="saved-section mt-4">
+
+  <h5 class="mb-3">Saved For Later</h5>
+
+  <div id="savedItems">
+
+    <div class="text-muted">
+      No items saved yet
+    </div>
+
+  </div>
+
+</div>
+      
     <!-- SUMMARY -->
     <div class="col-lg-4">
       <div class="summary-card">
         <h5>Order Summary</h5>
+
+          <!-- DELIVERY CHECK -->
+<div class="delivery-check mt-3 mb-3">
+
+  <label class="form-label">Check Delivery</label>
+
+  <div class="input-group">
+    <input
+      type="text"
+      id="pincodeInput"
+      class="form-control"
+      placeholder="Enter pincode"
+      maxlength="6"
+    >
+
+    <button
+      id="checkPincodeBtn"
+      class="btn btn-outline-dark"
+      type="button"
+    >
+      Check
+    </button>
+  </div>
+
+  <small id="deliveryResult" class="text-muted"></small>
+
+</div>
         <div class="d-flex justify-content-between">
           <span>Subtotal</span>
-          <strong id="cartSubtotal">₹0</strong>
+          <strong id="cartSubtotal">
+  ₹{{ subtotal or 0 }}
+</strong>
         </div>
-          <button id="placeOrderBtn" class="btn btn-dark w-100 mt-3">
-  Place Order (Cash on Delivery)
-</button>
+
+        <button id="placeOrderBtn" class="btn btn-dark w-100 mt-3">
+          Place Order (Cash on Delivery)
+        </button>
 
         <hr>
+
         <button class="btn btn-dark w-100 mt-3" disabled>
           Checkout (Next Step)
         </button>
+
         <small class="text-muted d-block mt-2">
           * Payment will be enabled in next module
         </small>
@@ -60,5 +172,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user/cart.js') }}"></script>
 {% endblock %}

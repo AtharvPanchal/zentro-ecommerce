@@ -1,0 +1,129 @@
+.orders-wrapper {
+    background-color: #f1f3f6;
+    min-height: 80vh;
+}
+
+.filter-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+
+
+/* ============================= */
+/* ORDER IMAGE FIXED SIZE */
+/* ============================= */
+
+.order-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.order-meta {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.order-price {
+    font-size: 15px;
+    margin-top: 8px;
+}
+/* ORDER IMAGE FIXED SIZE */
+
+.order-img-wrapper {
+    width: 85px;
+    height: 85px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.order-img {
+    width: 85px;
+    height: 85px;
+    object-fit: cover;
+    display: block;
+}
+
+/* ============================= */
+/* RIGHT SIDE SECTION */
+/* ============================= */
+
+.order-right {
+    text-align: right;
+}
+
+.order-status-line {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-delivered {
+    background-color: #2e7d32;
+}
+
+.status-shipped {
+    background-color: #1565c0;
+}
+
+.status-cancelled {
+    background-color: #c62828;
+}
+
+.status-pending {
+    background-color: #ff8f00;
+}
+
+.delivery-msg {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+/* ============================= */
+/* CARD IMPROVEMENT */
+/* ============================= */
+.order-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    transition: 0.2s ease;
+}
+
+.order-card .row {
+    min-height: 120px;
+}
+.order-card:hover {
+    box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+}
+
+
+
+/* ============================= */
+/* MOBILE FIX */
+/* ============================= */
+
+@media (max-width: 768px) {
+    .order-right {
+        text-align: left;
+        margin-top: 15px;
+    }
+
+    .order-status-line {
+        justify-content: flex-start;
+    }
+}

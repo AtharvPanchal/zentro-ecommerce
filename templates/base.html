@@ -14,6 +14,11 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://zentro.example">
 
+
+  <!--- CSRF TOKEN --->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="ZENTRO – Everything at Your Center">
@@ -36,10 +41,11 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 
   <!-- Page specific CSS -->
-  {% block page_css %}{% endblock %}
+  {% block styles %}{% endblock %}
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
+
 
   <!-- FLASH MESSAGES -->
   {% include "partials/_flash_messages.html" %}
@@ -51,7 +57,8 @@
   {% include 'partials/_header.html' %}
 
   <!-- MAIN CONTENT -->
-  <main id="main-content">
+  <main id="main-content" class="flex-grow-1">
+
     {% block content %}{% endblock %}
   </main>
 
@@ -59,7 +66,8 @@
   {% include 'partials/_footer.html' %}
 
   <!-- GLOBAL MODALS -->
-  {% include 'components/_quick_view_modal.html' %}
+  <!-- {% include 'components/_quick_view_modal.html' %} -->
+
 
   <!-- Toast container -->
   <div id="toastContainer"
@@ -80,7 +88,9 @@
 
 
   <!-- Page specific JS -->
-  {% block page_js %}{% endblock %}
+  {% block scripts %}{% endblock %}
+
+
 
 </body>
 </html>

@@ -7,6 +7,8 @@ from app.extensions import db, migrate, login_manager, mail, limiter, scheduler,
 from app.services.audit_retention import auto_archive_old_audit_logs
 from app.services.audit_cleanup_service import cleanup_old_archived_audit_logs
 from app.services.system_jobs import cleanup_expired_otps
+from flask_login import current_user
+from app.models import Wishlist
 
 from app.utils.time_utils import (
     timeago_ist,
@@ -118,8 +120,27 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(user_bp)
-    csrf.exempt(api_bp)
     app.register_blueprint(api_bp)
+
+    # 🔓 Exempt API routes from CSRF (for AJAX / future React)
+    csrf.exempt(api_bp)
+
+
+    # --------------------------------------------------
+    # GLOBAL CONTEXT PROCESSOR (WISHLIST COUNT)
+    # --------------------------------------------------
+    @app.context_processor
+    def inject_wishlist_count():
+        if current_user.is_authenticated:
+            count = Wishlist.query.filter_by(
+                user_id=current_user.id
+            ).count()
+        else:
+            count = 0
+
+        return {
+            "wishlist_count": count
+        }
 
     #  AUDIT INSIGHT ROUTES (MISSING FIX)
     from app.admin.routes.audit_insight_routes import audit_insight_bp

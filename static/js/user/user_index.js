@@ -293,10 +293,12 @@ if ($('#productSkeleton')) {
   }
 
   state.products.forEach(p => {
+    const oldPrice = p.old_price || p.oldPrice;
+
     const saleBadge = oldPrice ? `<div class="product-badge">SALE</div>` : '';
     const stockBadge = p.stock === 0 ? `<div class="out-stock-badge">OUT</div>` : '';
     const img = p.image || p.image_url || '/static/img/placeholders/product.png';
-    const oldPrice = p.old_price || p.oldPrice;
+
     const badge = oldPrice ? `<div class="product-badge">SALE</div>` : '';
     const liked = state.wishlist.includes(p.id);
 
@@ -460,10 +462,24 @@ $('#loadMoreBtn')?.addEventListener('click', () => {
 
 /* ----------------- Boot ----------------- */
 function boot() {
-state.wishlist = safeParse(STORAGE.WISHLIST, []);
+
+  state.wishlist = safeParse(STORAGE.WISHLIST, []);
+
+  /* ---------------------------
+     READ SEARCH QUERY FROM URL
+  ---------------------------- */
+
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+
+  if (q && $('#search-input')) {
+    $('#search-input').value = q;
+  }
+
   updateCity();
+
   fetchProducts(true);
+
   loadCartFromDB();
 }
-
 document.addEventListener('DOMContentLoaded', boot);

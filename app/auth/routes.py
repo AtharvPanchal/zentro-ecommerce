@@ -15,7 +15,6 @@ import requests
 from app.extensions import db, limiter
 from app.models import User
 from app.models import LoginActivity
-from app.utils.utils import verify_password, hash_password
 from app.services.otp_service import (
     generate_otp, verify_otp, invalidate_otp
 )
@@ -29,8 +28,8 @@ from app.services.email_service import (
 from . import auth_bp
 from datetime import timedelta
 from app.utils.time_utils import utc_now
-
-
+from app.models import CartItem, Product
+from flask import session
 
 
 # ==================================================
@@ -100,7 +99,7 @@ def log_login_attempt(user, status):
         created_at=utc_now().replace(tzinfo=None)
     )
     db.session.add(activity)
-
+    db.session.commit()
 
 
 # ==================================================
@@ -140,16 +139,19 @@ def login():
 
     # ---------- USER NOT FOUND ----------
     if not user:
+        log_login_attempt(None, "user_not_found")
         flash("❌ Invalid Email or Password", "danger")
         return redirect(url_for("auth.login"))
+
 
     # ---------- ACCOUNT LOCKED (CHECK FIRST) ----------
     if user.lock_until and utc_now().replace(tzinfo=None) < user.lock_until:
         log_login_attempt(user, "locked")
         return redirect(url_for("auth.login", email=email))
 
+
     # ---------- WRONG PASSWORD ----------
-    if not verify_password(password, user.password_hash):
+    if not user.check_password(password):
         log_login_attempt(user, "failed")
 
         user.failed_login_attempts += 1
@@ -174,13 +176,16 @@ def login():
     # ---------- ACCOUNT DISABLED ----------
     if not user.is_active:
         log_login_attempt(user, "disabled")
-        flash("🚫 Your account has been disabled by admin.", "danger")
+        user.failed_login_attempts = 0
+        db.session.commit()
+        flash("🚫 Your Account Has Been Disabled By Admin.", "danger")
         return redirect(url_for("auth.login"))
+
 
     # ---------- EMAIL NOT VERIFIED ----------
     if not user.email_verified:
         log_login_attempt(user, "email_not_verified")
-        flash("📧 Please verify your email.", "warning")
+        flash("📧 Please Verify Your Email.", "warning")
         return redirect(url_for("auth.login"))
 
     # ---------- SUCCESS ----------
@@ -188,10 +193,52 @@ def login():
     user.lock_until = None
     db.session.commit()
 
+    log_login_attempt(user, "success")
+
     login_user(user, remember=remember)
+
+    # NOTE: Guest cart is session-based and merged into DB cart on login (Phase-2 design)
+    # This prevents cart loss when a guest user logs in.
+
+    # ==================================================
+    # MERGE GUEST CART → USER CART (PHASE-2 FINAL FIX)
+    # ==================================================
+
+
+    guest_cart = session.pop("cart", None)
+
+    if guest_cart:
+        for product_id, qty in guest_cart.items():
+            product = Product.query.get(int(product_id))
+            if not product:
+                continue
+
+            qty = min(int(qty), product.stock)
+
+            existing = CartItem.query.filter_by(
+                user_id=user.id,
+                product_id=product.id
+            ).first()
+
+            if existing:
+                existing.quantity = qty
+            else:
+                db.session.add(
+                    CartItem(
+                        user_id=user.id,
+                        product_id=product.id,
+                        quantity=qty
+                    )
+                )
+
+        db.session.commit()
+
+        # Optional UX: inform user that cart was restored after login
+        flash("🛒 Your Cart Items Have Been Restored", "info")
+
+
     session["session_version"] = user.session_version
 
-    log_login_attempt(user, "success")
     flash("✅ Login Successful", "success")
     return redirect(url_for("main.index"))
 
@@ -233,9 +280,9 @@ def signup():
         username=username,
         email=email,
         notification_email=email,
-        password_hash=hash_password(password),
         email_verified=False
     )
+    user.set_password(password)
 
     db.session.add(user)
     db.session.commit()
@@ -279,8 +326,10 @@ def verify_email(token):
 @login_required
 def logout():
     logout_user()
-    flash("👋 Logged Out", "info")
+    flash("Logged Out Successfully", "info")
     return redirect(url_for("auth.login"))
+
+
 
 # ==================================================
 # FORGOT PASSWORD
@@ -353,7 +402,7 @@ def reset_password():
             flash("❌ Passwords Do Not Match", "danger")
             return redirect(url_for("auth.reset_password", email=email))
 
-        user.password_hash = hash_password(password)
+        user.set_password(password)
         user.session_version += 1
         db.session.commit()
 
@@ -397,3 +446,4 @@ def resend_verification():
 
     flash("📧 Verification Email Resent.", "info")
     return redirect(url_for("auth.login"))
+

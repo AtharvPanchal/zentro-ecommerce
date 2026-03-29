@@ -21,10 +21,11 @@ def to_ist(dt):
     return dt.astimezone(IST)
 
 
-# 🔹 FORMAT helper 
-def format_ist(dt, fmt):
+# 🔹 FORMAT helper (SAFE DEFAULT)
+def format_ist(dt, fmt="%d %b %Y %I:%M %p"):
     ist_dt = to_ist(dt)
     return ist_dt.strftime(fmt) if ist_dt else ""
+
 
 # 🔹 Timeago (for UI only)
 def timeago_ist(dt):

@@ -1,0 +1,62 @@
+/* ===============================
+   PDP REVIEWS – FLIPKART STYLE
+   =============================== */
+
+.review-sort {
+  width: 140px;
+}
+
+.review-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-user {
+  font-size: 15px;
+}
+
+.review-rating-badge {
+  background: #388e3c;
+  color: #fff;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.review-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+  margin: 6px 0;
+}
+
+.verified-badge {
+  color: #388e3c;
+  font-weight: 500;
+}
+
+.review-text {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #333;
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

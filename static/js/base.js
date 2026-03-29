@@ -1,3 +1,23 @@
+/* ======================
+   STORAGE KEYS
+====================== */
+const STORAGE = {
+  WISHLIST: 'zentro_wishlist',
+  CITY: 'zentro_city',
+  COOKIE: 'zentro_cookie_accepted',
+  NEWUSER: 'zentro_newuser_shown',
+  MINI_OPEN: 'zentro_mini_open'
+};
+
+/* ======================
+   GLOBAL STATE
+====================== */
+window.ZENTRO = {
+  wishlist: [],
+  city: localStorage.getItem(STORAGE.CITY) || 'Delhi'
+};
+
+
 // AUTO DISMISS FLASH TOASTS
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".flash-toast").forEach(toast => {
@@ -29,25 +49,16 @@ const $$ = sel => Array.from(document.querySelectorAll(sel));
 const fmtPrice = v => '₹' + Number(v).toLocaleString('en-IN');
 
 /* ======================
-   STORAGE KEYS
+   CSRF TOKEN HELPER
 ====================== */
-const STORAGE = {
-  CART: 'zentro_cart',
-  WISHLIST: 'zentro_wishlist',
-  CITY: 'zentro_city',
-  COOKIE: 'zentro_cookie_accepted',
-  NEWUSER: 'zentro_newuser_shown',
-  MINI_OPEN: 'zentro_mini_open'
-};
+function getCSRFToken() {
+  return document
+    .querySelector('meta[name="csrf-token"]')
+    ?.getAttribute("content");
+}
 
-/* ======================
-   GLOBAL STATE (SHARED)
-====================== */
-window.ZENTRO = {
-  cart: [],
-  wishlist: [],
-  city: localStorage.getItem(STORAGE.CITY) || 'Delhi'
-};
+
+
 
 /* ======================
    SAFE STORAGE HELPERS
@@ -61,15 +72,11 @@ function safeParse(key, fallback = []) {
   }
 }
 
-function saveCart() {
-  localStorage.setItem(STORAGE.CART, JSON.stringify(ZENTRO.cart));
-}
+
 function saveWishlist() {
   localStorage.setItem(STORAGE.WISHLIST, JSON.stringify(ZENTRO.wishlist));
 }
-function loadCart() {
-  ZENTRO.cart = safeParse(STORAGE.CART, []);
-}
+
 function loadWishlist() {
   ZENTRO.wishlist = safeParse(STORAGE.WISHLIST, []);
 }
@@ -123,55 +130,18 @@ $$('.city-select').forEach(btn => {
   });
 });
 
-/* ======================
-   BADGES (CART / WISHLIST)
-====================== */
+
+/* =========================
+update badge
+=========================*/
 function updateBadges() {
-  const cartCount = ZENTRO.cart.reduce((s, i) => s + (i.qty || 1), 0);
-  const wlCount = ZENTRO.wishlist.length;
-
-  const cartBadge = $('#cartBadge');
-  const wlBadge = $('#wishlistBadge');
-
-  if (cartBadge) {
-    cartBadge.style.display = cartCount ? 'inline-block' : 'none';
-    cartBadge.textContent = cartCount;
-  }
-
+  const wlBadge = document.getElementById("wishlistBadge");
   if (wlBadge) {
-    wlBadge.style.display = wlCount ? 'inline-block' : 'none';
-    wlBadge.textContent = wlCount;
+    wlBadge.textContent = ZENTRO.wishlist.length;
+    wlBadge.style.display = ZENTRO.wishlist.length ? "inline-block" : "none";
   }
 }
 
-/* ======================
-   CART CORE (NO PRODUCTS LOGIC)
-====================== */
-function removeFromCart(id) {
-  const idx = ZENTRO.cart.findIndex(i => i.id === id);
-  if (idx !== -1) {
-    ZENTRO.cart.splice(idx, 1);
-    saveCart();
-    updateBadges();
-    showToast('Removed from cart');
-  }
-}
-
-/* ======================
-   WISHLIST CORE
-====================== */
-function toggleWishlist(id) {
-  const i = ZENTRO.wishlist.indexOf(id);
-  if (i === -1) {
-    ZENTRO.wishlist.push(id);
-    showToast('Added to wishlist');
-  } else {
-    ZENTRO.wishlist.splice(i, 1);
-    showToast('Removed from wishlist');
-  }
-  saveWishlist();
-  updateBadges();
-}
 
 /* ======================
    COOKIE BANNER
@@ -241,10 +211,8 @@ miniEl?.addEventListener('hidden.bs.offcanvas', () => {
    BOOT
 ====================== */
 function bootBase() {
-  loadCart();
   loadWishlist();
   updateCityText();
-  updateBadges();
   checkCookieBanner();
   maybeShowNewUser();
 
@@ -254,54 +222,391 @@ function bootBase() {
 }
 
 document.addEventListener('DOMContentLoaded', bootBase);
-window.addEventListener('beforeunload', () => {
-  saveCart();
-  saveWishlist();
+
+
+
+
+/* ======================
+   WISHLIST (PRODUCT CARD)
+====================== */
+document.addEventListener("click", function (e) {
+
+  const btn = e.target.closest(".wishlist-btn");
+  if (!btn) return;
+
+  const productId = btn.dataset.id;
+  if (!productId) return;
+
+  fetch(`/wishlist/toggle/${productId}`, {
+  method: "POST",
+  headers: {
+    "X-CSRFToken": getCSRFToken(),
+    "X-Requested-With": "XMLHttpRequest"
+  }
+})
+
+
+  .then(res => {
+    // 🔒 Not logged in
+    if (res.status === 401) {
+      window.location.href = "/login";
+      return;
+    }
+    return res.json();
+  })
+  .then(data => {
+    if (!data || !data.success) return;
+
+    const icon = btn.querySelector("i");
+
+    if (data.added) {
+  btn.classList.add("active");
+  btn.classList.remove("btn-outline-danger");
+  btn.classList.add("btn-danger");
+
+  icon.classList.remove("fa-regular");
+  icon.classList.add("fa-solid");
+
+  showToast("Added to wishlist ❤️");
+} else {
+  btn.classList.remove("active");
+  btn.classList.remove("btn-danger");
+  btn.classList.add("btn-outline-danger");
+
+  icon.classList.remove("fa-solid");
+  icon.classList.add("fa-regular");
+
+  showToast("Removed from wishlist");
+}
+refreshWishlistBadge();
+
+  })
+  .catch(err => console.error(err));
+
 });
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadProducts();
+/*=============================================
+ QUICK VIEW PRODUCT MODAL
+=============================================*/
+document.addEventListener("click", async (e) => {
+
+  const btn = e.target.closest(".quick-view-btn");
+  if (!btn) return;
+
+  // mark active button
+  document
+    .querySelectorAll(".quick-view-btn")
+    .forEach(b => b.classList.remove("active"));
+
+  btn.classList.add("active");
+
+  const productId = btn.dataset.id;
+  if (!productId) return;
+
+  try {
+    const res = await fetch(`/api/product/${productId}`);
+    const data = await res.json();
+
+    // Fill modal
+    document.getElementById("quickViewTitle").textContent = data.name;
+    document.getElementById("quickName").textContent = data.name;
+    document.getElementById("quickPrice").textContent = `₹${data.price}`;
+
+    const img = document.getElementById("quickImage");
+    if (data.image) {
+      img.src = data.image.startsWith("static/")
+        ? `/${data.image}`
+        : `/static/${data.image}`;
+    } else {
+      img.src = "/static/img/placeholders/product.png";
+    }
+
+    const modal = new bootstrap.Modal(
+      document.getElementById("quickViewModal")
+    );
+
+    const qtyInput = document.querySelector("#quickViewModal .qty-input");
+if (qtyInput) qtyInput.value = 1;
+
+    modal.show();
+
+  } catch (err) {
+    console.error("Quick view error", err);
+  }
 });
 
-function loadProducts() {
-  fetch("/api/products")
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) return;
 
-      const grid = document.getElementById("productsGrid");
-      if (!grid) return;
 
-      grid.innerHTML = "";
+/* ======================
+   QUICK VIEW BUTTON RESET ON CLOSE
+====================== */
+const qvModalEl = document.getElementById("quickViewModal");
 
-      data.products.forEach(p => {
-        grid.innerHTML += `
-          <div class="col-md-4 col-lg-3">
-            <div class="card h-100 shadow-sm">
-              <img src="${p.image}" class="card-img-top" style="height:200px;object-fit:cover">
-              <div class="card-body">
-                <h6 class="fw-bold">${p.name}</h6>
-                <div class="mb-1">⭐ ${p.rating}</div>
-                <div>
-                  <span class="fw-bold text-success">₹${p.price}</span>
-                  ${
-                    p.old_price
-                      ? `<small class="text-muted text-decoration-line-through ms-2">₹${p.old_price}</small>`
-                      : ""
-                  }
-                </div>
-              </div>
-              <div class="card-footer bg-white border-0">
-                <button class="btn btn-dark w-100">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    })
-    .catch(err => console.error(err));
+if (qvModalEl) {
+  qvModalEl.addEventListener("hidden.bs.modal", () => {
+    document
+      .querySelectorAll(".quick-view-btn.active")
+      .forEach(btn => btn.classList.remove("active"));
+  });
 }
 
+
+/* ======================
+   UPDATE CART BADGE
+====================== */
+async function refreshCartBadge() {
+  try {
+    const res = await fetch("/api/cart");
+    const data = await res.json();
+
+    const badge = document.getElementById("cartCount");
+    if (!badge) return;
+
+    if (!data.success || data.cart.length === 0) {
+      badge.classList.add("d-none");
+      return;
+    }
+
+    const totalQty = data.cart.reduce((s, i) => s + i.quantity, 0);
+    badge.textContent = totalQty;
+    badge.classList.remove("d-none");
+
+  } catch (e) {
+    console.error("Cart badge error");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", refreshCartBadge);
+
+/* ======================
+   UPDATE WISHLIST BADGE (BACKEND TRUTH)
+====================== */
+async function refreshWishlistBadge() {
+  try {
+    const res = await fetch("/api/wishlist/count");
+    if (!res.ok) return;
+
+    const data = await res.json();
+    const badge = document.getElementById("wishlistBadge");
+    if (!badge) return;
+
+    if (!data.success || data.count === 0) {
+      badge.classList.add("d-none");
+      return;
+    }
+
+    badge.textContent = data.count;
+    badge.classList.remove("d-none");
+
+  } catch (e) {
+    console.error("Wishlist badge error", e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  refreshWishlistBadge();
+});
+
+/* ======================
+   GLOBAL QTY HANDLER (PDP + CARD + MODAL)
+====================== */
+
+document.addEventListener("click", function (e) {
+
+  const minusBtn = e.target.closest(".qty-minus");
+  const plusBtn = e.target.closest(".qty-plus");
+
+  if (!minusBtn && !plusBtn) return;
+
+  // Find closest container that has qty input
+  const container = e.target.closest(".qty-group, .pdp-qty-box, #quickViewModal");
+  if (!container) return;
+
+  const input = container.querySelector(".qty-input");
+  if (!input) return;
+
+  let current = parseInt(input.value || 1, 10);
+  const stock = parseInt(input.dataset.stock || 9999, 10);
+
+  if (minusBtn) {
+    if (current > 1) {
+      input.value = current - 1;
+    }
+  }
+
+  if (plusBtn) {
+    if (current < stock) {
+      input.value = current + 1;
+    } else {
+      showToast("Maximum stock reached", "error");
+    }
+  }
+
+});
+
+/* ======================
+   GLOBAL ADD TO CART
+====================== */
+
+document.addEventListener("click", async function (e) {
+
+  const btn = e.target.closest(".add-cart");
+  if (!btn) return;
+
+  const productId = btn.dataset.productId;
+  if (!productId) {
+    showToast("Product ID missing", "error");
+    return;
+  }
+
+  // Find qty input in same container
+  const container = btn.closest(".pdp-buy-box, .qty-group, #quickViewModal, .card");
+  const qtyInput = container?.querySelector(".qty-input");
+
+  const quantity = qtyInput ? parseInt(qtyInput.value, 10) : 1;
+
+  try {
+    const res = await fetch("/api/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken()
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        quantity: quantity
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      showToast(data.message || "Failed to add to cart", "error");
+      return;
+    }
+
+    showToast("Added to cart 🛒");
+    refreshCartBadge();
+
+  } catch (err) {
+    console.error(err);
+    showToast("Server error", "error");
+  }
+
+});
+
+
+
+/* ======================
+   LIVE SEARCH SYSTEM
+====================== */
+
+const searchInput = document.getElementById("search-input");
+const suggestionsBox = document.getElementById("search-suggestions");
+const searchBtn = document.getElementById("search-btn");
+
+let searchTimer = null;
+
+async function fetchSearchSuggestions(query) {
+
+  if (!query || query.length < 2) {
+    suggestionsBox.style.display = "none";
+    suggestionsBox.innerHTML = "";
+    return;
+  }
+
+  try {
+
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    if (!data.success || !data.products.length) {
+      suggestionsBox.innerHTML = `
+        <div class="search-empty">
+          No products found
+        </div>`;
+      suggestionsBox.style.display = "block";
+      return;
+    }
+
+    suggestionsBox.innerHTML = "";
+
+    data.products.forEach(p => {
+
+      const img = p.image || "/static/img/placeholders/product.png";
+
+      const item = document.createElement("div");
+      item.className = "search-item";
+
+      item.innerHTML = `
+        <img src="${img}">
+        <div>
+          <div class="search-name">${p.name}</div>
+          <div class="search-price">₹${p.price}</div>
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        window.location.href = `/product/${p.id}`;
+      });
+
+      suggestionsBox.appendChild(item);
+    });
+
+    suggestionsBox.style.display = "block";
+
+  } catch (err) {
+    console.error("Search error", err);
+  }
+}
+
+
+/* Debounce typing */
+searchInput?.addEventListener("input", e => {
+
+  const q = e.target.value.trim();
+
+  clearTimeout(searchTimer);
+
+  searchTimer = setTimeout(() => {
+    fetchSearchSuggestions(q);
+  }, 250);
+
+});
+
+
+/* Enter key search */
+searchInput?.addEventListener("keypress", e => {
+
+  if (e.key === "Enter") {
+
+    const q = searchInput.value.trim();
+
+    if (!q) return;
+
+    window.location.href = `/search?q=${encodeURIComponent(q)}`;
+  }
+
+});
+
+
+/* Search button click */
+searchBtn?.addEventListener("click", () => {
+
+  const q = searchInput.value.trim();
+
+  if (!q) return;
+
+  window.location.href = `/search?q=${encodeURIComponent(q)}`;
+});
+
+
+/* Click outside close dropdown */
+document.addEventListener("click", e => {
+
+  if (!e.target.closest(".search-box")) {
+    suggestionsBox.style.display = "none";
+  }
+
+});

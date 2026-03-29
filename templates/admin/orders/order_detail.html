@@ -1,0 +1,133 @@
+{% extends "admin/base.html" %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <h3 class="mb-4">Order #{{ order.order_number }}</h3>
+
+    <div class="row">
+
+        <!-- LEFT SECTION -->
+        <div class="col-lg-8">
+
+            <!-- ORDER SUMMARY -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5>Order Summary</h5>
+                    <p><strong>Status:</strong> {{ order.status }}</p>
+                    <p><strong>Total Amount:</strong> ₹ {{ order.total_amount }}</p>
+                    <p><strong>Created At:</strong> {{ order.created_at }}</p>
+                </div>
+            </div>
+
+            <!-- ITEMS TABLE -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5>Items</h5>
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price at Purchase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹ {{ item.price_at_purchase }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5>Order Timeline</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for event in timeline %}
+                        <li class="list-group-item">
+                            <strong>{{ event.status }}</strong><br>
+                            <small>{{ event.created_at }}</small>
+                            {% if event.note %}
+                                <div>{{ event.note }}</div>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SECTION -->
+        <div class="col-lg-4">
+
+            <!-- USER INFO -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5>User Info</h5>
+                    <p><strong>User ID:</strong> {{ user.id }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                </div>
+            </div>
+
+            <!-- PAYMENT INFO -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5>Payment Info</h5>
+                    <p><strong>Method:</strong> {{ order.payment_method }}</p>
+                    <p><strong>Status:</strong> {{ order.payment_status }}</p>
+                </div>
+            </div>
+
+            <!-- DELIVERY SNAPSHOT -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5>Delivery Details</h5>
+                    <p><strong>Name:</strong> {{ order.delivery_full_name }}</p>
+                    <p><strong>Phone:</strong> {{ order.delivery_phone }}</p>
+                    <p><strong>Address:</strong><br>{{ order.delivery_address }}</p>
+                </div>
+            </div>
+
+            <!-- ACTION PANEL -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5>Update Status</h5>
+
+                    <form method="POST"
+                          action="{{ url_for('admin.update_order_status_admin', order_id=order.id) }}">
+
+                        <select name="new_status" class="form-select mb-3">
+                            <option value="">Select Status</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="out_for_delivery">Out for Delivery</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="return_requested">Return Requested</option>
+                            <option value="returned">Returned</option>
+                        </select>
+
+                        <button class="btn btn-primary w-100">
+                            Update
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

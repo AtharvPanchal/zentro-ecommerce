@@ -36,3 +36,10 @@ instance/
 Thumbs.db
 .vscode/
 .idea/
+
+
+# --------------------------------------------------
+# UPLOADS (USER GENERATED FILES) ❗ IMPORTANT
+# --------------------------------------------------
+static/uploads/
+app/static/uploads/

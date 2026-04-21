@@ -56,16 +56,23 @@
 
   <div class="filter-right">
 
-   <button type="submit" class="btn btn-primary action-btn">
-      <i data-lucide="filter" class="icon" width="20" height="20"></i> Apply
-    </button>
+  <button type="submit" class="btn btn-primary action-btn">
+    <i data-lucide="filter" class="icon"></i> Apply
+  </button>
 
-    <a href="{{ url_for('admin.admin_users') }}"
-       class="btn btn-outline-secondary action-btn">
-      <i data-lucide="rotate-ccw" class="icon" width="20" height="20"></i> Reset
-    </a>
+  <a href="{{ url_for('admin.admin_users') }}"
+     class="btn btn-outline-secondary action-btn">
+    <i data-lucide="rotate-ccw" class="icon"></i> Reset
+  </a>
 
-  </div>
+  <!-- ✅ NEW CSV BUTTON -->
+  <a href="{{ url_for('admin.export_users') }}"
+   class="btn btn-outline-success action-btn">
+   <i data-lucide="download" class="icon" width="20" height="20"></i>
+   CSV
+</a>
+
+</div>
 
 </form>
 
@@ -112,10 +119,37 @@
                 <div class="user-avatar">
                   {{ u.email[0]|upper if u.email else 'U' }}
                 </div>
-                <div>
-                  <div class="fw-semibold">{{ u.email if u.email else 'No Email' }}</div>
-                  <div class="text-muted small">Registered user</div>
-                </div>
+               <div>
+
+  <!-- EMAIL + NEW BADGE -->
+  <div class="fw-semibold">
+
+    <span class="text-truncate">
+      {{ u.email if u.email else 'No Email' }}
+    </span>
+
+    {% if u.is_new %}
+      <span class="badge-new">NEW</span>
+    {% endif %}
+
+  </div>
+
+  <!-- SUBTEXT -->
+  <div class="text-muted small">
+
+    Registered user
+
+    {% if u.created_at %}
+      • {{ u.created_at.strftime('%d %b %Y') }}
+    {% endif %}
+
+    {% if u.time_ago %}
+      • {{ u.time_ago }}
+    {% endif %}
+
+  </div>
+
+</div>
               </div>
             </td>
 

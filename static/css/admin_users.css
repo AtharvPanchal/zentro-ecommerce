@@ -315,11 +315,6 @@
 }
 
 
-.admin-users-table td:nth-child(2) .fw-semibold {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 
 /* =========================================
@@ -374,8 +369,40 @@
   justify-content: center;
 }
 
-
-.admin-users-table td,
-.admin-users-table th {
+.admin-users-table td {
   overflow: hidden;
+}
+
+
+/* =========================================
+   NEW USER BADGE
+========================================= */
+.badge-new {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+
+/* =========================================
+   USER TEXT FIX (NO BREAK)
+========================================= */
+.admin-users-table td:nth-child(2) .fw-semibold {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+
+.admin-users-table td:nth-child(2) .text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

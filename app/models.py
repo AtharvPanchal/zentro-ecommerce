@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import UserMixin
 from enum import Enum
 from app.extensions import db
@@ -57,7 +57,45 @@ class User(UserMixin, db.Model):
         default=UserRole.USER.value
     )
 
-    created_at = db.Column(db.DateTime, default=db.func.now())
+    created_at = db.Column(db.DateTime, default=utc_now)
+
+    # ==================================================
+    # 🆕 NEW USER BADGE LOGIC
+    # ==================================================
+    @property
+    def is_new(self):
+        """
+        User considered NEW if created within last 24 hours
+        """
+        if not self.created_at:
+            return False
+
+        return (utc_now().replace(tzinfo=None) - self.created_at) <= timedelta(hours=24)
+
+    # ==================================================
+    # 🆕 TIME AGO (FOR UI)
+    # ==================================================
+    @property
+    def time_ago(self):
+        if not self.created_at:
+            return None
+
+        diff = utc_now().replace(tzinfo=None) - self.created_at
+
+        if diff.days > 0:
+            return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
+
+        hours = diff.seconds // 3600
+        if hours > 0:
+            return f"{hours} hr{'s' if hours > 1 else ''} ago"
+
+        minutes = diff.seconds // 60
+        if minutes > 0:
+            return f"{minutes} min ago"
+
+        return "just now"
+
+
 
     # ==================================================
     # 🟢 DERIVED STATUS (INDUSTRY STANDARD)
@@ -71,7 +109,9 @@ class User(UserMixin, db.Model):
         if not self.is_active:
             return "disabled"
 
-        if self.lock_until and self.lock_until > utc_now().replace(tzinfo=None):
+        now = utc_now().replace(tzinfo=None)
+
+        if self.lock_until and self.lock_until > now:
             return "locked"
 
         return "active"
@@ -106,7 +146,7 @@ class OTP(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow
+        default=utc_now
     )
 
     user = db.relationship(
@@ -191,7 +231,7 @@ class Admin(UserMixin, db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=db.func.now()
+        default=utc_now
     )
 
     def __repr__(self):
@@ -235,7 +275,7 @@ class AdminOTP(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow
+        default=utc_now
     )
 
     admin = db.relationship(
@@ -313,15 +353,16 @@ class Category(db.Model):
     created_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.func.now()
+        default=utc_now
     )
 
     updated_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.func.now(),
-        onupdate=db.func.now()
+        default=utc_now,
+        onupdate=utc_now
     )
+
 
     # --------------------------------------------------
     # 🔒 HARD DELETE BLOCK
@@ -385,7 +426,10 @@ class Product(db.Model):
     )
 
     # 🔗 CATEGORY RELATIONSHIP (REQUIRED FOR PDP & RELATED)
-    category = db.relationship("Category", backref="products")
+    category = db.relationship(
+        "Category",
+        backref=db.backref("products", lazy="select")
+    )
 
 
     price = db.Column(
@@ -422,7 +466,7 @@ class Product(db.Model):
         Final price shown to user (Phase-2 safe).
         JS must NEVER calculate price.
         """
-        return float(self.price)
+        return float(self.price or 0)
 
     @property
     def is_in_stock(self):
@@ -454,7 +498,7 @@ class Product(db.Model):
 
 
     #  RATING FIELDS (NEW)
-    avg_rating = db.Column(db.Float, default=0)
+    avg_rating = db.Column(db.Float, default=0.0)
 
     # --------------------------------------------------
     # RATING VISIBILITY CONTROL (PHASE-2 SAFE)
@@ -470,17 +514,16 @@ class Product(db.Model):
 
     rating_count = db.Column(db.Integer, default=0)
 
-
     created_at = db.Column(
         db.DateTime,
-        default=db.func.now(),
+        default=utc_now,
         nullable=False
     )
 
     updated_at = db.Column(
         db.DateTime,
-        default=db.func.now(),
-        onupdate=db.func.now(),
+        default=utc_now,
+        onupdate=utc_now,
         nullable=False
     )
 
@@ -558,6 +601,11 @@ class AttributeType(db.Model):
 
     __tablename__ = "attribute_types"
 
+    __table_args__ = (
+        db.UniqueConstraint("name", "category_id", name="uq_attr_category"),
+        db.UniqueConstraint("slug", "category_id", name="uq_slug_category"),
+    )
+
     id = db.Column(db.Integer, primary_key=True)
 
     name = db.Column(
@@ -567,7 +615,6 @@ class AttributeType(db.Model):
 
     slug = db.Column(
         db.String(120),
-        unique=True,
         nullable=False,
         index=True
     )
@@ -627,7 +674,8 @@ class ProductAttribute(db.Model):
         db.UniqueConstraint(
             "product_id",
             "attribute_id",
-            name="uq_product_attribute"
+            "value",
+            name="uq_product_attribute_value"
         ),
 
         db.Index(
@@ -655,7 +703,7 @@ class DeliveryPincode(db.Model):
     created_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.func.now()
+        default=utc_now
     )
 
     def __repr__(self):
@@ -691,7 +739,7 @@ class ProductReview(db.Model):
 
     review_text = db.Column(db.Text, nullable=True)
 
-    rating = db.Column(db.Integer, nullable=True)
+    rating = db.Column(db.Integer, nullable=True, default=None)
 
     # ---------------- MODERATION FLAGS ----------------
     is_active = db.Column(db.Boolean, default=False)
@@ -710,7 +758,7 @@ class ProductReview(db.Model):
     )
     action_at = db.Column(db.DateTime)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     # relationships
     product = db.relationship("Product", backref="reviews")
@@ -948,7 +996,7 @@ class UserAddress(db.Model):
     address_type = db.Column(db.String(20), default="home")  # home / work
     is_default = db.Column(db.Boolean, default=False)
 
-    created_at = db.Column(db.DateTime, default=db.func.now())
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     user = db.relationship(
         "User",
@@ -982,7 +1030,7 @@ class Wishlist(db.Model):
     created_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=lambda: utc_now().replace(tzinfo=None)
+        default=utc_now
     )
 
     __table_args__ = (
@@ -1033,7 +1081,7 @@ class CartItem(db.Model):
     created_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.func.now(),
+        default=utc_now,
         index=True
     )
 
@@ -1075,7 +1123,7 @@ class CartItem(db.Model):
         price_snapshot * quantity
         Used in cart price engine
         """
-        return float(self.price_at_add) * self.quantity
+        return float(self.price_at_add or 0) * self.quantity
 
 
 
@@ -1105,7 +1153,7 @@ class SavedForLater(db.Model):
     created_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=db.func.now()
+        default=utc_now
     )
 
     __table_args__ = (
@@ -1123,7 +1171,7 @@ class SavedForLater(db.Model):
             lazy="dynamic",
             cascade="all, delete"
         )
-    )
+        )
 
     product = db.relationship("Product")
 
@@ -1158,7 +1206,7 @@ class LoginActivity(db.Model):
         db.DateTime,
         nullable=False,
         index=True,
-        default=lambda: utc_now().replace(tzinfo=None)
+        default=utc_now
     )
 
     user = db.relationship(
@@ -1216,7 +1264,7 @@ class UserStatusReason(db.Model):
 
     created_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
+        default=utc_now,
         nullable=False
     )
 
@@ -1284,7 +1332,7 @@ class AdminActivityLog(db.Model):
 
     # ⏱ TIME (UTC ONLY – INDUSTRY STANDARD)
     created_at = db.Column(
-        db.DateTime(timezone=True),
+        db.DateTime,
         nullable=False,
         default=utc_now
     )
@@ -1329,7 +1377,7 @@ class AuditInsight(db.Model):
     # ⏱ GENERATED TIME (UTC)
     generated_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,
+        default=utc_now,
         nullable=False
     )
 

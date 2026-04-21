@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import or_
 from app.admin import admin_bp
 from app.admin.decorators import admin_required
@@ -13,7 +13,6 @@ from app.models import LoginActivity
 import csv
 from io import StringIO
 from flask import Response
-from datetime import timedelta
 from app.utils.time_utils import utc_now
 from app.utils.activity_logger import log_admin_action
 from app.utils.time_utils import IST
@@ -71,10 +70,17 @@ def admin_users():
     # STATUS FILTER
     # -----------------------------
     if status == "active":
+        now = utc_now().replace(tzinfo=None)
+
         query = query.filter(
             User.is_active.is_(True),
-            User.lock_until.is_(None)
+            or_(
+                User.lock_until.is_(None),
+                User.lock_until <= now
+            )
         )
+
+
 
     elif status == "disabled":
         query = query.filter(User.is_active.is_(False))
@@ -82,7 +88,7 @@ def admin_users():
     elif status == "locked":
         query = query.filter(
             User.lock_until.isnot(None),
-            User.lock_until > utc_now()
+            User.lock_until > utc_now().replace(tzinfo=None)
         )
 
 
@@ -108,8 +114,8 @@ def admin_users():
     return render_template(
         "admin/users.html",
         users=users,
-        pagination=pagination,  
-        now=utc_now()
+        pagination=pagination,
+        now=utc_now().replace(tzinfo=None)
     )
 
 
@@ -132,14 +138,13 @@ def lock_user(user_id):
         flash("Disabled user cannot be locked.", "danger")
         return redirect(url_for("admin.admin_users"))
 
-    now = utc_now()
+    now = utc_now().replace(tzinfo=None)
 
     # 🔐 FORCE ADMIN LOCK (24 HOURS)
     user.lock_until = now + timedelta(hours=24)
     user.is_active = True
 
-    # 🆕 SAVE REASON
-    admin_id = session.get("admin_id")
+
 
     reason = UserStatusReason(
         user_id=user.id,
@@ -184,9 +189,9 @@ def toggle_user_status(user_id):
     user = User.query.get_or_404(user_id)
 
     # 🔐 SAFETY CHECK
-   # if user.id == current_user.id:
-    #    flash("You cannot modify your own account.", "danger")
-     #   return redirect(url_for("admin.admin_users"))
+    if user.id == session.get("admin_id"):
+        flash("You cannot modify your own account.", "danger")
+        return redirect(url_for("admin.admin_users"))
 
     # no early return here
     # disabled user SHOULD be allowed to enable
@@ -220,9 +225,13 @@ def toggle_user_status(user_id):
 
     log_admin_user_login_activity(user, status)
 
-    db.session.commit()
+    try:
+        db.session.commit()
+        flash(f"User account {action_text} successfully.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Something went wrong.", "danger")
 
-    flash(f"User account {action_text} successfully.", "success")
     return redirect(url_for("admin.admin_users"))
 
 
@@ -271,9 +280,14 @@ def unlock_user(user_id):
 
     log_admin_user_login_activity(user, "success")
 
-    db.session.commit()
+    try:
+        db.session.commit()
+        flash("User unlocked and updated successfully ✅", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Something went wrong.", "danger")
 
-    flash("User unlocked and activated successfully ✅", "success")
+
     return redirect(url_for("admin.admin_users"))
 
 
@@ -328,6 +342,7 @@ def user_login_history(user_id):
     if from_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
+        start_date = start_date.replace(tzinfo=None)
         logs_query = logs_query.filter(
             LoginActivity.created_at >= start_date
         )
@@ -335,6 +350,7 @@ def user_login_history(user_id):
     if to_date:
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = end_date.replace(tzinfo=None)
         logs_query = logs_query.filter(
             LoginActivity.created_at <= end_date
         )
@@ -398,6 +414,7 @@ def export_user_login_history_csv(user_id):
     if from_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
+        start_date = start_date.replace(tzinfo=None)
         logs_query = logs_query.filter(
             LoginActivity.created_at >= start_date
         )
@@ -405,9 +422,12 @@ def export_user_login_history_csv(user_id):
     if to_date:
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = end_date.replace(tzinfo=None)
         logs_query = logs_query.filter(
             LoginActivity.created_at <= end_date
         )
+
+
 
     logs = logs_query.order_by(
         LoginActivity.created_at.desc()
@@ -436,7 +456,7 @@ def export_user_login_history_csv(user_id):
 
     # CSV ROWS
     for log in logs:
-        ist_time = log.created_at.astimezone(IST)
+        ist_time = log.created_at.replace(tzinfo=None).astimezone(IST)
         writer.writerow([
             ist_time.strftime("%d %b %Y"),
             ist_time.strftime("%I:%M %p"),
@@ -458,6 +478,66 @@ def export_user_login_history_csv(user_id):
         action="Exported login activity CSV",
         target_user_id=user.id,
         reason="Admin exported login activity"
+    )
+
+    return response
+
+
+# ==================================================
+# USERS LIST - CSV EXPORT
+# ==================================================
+@admin_bp.route("/users/export")
+@admin_required
+def export_users():
+
+    users = User.query.order_by(User.created_at.desc()).all()
+
+    if not users:
+        flash("No users found for export.", "warning")
+        return redirect(url_for("admin.admin_users"))
+
+    output = StringIO()
+    writer = csv.writer(output)
+
+    # HEADER
+    writer.writerow([
+        "ID",
+        "Email",
+        "Status",
+        "Created Date",
+        "Created Time"
+    ])
+
+    # ROWS
+    for u in users:
+        status = u.status
+
+        created_date = ""
+        created_time = ""
+
+        if u.created_at:
+            ist_time = u.created_at.replace(tzinfo=None).astimezone(IST)
+            created_date = ist_time.strftime("%d %b %Y")
+            created_time = ist_time.strftime("%I:%M %p")
+
+        writer.writerow([
+            u.id,
+            u.email,
+            status,
+            created_date,
+            created_time
+        ])
+
+    response = Response(
+        output.getvalue(),
+        mimetype="text/csv"
+    )
+
+    response.headers["Content-Disposition"] = "attachment; filename=users.csv"
+
+    log_admin_action(
+        action="Exported users CSV",
+        reason="Admin exported users list"
     )
 
     return response

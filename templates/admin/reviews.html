@@ -1,10 +1,15 @@
 {% extends "admin/admin_base.html" %}
+
 {% block title %}Review Moderation{% endblock %}
 {% block page_title %}Review Moderation{% endblock %}
 
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_reviews.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<div class="container-fluid px-4 py-3">
+<div class="admin-page px-3 py-3">
 
   <!-- PAGE HEADER -->
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -25,9 +30,9 @@
 
     <!-- FILTER BAR -->
     <div class="card-body pb-2">
-      <form method="GET" class="audit-filter-bar">
+      <form method="GET" class="review-filter-bar">
 
-        <div class="filter-left">
+        <div class="review-filter-left">
           <input type="text"
                  name="search"
                  class="form-control"
@@ -49,7 +54,7 @@
           </select>
         </div>
 
-        <div class="filter-right">
+        <div class="review-filter-right">
           <button class="btn btn-primary">
             <i class="bi bi-funnel"></i> Apply
           </button>
@@ -64,19 +69,19 @@
     </div>
 
     <!-- TABLE -->
-    <div class="table-responsive">
-      <table class="table align-middle mb-0 admin-activity-table">
+    <div class="table-responsive review-table-wrapper">
+      <table class="table align-middle mb-0 review-table">
 
         <thead class="table-light text-muted small">
           <tr>
-            <th style="width:80px">ID</th>
+            <th class="col-id">ID</th>
             <th>User</th>
             <th>Product</th>
 
-            <th style="width:120px">Status</th>
+            <th class="col-status">Status</th>
             <th>Review</th>
-            <th style="width:180px">Date</th>
-            <th style="width:120px" class="text-end">Actions</th>
+            <th class="col-date">Date</th>
+            <th class="text-end actions-col">Actions</th>
           </tr>
         </thead>
 
@@ -84,7 +89,7 @@
 
         {% if reviews|length == 0 %}
           <tr>
-           <td colspan="7" class="text-center text-muted py-4">
+           <td colspan="7" class="text-center text-muted py-5 empty-state align-middle">
 
               No reviews found
             </td>
@@ -104,14 +109,18 @@
                 {{ r.user.email[0]|upper }}
               </div>
               <div>
-                <div class="fw-semibold">{{ r.user.email }}</div>
+                <div class="fw-semibold text-truncate user-email" style="max-width:180px;">
+  {{ r.user.email }}
+</div>
                 <div class="text-muted small">Customer</div>
               </div>
             </div>
           </td>
 
           <!-- PRODUCT -->
-          <td class="fw-semibold">{{ r.product.name }}</td>
+          <td class="fw-semibold product-name text-truncate" style="max-width:200px;">
+  {{ r.product.name }}
+</td>
 
 
           <!-- STATUS -->
@@ -126,12 +135,12 @@
           </td>
 
           <!-- REVIEW -->
-          <td class="text-muted">
-            {{ r.review_text }}
-          </td>
+          <td class="text-muted review-text">
+  {{ r.review_text | truncate(120) }}
+</td>
 
           <!-- DATE -->
-         <td class="text-muted small">
+         <td class="text-muted small review-date">
          {{ r.created_at | to_ist | format_ist("%d %b %Y %I:%M %p") }}<br>
 <small class="text-muted">
   ({{ r.created_at | timeago }})
@@ -141,7 +150,8 @@
 
 
           <!-- ACTIONS -->
-          <td class="text-end">
+          <td class="text-end actions-col">
+  <div class="d-flex justify-content-end gap-1">
             {% if not r.is_active %}
             <form method="POST"
                   action="{{ url_for('admin.approve_review', review_id=r.id) }}"
@@ -172,13 +182,16 @@
                 <i class="bi bi-trash"></i>
               </button>
             </form>
+  </div>
           </td>
+
 
         </tr>
         {% endfor %}
         </tbody>
       </table>
     </div>
+
 
     <!-- PAGINATION -->
     {% if pagination.pages > 1 %}
@@ -219,64 +232,6 @@
 
   </div>
 </div>
-
-<!-- INLINE STYLE (AUDIT LOG SYSTEM) -->
-<style>
-.audit-filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.filter-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-.filter-left .form-control,
-.filter-left .form-select {
-  height: 38px;
-  font-size: .85rem;
-  min-width: 180px;
-}
-.filter-left input[type="text"] {
-  min-width: 280px;
-}
-.filter-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.admin-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #eef2ff;
-  color: #4338ca;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.admin-activity-table thead th {
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  font-size: .7rem;
-}
-.activity-row:hover {
-  background: #f9fafb;
-}
-.severity-pill {
-  padding: 4px 10px;
-  font-size: .7rem;
-  font-weight: 700;
-  border-radius: 999px;
-}
-.severity-high { background:#fee2e2; color:#991b1b; }
-.severity-medium { background:#fef3c7; color:#92400e; }
-.severity-low { background:#dcfce7; color:#166534; }
-</style>
 
 {% endblock %}
 

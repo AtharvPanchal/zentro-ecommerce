@@ -1,277 +1,447 @@
 /* =========================
-   BASE LAYOUT
+BASE LAYOUT
 ========================= */
-
 body.admin-body {
-  font-family: Inter, sans-serif;
-  background: #f4f6f9;
-  margin: 0;
+font-family: Inter, sans-serif;
+background: #f4f6f9;
+margin: 0;
 }
 
 .admin-wrapper {
-  display: flex;
-  height: 100vh;
+display: flex;
+min-height: 100vh;
+overflow: auto;
 }
 
 .admin-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+flex: 1;
+display: flex;
+flex-direction: column;
 }
 
 .admin-content {
-  padding: 24px;
-  overflow-y: auto;
+padding: 24px 32px;
+overflow-y: auto;
+overflow-x: hidden;
+flex: 1;
+min-width: 0;
 }
 
-/* =========================
-   SIDEBAR
-========================= */
+.container-fluid {
+max-width: 100%;
+padding-left: 12px;
+padding-right: 12px;
+}
 
+
+/* =========================
+SIDEBAR
+========================= */
 .admin-sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, #0b1b2b, #091421);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
+width: 260px;
+background: linear-gradient(180deg, #0b1b2b, #091421);
+color: #fff;
+display: flex;
+flex-direction: column;
 }
 
 .brand {
-  display: flex;
-  gap: 12px;
-  padding: 20px;
-  align-items: center;
+display: flex;
+gap: 12px;
+padding: 20px;
+align-items: center;
 }
 
 .brand .logo {
-  background: #e29b26;
-  color: #000;
-  font-weight: 800;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
+background: #e29b26;
+color: #000;
+font-weight: 800;
+width: 38px;
+height: 38px;
+border-radius: 10px;
+display: grid;
+place-items: center;
 }
 
 .menu a {
-  display: block;
-  padding: 14px 20px;
-  color: #cfd8e3;
-  text-decoration: none;
+display: block;
+padding: 14px 20px;
+color: #cfd8e3;
+text-decoration: none;
 }
 
 .menu a.active,
 .menu a:hover {
-  background: rgba(255,255,255,.08);
-  color: #fff;
+background: rgba(255,255,255,.08);
+color: #fff;
 }
 
 .logout {
-  margin-top: auto;
-  padding: 20px;
+margin-top: auto;
+padding: 20px;
 }
 
-/* =========================
-   TOPBAR
-========================= */
 
+
+/* =========================
+TOPBAR
+========================= */
 .admin-topbar {
-  background: #fff;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
+background: #fff;
+padding: 16px 24px;
+border-bottom: 1px solid #e5e7eb;
+display: flex;
+justify-content: space-between;
 }
 
-/* =========================
-   DROPDOWN
-========================= */
 
+
+/* =========================
+DROPDOWN
+========================= */
 .menu-dropdown {
-  display: flex;
-  flex-direction: column;
+display: flex;
+flex-direction: column;
 }
 
 .menu-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: space-between;
+cursor: pointer;
 }
 
 .menu-toggle .dropdown-icon {
-  margin-left: auto;
-  font-size: 12px;
-  transition: transform 0.2s ease;
+margin-left: auto;
+font-size: 12px;
+transition: transform 0.2s ease;
 }
 
 .menu-dropdown .submenu {
-  display: none;
-  flex-direction: column;
-  padding-left: 28px;
+display: none;
+flex-direction: column;
+padding-left: 28px;
 }
 
 .menu-dropdown .submenu a {
-  font-size: 14px;
-  padding: 8px 0;
-  color: #cbd5e1;
+font-size: 14px;
+padding: 8px 0;
+color: #cbd5e1;
 }
 
 .menu-dropdown.open .submenu {
-  display: flex;
+display: flex;
 }
 
 .menu-dropdown.open .dropdown-icon {
-  transform: rotate(180deg);
+transform: rotate(180deg);
 }
+
+
 
 /* =========================
-   COMMON UI
+COMMON UI
 ========================= */
-
-.form-control,
-.form-select {
-  border-radius: 8px;
-}
-
 .card .border-bottom {
-  background: #fafbfc;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+background: #fafbfc;
+box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .id-badge {
-  display: inline-block;
-  min-width: 38px;
-  text-align: center;
-  padding: 6px 10px;
-  font-weight: 600;
-  font-size: 13px;
-  border-radius: 8px;
-  background: #f1f3f5;
-  border: 1px solid #e0e0e0;
+display: inline-block;
+min-width: 40px;
+text-align: center;
+padding: 6px 12px;
+font-weight: 600;
+font-size: 13px;
+border-radius: 8px;
+background: #eef2ff;
+border: 1px solid #dbeafe;
+color: #1e3a8a;
 }
 
-/* =========================
-   TABLE (SAFE SCOPED)
-========================= */
 
-.admin-content .table {
+
+
+
+/* =========================
+CATEGORY STATS UI (STEP 3.3 POLISH)
+========================= */
+/* stats text alignment */
+.stats-box div {
+font-size: 12.5px;
+margin-bottom: 2px;
+}
+
+/* stronger highlight for avg price */
+.stats-box .fw-bold {
+font-size: 14px;
+}
+
+.admin-content img {
+max-width: 100%;
+height: auto;
+object-fit: contain;
+}
+
+.stats-box .stat-value:last-child {
+font-size: 16px;
+}
+
+
+.stats-label {
+font-weight: 600;
+color: #64748b; /* slightly lighter */
+}
+
+
+.stats-box {
+min-width: 120px;
+background: #f8f9fa;
+border-radius: 6px;
+padding: 8px 6px;
+transition: all 0.2s ease;
+box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.stats-box:hover {
+background: #eef3ff;
+transform: translateY(-2px);
+}
+
+.stat-value {
+font-weight: 700;
+font-size: 14px;
+color: #1e293b; /* slate-800 (soft black) */
+}
+
+.avg-price {
+font-weight: 800 !important;
+font-size: 15px;
+color: #0f172a !important;
+}
+
+
+
+/* =========================
+TABLE (SAFE SCOPED)
+========================= */
+.admin-activity-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
-/* HEADINGS */
-.admin-content .table thead {
-  background: #fafbfc;
-}
 
-.admin-content .table thead th {
-  font-size: 14px;
-  font-weight: 600;
-  color: #495057;
-  vertical-align: middle;
-}
 
-/* CELLS */
-.admin-content .table td {
-  padding: 14px 12px;
-  vertical-align: middle;
-}
 
-/* GRID */
-.admin-content .table th,
-.admin-content .table td {
-  border-right: 1px solid rgba(0,0,0,0.04);
-}
 
-.admin-content .table th:last-child,
-.admin-content .table td:last-child {
-  border-right: none;
-}
-
-.admin-content .table tbody tr {
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-/* HOVER */
-.admin-content .table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-/* ALIGNMENTS FIX */
-.admin-content .table th {
-  text-align: left;
-}
-
-.admin-content .table th:last-child,
-.admin-content .table td:last-child {
-  text-align: right;
-}
 
 /* =========================
-   PAGINATION
+PAGINATION
 ========================= */
-
 .pagination-modern {
-  gap: 6px;
+gap: 6px;
 }
 
 .pagination-modern .page-link {
-  border: none;
-  background: #f1f3f5;
-  color: #333;
-  font-weight: 500;
-  border-radius: 8px;
-  margin: 0 4px;
-  padding: 6px 12px;
-  transition: all 0.2s ease;
+border: none;
+background: #f1f3f5;
+color: #333;
+font-weight: 500;
+border-radius: 8px;
+margin: 0 4px;
+padding: 6px 12px;
+transition: all 0.2s ease;
 }
 
 .pagination-modern .page-link:hover {
-  background: #e2e6ea;
+background: #e2e6ea;
 }
 
 .pagination-modern .active .page-link {
-  background: #0d6efd;
-  color: #fff;
+background: #0d6efd;
+color: #fff;
 }
 
 .pagination-modern .disabled .page-link {
-  background: transparent;
-  color: #999;
+background: transparent;
+color: #999;
 }
 
 
 /* =========================
-   AUDIT DETAILS FINAL FIX
+AUDIT DETAILS FINAL FIX
 ========================= */
-
 .audit-details-table {
-  width: 100%;
-  border-collapse: collapse;
+width: 100%;
+border-collapse: collapse;
 }
 
 .audit-details-table th {
-  width: 180px;
-  text-align: left;
-  font-weight: 600;
-  color: #495057;
-  padding: 10px 12px;
+width: 180px;
+text-align: left;
+font-weight: 600;
+color: #495057;
+padding: 10px 12px;
 }
 
 .audit-details-table td {
-  text-align: left;
-  padding: 10px 12px;
-  color: #212529;
-  word-break: break-word;
+text-align: left;
+padding: 10px 12px;
+color: #212529;
+word-break: break-word;
 }
 
 /* FORCE REMOVE GLOBAL TABLE EFFECT */
 .audit-details-table th,
 .audit-details-table td {
-  border: none !important;
+border: none !important;
+}
+
+.hover-bg:hover {
+background:#f1f3f5;
+transition: 0.2s;
+}
+
+
+
+.card {
+border-radius: 12px;
+overflow: hidden;
+margin-bottom: 16px;
+}
+
+.form-control,
+.form-select {
+border-radius: 8px;
+min-height: 42px;
+padding: 0 12px;
+}
+
+.admin-sidebar {
+flex-shrink: 0;
+}
+
+
+
+.form-grid {
+display: grid;
+grid-template-columns: repeat(12,1fr);
+gap: 16px;
+}
+
+@media (max-width: 768px) {
+.form-grid {
+grid-template-columns: 1fr;
+}
+}
+
+
+.form-actions {
+display: flex;
+justify-content: flex-end;
+align-items: center;
+gap: 12px;
+flex-wrap: wrap;
+}
+
+
+
+
+textarea.form-control {
+min-height: 120px;
+resize: vertical;
+}
+
+
+.form-grid > * {
+grid-column: span 6;
+}
+
+@media (max-width: 768px) {
+.form-grid > * {
+grid-column: span 12;
+}
+}
+
+
+
+/* =========================
+BUTTON FIX GLOBAL
+========================= */
+.btn {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+}
+
+/* small icon buttons (action column) */
+.btn-sm {
+height: 32px !important;
+padding: 0 10px !important;
+}
+
+
+.form-actions .btn {
+min-width: 120px;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+}
+
+.table-responsive {
+overflow-x: auto;
+    width: 100%;
+}
+
+
+
+.btn-primary {
+border-radius: 8px;
+}
+
+
+
+
+/* USERS FILTER BUTTON FIX */
+.user-filters .btn {
+height: 41px;
+padding: 0 18px;
+font-size: 15px;
+}
+
+.form-footer {
+    margin-top: 32px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-lg {
+  height: 46px !important;
+  padding: 0 20px !important;
+  font-size: 15px;
+}
+
+
+/* CANCEL BUTTON FINAL */
+.btn-cancel {
+    background: #eef4ff;
+    color: #1d4ed8;
+    border: 1px solid #c7d2fe;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #a5b4fc;
+}
+
+.created-main {
+  font-weight: 500;
+}
+
+.created-sub {
+  font-size: 12px;
 }

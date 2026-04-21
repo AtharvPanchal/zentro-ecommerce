@@ -4,15 +4,22 @@
 Products | Admin
 {% endblock %}
 
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_products_list.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<div class="container-fluid px-4">
+<div class="admin-page px-3 py-3">
 
   <!-- HEADER -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="fw-bold mb-1">Product Catalogue</h2>
+
       <p class="text-muted mb-0">Manage and review all products</p>
+
     </div>
 
     <a href="{{ url_for('admin.admin_products.add_product_ui') }}" class="btn btn-primary">
@@ -20,253 +27,234 @@ Products | Admin
     </a>
   </div>
 
-  <!-- FILTER BAR -->
-  <div class="card shadow-sm border-0 mb-3">
-    <div class="p-3 border-bottom">
+  <div class="row">
 
-      <form method="GET" class="row g-2 align-items-center">
 
-        <!-- SEARCH -->
-        <div class="col-md-3">
-          <input type="text" name="search" value="{{ request.args.get('search','') }}"
-                 class="form-control" placeholder="Search product name">
+
+    <!-- RIGHT SIDE -->
+    <div class="col-md-12">
+
+      <!-- FILTER BAR -->
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="p-3 border-bottom">
+
+          <form method="GET" class="row g-3 align-items-end product-filter-bar">
+
+            <div class="col-md-2">
+  <select name="category" class="form-select">
+    <option value="">All Categories</option>
+    {% for cat in categories %}
+      <option value="{{ cat.id }}"
+        {% if request.args.get('category') == cat.id|string %}selected{% endif %}>
+        {{ cat.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
+
+            <div class="col-md-4">
+              <input type="text" name="search"
+                     value="{{ request.args.get('search','') }}"
+                     class="form-control"
+                     placeholder="Search product name">
+            </div>
+
+            <div class="col-md-2">
+              <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="ACTIVE" {% if request.args.get('status')=='ACTIVE' %}selected{% endif %}>Active</option>
+                <option value="INACTIVE" {% if request.args.get('status')=='INACTIVE' %}selected{% endif %}>Inactive</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <select name="sort" class="form-select">
+                <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price Low → High</option>
+                <option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price High → Low</option>
+              </select>
+            </div>
+
+            <div class="col-md-2 d-flex gap-2">
+              <button class="btn btn-primary">Apply</button>
+              <a href="{{ url_for('admin.admin_products.product_list_ui') }}"
+                 class="btn btn-outline-secondary">Reset</a>
+            </div>
+
+          </form>
+
         </div>
+      </div>
 
-        <!-- CATEGORY -->
-        <div class="col-md-2">
-          <select name="category" class="form-select">
-            <option value="">All Categories</option>
-            {% for c in categories %}
-              <option value="{{ c.id }}"
-                {% if request.args.get('category') == c.id|string %}selected{% endif %}>
-                {{ c.name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+      <!-- TABLE -->
+      <div class="card shadow-sm border-0">
 
-        <!-- SORT -->
-        <div class="col-md-2">
-          <select name="sort" class="form-select">
-            <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest</option>
+        <div class="table-responsive product-table-wrapper">
+         <table class="table product-table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">ID</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th class="text-end pe-4">Action</th>
+              </tr>
+            </thead>
 
-<option value="price_low" {% if request.args.get('sort') == 'price_low' %}selected{% endif %}>Price Low → High</option>
+            <tbody>
 
-<option value="price_high" {% if request.args.get('sort') == 'price_high' %}selected{% endif %}>Price High → Low</option>
-          </select>
-        </div>
+              {% for product in products %}
+              <tr>
 
-        <!-- BUTTONS -->
-        <div class="col-md-5 d-flex justify-content-end gap-2">
-          <button class="btn btn-primary">Apply</button>
+                <td class="ps-4">{{ product.id }}</td>
 
-          <a href="{{ url_for('admin.admin_products.product_list_ui') }}"
-             class="btn btn-outline-secondary">Reset</a>
-        </div>
+                <td>
+                  {% if product.image_list and product.image_list|length > 0 %}
+                    <img src="{{ url_for('static', filename=product.image_list[0]) }}"
+                         style="width:80px;height:60px;object-fit:contain;background:#f8f9fa;padding:6px;border-radius:8px;">
+                  {% else %}
+                    <div style="width:55px;height:55px;background:#f3f4f6;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                      N/A
+                    </div>
+                  {% endif %}
+                </td>
 
-      </form>
+                <td class="fw-semibold product-name">{{ product.name }}</td>
 
-    </div>
-  </div>
+                <td>
+                  <span class="badge bg-light border text-dark">
+                    {{ product.category.name if product.category else '—' }}
+                  </span>
+                </td>
 
-  <!-- TABLE -->
-  <div class="card shadow-sm border-0">
+                <td class="sku-col">{{ product.sku }}</td>
 
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0 text-nowrap">
+                <td class="fw-bold price-col">₹ {{ "{:,.2f}".format(product.price) }}</td>
 
-        <thead class="table-light text-nowrap">
-          <tr>
-            <th class="ps-4">ID</th>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>SKU</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th class="text-end pe-4">Action</th>
-          </tr>
-        </thead>
+                <td>
+                  {% if product.status == "ACTIVE" %}
+                    <span class="badge bg-success">ACTIVE</span>
+                  {% else %}
+                    <span class="badge bg-secondary">INACTIVE</span>
+                  {% endif %}
 
-        <tbody>
+                </td>
 
-          {% for product in products %}
-          <tr>
-
-            <!-- ID -->
-            <td class="ps-4">{{ product.id }}</td>
-
-            <!-- IMAGE -->
-            <td>
-              {% if product.image_list and product.image_list|length > 0 %}
-                <img src="{{ url_for('static', filename=product.image_list[0]) }}"
-                     style="
-width:100px;
-height:80px;
-object-fit:contain;
-background:#f8f9fa;
-padding:6px;
-border-radius:8px;
-border:2px solid #e5e7eb;
-">
-              {% else %}
-                <div style="width:55px;height:55px;background:#f3f4f6;border-radius:6px;
-                            display:flex;align-items:center;justify-content:center;font-size:11px;">
-                  N/A
-                </div>
-              {% endif %}
-            </td>
-
-            <!-- NAME -->
-            <td class="fw-semibold">
-  {{ product.name }}
-
+               <td class="created-cell">
   {% if product.created_at %}
-    {% set diff_seconds = (now - product.created_at).total_seconds() %}
-
-    {% if diff_seconds >= 0 and diff_seconds <= 86400 %}
-      <span class="badge bg-primary ms-2">NEW</span>
-    {% endif %}
-  {% endif %}
-</td>
-            <!-- CATEGORY -->
-            <td>
-              <span class="badge bg-light border text-dark">
-                {{ product.category.name if product.category else '—' }}
-              </span>
-            </td>
-
-            <!-- SKU -->
-            <td>{{ product.sku }}</td>
-
-            <!-- PRICE -->
-            <td class="fw-bold text-dark">
-  ₹ {{ "{:,.2f}".format(product.price) }}
-</td>
-
-            <!-- STATUS -->
-            <td>
-              {% if product.status == "ACTIVE" %}
-                <span class="badge rounded-pill bg-success px-3">ACTIVE</span>
-              {% else %}
-                <span class="badge bg-secondary">INACTIVE</span>
-              {% endif %}
-            </td>
-
-            <!-- DATE -->
-             <td>
-  {% if product.created_at %}
-    {{ product.created_at.strftime("%a, %d %b %Y") }}
-    <br>
-
-    {% set diff = (now - product.created_at).total_seconds() %}
-
-    <small class="text-muted">
-
-      {% if diff < 60 %}
-        Just now
-
-      {% elif diff < 3600 %}
-        {{ (diff // 60)|int }} min ago
-
-      {% elif diff < 86400 %}
-        {{ (diff // 3600)|int }} hr ago
-
-      {% elif diff < 172800 %}
-        1 day ago
-
-      {% else %}
-        {{ (diff // 86400)|int }} days ago
-
-      {% endif %}
-
+    <span class="created-main d-block">
+      {{ product.created_at.strftime("%a, %d %b %Y, %I:%M %p") }}
+    </span>
+    <small class="created-sub text-muted d-block">
+      {{ product.created_at|timeago }}
     </small>
-
   {% else %}
     —
   {% endif %}
 </td>
 
+                <td class="text-end pe-4">
 
-            <!-- ACTION -->
-            <td class="text-end pe-4">
-              <a href="{{ url_for('admin.admin_products.edit_product_ui', product_id=product.id) }}"
-                 class="btn btn-sm btn-outline-dark">
-                <i class="bi bi-pencil"></i> Edit
+                  <a href="{{ url_for('admin.admin_products.edit_product_ui', product_id=product.id) }}"
+                     class="btn btn-sm btn-outline-dark">
+                    Edit
+                  </a>
+
+                  <form method="POST"
+                        action="{{ url_for('admin.admin_products.toggle_product', product_id=product.id) }}"
+                        class="d-inline"
+                        onsubmit="return confirm('Are You Sure?');">
+
+                    <button class="btn btn-sm {% if product.status=='ACTIVE' %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                      {% if product.status=='ACTIVE' %}
+                        Deactivate
+                      {% else %}
+                        Activate
+                      {% endif %}
+                    </button>
+
+                  </form>
+
+                </td>
+
+              </tr>
+
+              {% else %}
+              <tr>
+                <td colspan="9" class="text-center py-4 text-muted">
+                  No products found
+                </td>
+              </tr>
+              {% endfor %}
+
+            </tbody>
+
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="p-3">
+          <ul class="pagination justify-content-end">
+
+            {% if pagination.has_prev %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('admin.admin_products.product_list_ui',
+                 page=pagination.prev_num,
+                 search=request.args.get('search'),
+                 sort=request.args.get('sort'),
+                 status=request.args.get('status'),
+                 category=request.args.get('category')) }}">
+                Prev
               </a>
-            </td>
+            </li>
+            {% endif %}
 
-          </tr>
+            {% for p in pagination.iter_pages() %}
+              {% if p %}
+              <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link"
+                   href="{{ url_for('admin.admin_products.product_list_ui',
+                   page=p,
+                   search=request.args.get('search'),
+                   sort=request.args.get('sort'),
+                   status=request.args.get('status'),
+                   category=request.args.get('category')) }}">
+                  {{ p }}
+                </a>
+              </li>
+              {% endif %}
+            {% endfor %}
 
-          {% else %}
-          <tr>
-            <td colspan="9" class="text-center py-4 text-muted">
-              No products found
-            </td>
-          </tr>
-          {% endfor %}
+            {% if pagination.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('admin.admin_products.product_list_ui',
+                 page=pagination.next_num,
+                 search=request.args.get('search'),
+                 sort=request.args.get('sort'),
+                 status=request.args.get('status'),
+                 category=request.args.get('category')) }}">
+                Next
+              </a>
+            </li>
+            {% endif %}
 
-        </tbody>
-      </table>
+          </ul>
+        </div>
+
+      </div>
+
     </div>
-
-    <!-- PAGINATION -->
-    <div class="p-3">
-      <ul class="pagination pagination-modern justify-content-end mb-0">
-
-        {% if pagination and pagination.has_prev %}
-        <li class="page-item">
-          <a class="page-link"
-   href="{{ url_for(
-       'admin.admin_products.product_list_ui',
-       page=pagination.prev_num,
-       search=request.args.get('search'),
-       category=request.args.get('category'),
-       sort=request.args.get('sort')
-   ) }}">
-            Previous
-          </a>
-        </li>
-        {% endif %}
-
-        {% for p in pagination.iter_pages() %}
-          {% if p %}
-          <li class="page-item {% if p == pagination.page %}active{% endif %}">
-            <a class="page-link"
-               href="{{ url_for(
-  'admin.admin_products.product_list_ui',
-  page=p,
-  search=request.args.get('search'),
-  category=request.args.get('category'),
-  sort=request.args.get('sort')
-) }}">
-              {{ p }}
-            </a>
-          </li>
-          {% endif %}
-        {% endfor %}
-
-        {% if pagination and pagination.has_next %}
-        <li class="page-item">
-          <a class="page-link"
-   href="{{ url_for(
-       'admin.admin_products.product_list_ui',
-       page=pagination.next_num,
-       search=request.args.get('search'),
-       category=request.args.get('category'),
-       sort=request.args.get('sort')
-   ) }}">
-            Next
-          </a>
-        </li>
-        {% endif %}
-
-      </ul>
-    </div>
-
   </div>
 
 </div>
+
+
 
 {% endblock %}

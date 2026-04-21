@@ -148,21 +148,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     background:#eef2ff;
 }
 
-/* BUTTON */
-.form-footer {
-    margin-top:32px;
-    display:flex;
-    justify-content:flex-end;
-}
 
-.btn-primary-clean {
-    background:linear-gradient(135deg,#6366f1,#4f46e5);
-    color:#fff;
-    padding:12px 32px;
-    border-radius:12px;
-    border:none;
-    font-weight:600;
-}
+
 
 </style>
 
@@ -293,10 +280,21 @@ Upload Image
 </div>
 
 <div class="form-footer">
-<button type="submit" class="btn-primary-clean">
-<i class="fa-solid fa-check me-2"></i>
-Save Product
-</button>
+
+ <a href="{{ url_for('admin.admin_products.product_list_ui') }}"
+   class="btn btn-lg btn-cancel">
+   Cancel
+</a>
+
+  <button type="submit" class="btn btn-primary btn-lg">
+    <i class="fa-solid fa-check me-2"></i>
+    {% if mode == "edit" %}
+      Update Product
+    {% else %}
+      Save Product
+    {% endif %}
+  </button>
+
 </div>
 
 </form>

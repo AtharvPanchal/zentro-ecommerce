@@ -1,0 +1,89 @@
+/* =========================
+   PRODUCT LIST – SAFE MODULE CSS
+========================= */
+
+/* WRAPPER */
+.product-table-wrapper {
+  overflow-x: auto;
+}
+
+/* TABLE */
+.product-table {
+  width: 100%;
+  table-layout: auto;
+}
+
+/* CELLS */
+.product-table th,
+.product-table td {
+  vertical-align: middle;
+}
+
+/* ID */
+.product-table td:nth-child(1) {
+  min-width: 60px;
+}
+
+/* IMAGE */
+.product-table td:nth-child(2) {
+  min-width: 90px;
+}
+
+/* NAME */
+.product-table td:nth-child(3) {
+  min-width: 200px;
+}
+
+/* CATEGORY */
+.product-table td:nth-child(4) {
+  white-space: nowrap;
+}
+
+/* SKU */
+.product-table td:nth-child(5) {
+  min-width: 140px;
+}
+
+/* 🔥 PRICE FIX (MAIN BUG FIX) */
+.product-table td:nth-child(6) {
+  min-width: 140px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* STATUS */
+.product-table td:nth-child(7) {
+  white-space: nowrap;
+}
+
+/* CREATED */
+.product-table td:nth-child(8) {
+  min-width: 220px;
+  white-space: nowrap;
+}
+
+/* ACTION */
+.product-table td:nth-child(9) {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* IMAGE FIX */
+.product-table img {
+  max-width: 80px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* FILTER BAR FIX */
+.product-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* EMPTY STATE */
+.product-table td.text-center {
+  padding: 40px 0;
+  color: #6b7280;
+}

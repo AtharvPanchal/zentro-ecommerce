@@ -13,12 +13,17 @@ from app.admin.validators.product_validators import (
     validate_product_update
 )
 
+from app.services.category_service import build_category_tree
+from app.services.category_service import get_all_subcategories
 from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 from flask import current_app
 from datetime import datetime
 import os
 import uuid
+
+
+
 
 # --------------------------------------------------
 # Blueprint
@@ -142,6 +147,7 @@ def product_list_ui():
     category_id = request.args.get("category")
     sort = request.args.get("sort")
     page = request.args.get("page", 1, type=int)
+    status = request.args.get("status")
 
     query = Product.query
 
@@ -153,10 +159,18 @@ def product_list_ui():
             )
         )
 
+    if status:
+        query = query.filter(Product.status == status)
+
     if category_id:
         try:
             category_id = int(category_id)
-            query = query.filter(Product.category_id == category_id)
+
+            #MAIN LOGIC
+            all_ids = [category_id] + get_all_subcategories(category_id)
+
+            query = query.filter(Product.category_id.in_(all_ids))
+
         except ValueError:
             pass
 
@@ -169,14 +183,17 @@ def product_list_ui():
 
     pagination = query.paginate(page=page, per_page=5, error_out=False)
 
+    # BUILD CATEGORY TREE
+    all_categories = Category.query.filter_by(status="ACTIVE").all()
+    category_tree = build_category_tree(all_categories)
+
     return render_template(
         "admin/products/list.html",
         products=pagination.items,
-        categories=Category.query.filter_by(status="ACTIVE").all(),
+        categories=category_tree,  # TREE PASS
         pagination=pagination,
         now=datetime.utcnow()
     )
-
 
 # --------------------------------------------------
 # ADD PRODUCT UI
@@ -331,3 +348,27 @@ def edit_product_ui(product_id):
         categories=Category.query.filter_by(status="ACTIVE").all(),
         mode="edit"
     )
+
+
+
+
+# --------------------------------------------------
+# TOGGLE PRODUCT STATUS
+# --------------------------------------------------
+@product_bp.route("/products/<int:product_id>/toggle", methods=["POST"])
+@admin_required
+@csrf.exempt
+def toggle_product(product_id):
+
+    product = Product.query.get_or_404(product_id)
+
+    if product.status == "ACTIVE":
+        product.status = "INACTIVE"
+        flash("Product deactivated", "warning")
+    else:
+        product.status = "ACTIVE"
+        flash("Product activated", "success")
+
+    db.session.commit()
+
+    return redirect(url_for("admin.admin_products.product_list_ui"))

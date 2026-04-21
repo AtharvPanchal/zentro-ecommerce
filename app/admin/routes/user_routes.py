@@ -5,7 +5,7 @@ from app.admin import admin_bp
 from app.admin.decorators import admin_required
 from app.extensions import db
 from app.models import User
-from app.models import UserStatusReason, AdminActivityLog
+from app.models import UserStatusReason
 from flask import session
 
 from app.models import LoginActivity
@@ -17,7 +17,7 @@ from datetime import timedelta
 from app.utils.time_utils import utc_now
 from app.utils.activity_logger import log_admin_action
 from app.utils.time_utils import IST
-
+from sqlalchemy.orm import joinedload
 
 
 
@@ -53,7 +53,10 @@ def admin_users():
     # -----------------------------
     # BASE QUERY
     # -----------------------------
-    query = User.query
+    query = User.query.options(
+        joinedload(User.status_reasons)
+    )
+
 
     # -----------------------------
     # SEARCH: EMAIL / ID
@@ -68,27 +71,47 @@ def admin_users():
     # STATUS FILTER
     # -----------------------------
     if status == "active":
-        query = query.filter(User.is_active == True, User.lock_until == None)
+        query = query.filter(
+            User.is_active.is_(True),
+            User.lock_until.is_(None)
+        )
 
     elif status == "disabled":
-        query = query.filter(User.is_active == False)
+        query = query.filter(User.is_active.is_(False))
 
     elif status == "locked":
         query = query.filter(
-            User.lock_until != None,
+            User.lock_until.isnot(None),
             User.lock_until > utc_now()
         )
 
+
     # -----------------------------
-    # FINAL RESULT
+    # PAGINATION PARAMS
     # -----------------------------
-    users = query.order_by(User.created_at.desc()).all()
+    page = request.args.get("page", 1, type=int)
+    per_page = 10
+
+    # -----------------------------
+    # PAGINATION QUERY
+    # -----------------------------
+    pagination = query.order_by(
+        User.created_at.desc()
+    ).paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+
+    users = pagination.items
 
     return render_template(
         "admin/users.html",
         users=users,
+        pagination=pagination,  
         now=utc_now()
     )
+
 
 
 # --------------------------------------------------

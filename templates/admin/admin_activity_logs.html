@@ -3,9 +3,13 @@
 {% block page_title %}Admin Activity Logs{% endblock %}
 {% set archived = request.args.get('archived', '0') %}
 
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/admin_activity_logs.css') }}">
+{% endblock %}
+
 {% block content %}
 
-<div class="container-fluid px-4 py-3">
+<div class="admin-page px-3 py-3">
 
 
   <!-- PAGE HEADER -->
@@ -158,12 +162,12 @@
     </th>
   {% endif %}
 
-  <th style="width:160px">Date</th>
+  <th style="min-width:140px">Date</th>
   <th style="width:160px">Time</th>
   <th>Admin</th>
   <th>Action</th>
   <th style="width:120px">Severity</th>
-  <th style="width:260px">Target User</th>
+  <th style="width:200px">Target User</th>
   <th style="width:100px" class="text-end">Actions</th>
 </tr>
 
@@ -174,7 +178,7 @@
         {% if logs|length == 0 %}
           <tr>
             <!-- ✅ STEP 2.3 – COLSPAN FIX -->
-            <td colspan="7" class="text-center text-muted py-4">
+            <td colspan="{{ 8 if session.get('is_super_admin') and archived == '0' else 7 }}">
               {% if archived == '1' %}
               No archived audit logs found
              {% else %}
@@ -425,119 +429,9 @@
   </div>
 </div>
 
-<style>
-/* ===============================
-   ADMIN ACTIVITY LOGS – PRO
-   =============================== */
 
-.audit-filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
 
-.filter-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
 
-.filter-left .form-control,
-.filter-left .form-select {
-  height: 38px;
-  font-size: 0.85rem;
-}
-
-.filter-left input[type="text"] {
-  min-width: 280px;
-}
-
-.filter-left select,
-.filter-left input[type="date"] {
-  min-width: 160px;
-}
-
-.filter-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-right .btn {
-  min-width: 85px;
-  font-size: 0.85rem;
-  justify-content: center;
-}
-
-.admin-activity-table thead th {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.7rem;
-}
-
-.activity-row:hover {
-  background: #f9fafb;
-}
-
-.admin-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #eef2ff;
-  color: #4338ca;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  border-radius: 999px;
-  background: #f1f5f9;
-}
-
-/* SEVERITY BADGES */
-.severity-pill {
-  display: inline-block;
-  padding: 4px 10px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  border-radius: 999px;
-}
-
-.severity-high {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.severity-medium {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.severity-low {
-  background: #dcfce7;
-  color: #166534;
-}
-
-  .admin-activity-table .btn {
-  padding: 4px 8px;
-}
-
-  .badge.bg-secondary {
-  background: #e5e7eb !important;
-  color: #374151;
-  font-weight: 600;
-}
-
-</style>
 <!-- CONFIRM ARCHIVE / UNARCHIVE MODAL -->
 <div class="modal fade" id="confirmActionModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">

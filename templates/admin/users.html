@@ -2,6 +2,11 @@
 {% block title %}User Management{% endblock %}
 {% block page_title %}User Management{% endblock %}
 
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_users.css') }}">
+{% endblock %}
+
 {% block content %}
 
 <div class="container-fluid px-4 py-3">
@@ -16,7 +21,7 @@
     </div>
 
     <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
-      {{ users|length }} Users
+      {{ pagination.total }} Users
     </span>
   </div>
 
@@ -24,45 +29,47 @@
   <div class="card shadow-sm border-0">
 
     <!-- FILTER BAR -->
-    <form method="get" class="row g-3 align-items-end mb-3 px-3 pt-3">
+    <form method="get" class="audit-filter-bar px-3 pt-3 pb-2 d-flex align-items-center">
 
-      <!-- SEARCH -->
-      <div class="col-md-4">
-        <label class="form-label small text-muted mb-1">Search</label>
-        <input type="text"
-               name="q"
-               value="{{ request.args.get('q','') }}"
-               class="form-control form-control-sm"
-               placeholder="Email or User ID">
-      </div>
+      <input type="hidden" name="page" value="1">
 
-      <!-- STATUS -->
-      <div class="col-md-3">
-        <label class="form-label small text-muted mb-1">Status</label>
-        <select name="status" class="form-select form-select-sm">
-          <option value="">All Status</option>
-          <option value="active" {{ 'selected' if request.args.get('status')=='active' }}>Active</option>
-          <option value="disabled" {{ 'selected' if request.args.get('status')=='disabled' }}>Disabled</option>
-          <option value="locked" {{ 'selected' if request.args.get('status')=='locked' }}>Locked</option>
-        </select>
-      </div>
+  <div class="row g-2 flex-grow-1 align-items-center">
 
-      <!-- ACTION BUTTONS -->
-     <div class="col-md-3 d-flex gap-2">
-  <button class="btn btn-primary btn-sm action-btn d-flex align-items-center justify-content-center gap-1">
-     <i data-lucide="filter" class="icon"></i>
-    <span>Apply</span>
-  </button>
+  <div class="col-md-4">
+    <input type="text"
+           name="q"
+           value="{{ request.args.get('q','') }}"
+           class="form-control"
+           placeholder="Email or User ID">
+  </div>
 
-  <a href="{{ url_for('admin.admin_users') }}"
-     class="btn btn-outline-secondary btn-sm action-btn d-flex align-items-center justify-content-center gap-1">
-     <i data-lucide="rotate-ccw" class="icon"></i>
-    <span>Reset</span>
-  </a>
+  <div class="col-md-3">
+    <select name="status" class="form-select">
+      <option value="">All Status</option>
+      <option value="active" {{ 'selected' if request.args.get('status')=='active' }}>Active</option>
+      <option value="disabled" {{ 'selected' if request.args.get('status')=='disabled' }}>Disabled</option>
+      <option value="locked" {{ 'selected' if request.args.get('status')=='locked' }}>Locked</option>
+    </select>
+  </div>
+
 </div>
 
+  <div class="filter-right">
 
-    </form>
+   <button type="submit" class="btn btn-primary action-btn">
+      <i data-lucide="filter" class="icon" width="20" height="20"></i> Apply
+    </button>
+
+    <a href="{{ url_for('admin.admin_users') }}"
+       class="btn btn-outline-secondary action-btn">
+      <i data-lucide="rotate-ccw" class="icon" width="20" height="20"></i> Reset
+    </a>
+
+  </div>
+
+</form>
+
+
 
     <!-- TABLE -->
     <div class="table-responsive">
@@ -74,17 +81,17 @@
             <th>User</th>
             <th style="width:140px">Status</th>
             <th style="width:190px">Lock Until</th>
-            <th style="width:340px" class="text-end">Actions</th>
+            <th style="width:260px">Actions</th>
           </tr>
         </thead>
 
         <tbody>
 
-        {% if users|length == 0 %}
+        {% if not users %}
           <!-- EMPTY STATE -->
           <tr>
             <td colspan="5" class="text-center text-muted py-4">
-              No users found for selected filters
+              No users found. Try adjusting filters.
             </td>
           </tr>
         {% endif %}
@@ -93,16 +100,20 @@
           <tr class="user-row">
 
             <!-- ID -->
-            <td class="fw-semibold text-muted">{{ u.id }}</td>
+            <td>
+  <span class="id-box">
+    {{ u.id }}
+  </span>
+</td>
 
             <!-- USER -->
             <td>
               <div class="d-flex align-items-center gap-3">
                 <div class="user-avatar">
-                  {{ u.email[0]|upper }}
+                  {{ u.email[0]|upper if u.email else 'U' }}
                 </div>
                 <div>
-                  <div class="fw-semibold">{{ u.email }}</div>
+                  <div class="fw-semibold">{{ u.email if u.email else 'No Email' }}</div>
                   <div class="text-muted small">Registered user</div>
                 </div>
               </div>
@@ -110,7 +121,7 @@
 
             <!-- STATUS -->
 <td>
-  {% if u.lock_until %}
+  {% if u.lock_until and u.lock_until > now %}
 
   <span class="status-pill danger">
     <span class="dot"></span> Locked
@@ -139,79 +150,91 @@
     </span>
   {% endif %}
 
-  {% if u.status_reasons and u.status_reasons|length > 0 and not u.lock_until %}
-  {% set last = u.status_reasons[-1] %}
-  <div class="text-muted small mt-1">
-    {{ last.action|capitalize }} – {{ last.reason }}
-  </div>
+  {% if u.status_reasons and u.status_reasons|length > 0 and not (u.lock_until and u.lock_until > now) %}
+{% set last = u.status_reasons[-1] %}
+<div class="text-muted small mt-1">
+  {{ last.action|capitalize }} – {{ last.reason }}
+</div>
 {% endif %}
 
 </td>
 
             <!-- LOCK UNTIL -->
-            <td class="text-muted small">
-              {% if u.lock_until %}
-              {{ (u.lock_until|to_ist).strftime('%d %b %Y, %I:%M %p') }}
+            <td>
+  {% if u.lock_until and u.lock_until > now %}
+    <div class="lock-date">
+      {{ (u.lock_until|to_ist).strftime('%d %b %Y') }}
+    </div>
+    <div class="lock-time">
+      {{ (u.lock_until|to_ist).strftime('%I:%M %p') }}
+    </div>
+  {% else %}
+    <span class="text-muted">—</span>
+  {% endif %}
+</td>
 
-              {% else %}
-                —
-              {% endif %}
-            </td>
+
 
             <!-- ACTIONS -->
-         <td class="text-end">
-  <div class="d-inline-flex gap-2 align-items-center">
+         <td class="text-end align-middle">
 
-    {% if u.lock_until %}
-  <!-- UNLOCK & ENABLE -->
-  <form method="POST" action="{{ url_for('admin.unlock_user', user_id=u.id) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="btn btn-sm btn-outline-success action-btn">
-      <i data-lucide="unlock" class="icon"></i>
-      <span>Unlock & Enable</span>
-    </button>
-  </form>
+<div class="actions-wrapper">
 
-  <!-- UNLOCK ONLY (KEEP DISABLED) -->
-  <form method="POST" action="{{ url_for('admin.unlock_user', user_id=u.id) }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="keep_disabled" value="1">
-    <button class="btn btn-sm btn-outline-secondary action-btn">
-      <i data-lucide="unlock" class="icon"></i>
-      <span>Unlock only</span>
-    </button>
-  </form>
+  <!-- LEFT SIDE (STACKED BUTTONS) -->
+  <div class="actions-left">
+
+    {% if u.lock_until and u.lock_until > now %}
+
+      <form method="POST" action="{{ url_for('admin.unlock_user', user_id=u.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-success action-btn">
+          <i data-lucide="unlock" class="icon"></i>
+          <span>Unlock & Enable</span>
+        </button>
+      </form>
+
+      <form method="POST" action="{{ url_for('admin.unlock_user', user_id=u.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="keep_disabled" value="1">
+        <button type="submit" class="btn btn-sm btn-outline-secondary action-btn">
+          <i data-lucide="unlock" class="icon"></i>
+          <span>Unlock only</span>
+        </button>
+      </form>
 
     {% else %}
-      <!-- ENABLE / DISABLE -->
+
       <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {% if u.is_active %}
-          <button class="btn btn-sm btn-outline-warning action-btn">
+          <button type="submit" class="btn btn-sm btn-outline-warning action-btn">
             <i data-lucide="user-x" class="icon"></i>
             <span>Disable</span>
           </button>
         {% else %}
-          <button class="btn btn-sm btn-outline-success action-btn">
+          <button type="submit" class="btn btn-sm btn-outline-success action-btn">
             <i data-lucide="user-check" class="icon"></i>
             <span>Enable</span>
           </button>
         {% endif %}
       </form>
 
-      <!-- LOCK -->
       {% if u.is_active %}
-        <form method="POST" action="{{ url_for('admin.lock_user', user_id=u.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button class="btn btn-sm btn-outline-danger action-btn">
-            <i data-lucide="lock" class="icon"></i>
-            <span>Lock</span>
-          </button>
-        </form>
+      <form method="POST" action="{{ url_for('admin.lock_user', user_id=u.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-sm btn-outline-danger action-btn">
+          <i data-lucide="lock" class="icon"></i>
+          <span>Lock</span>
+        </button>
+      </form>
       {% endif %}
+
     {% endif %}
 
-    <!-- LOGS (ALWAYS VISIBLE) -->
+  </div>
+
+  <!-- RIGHT SIDE (LOG BUTTON CENTERED) -->
+  <div class="actions-right">
     <a href="{{ url_for('admin.user_login_history', user_id=u.id) }}"
        class="btn btn-sm btn-primary action-btn">
       <i data-lucide="activity" class="icon"></i>
@@ -219,103 +242,85 @@
     </a>
 
   </div>
-</td>
+
+
+</div>
+         </td>
 
           </tr>
         {% endfor %}
 
         </tbody>
       </table>
+
+
+
+
     </div>
+
+
+    {% if pagination.pages > 1 %}
+<div class="card-footer bg-white border-top">
+  <nav>
+    <ul class="pagination pagination-sm mb-0 justify-content-end">
+
+      <!-- PREVIOUS -->
+      <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+        <a class="page-link"
+           href="{{ url_for('admin.admin_users',
+             page=pagination.prev_num,
+             q=request.args.get('q'),
+             status=request.args.get('status')
+           ) }}">
+          Previous
+        </a>
+      </li>
+
+      <!-- PAGE NUMBERS -->
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('admin.admin_users',
+                 page=p,
+                 q=request.args.get('q'),
+                 status=request.args.get('status')
+               ) }}">
+              {{ p }}
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">…</span>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      <!-- NEXT -->
+      <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+        <a class="page-link"
+           href="{{ url_for('admin.admin_users',
+             page=pagination.next_num,
+             q=request.args.get('q'),
+             status=request.args.get('status')
+           ) }}">
+          Next
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+</div>
+{% endif %}
+
+
 
   </div>
 </div>
 
-<style>
-/* ===============================
-   ENTERPRISE USER MANAGEMENT UI
-   =============================== */
-
-.admin-users-table thead th {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.7rem;
-}
-
-.user-row {
-  transition: background 0.15s ease;
-}
-
-.user-row:hover {
-  background: #f9fafb;
-}
-
-.user-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #e7edff;
-  color: #3b5bdb;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-}
-
-/* STATUS PILL */
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 999px;
-}
-
-.status-pill .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.status-pill.success {
-  background: #e6f4ea;
-  color: #1e7e34;
-}
-.status-pill.success .dot { background: #1e7e34; }
-
-.status-pill.warning {
-  background: #fff3cd;
-  color: #856404;
-}
-.status-pill.warning .dot { background: #856404; }
-
-.status-pill.danger {
-  background: #fdecea;
-  color: #b02a37;
-}
-.status-pill.danger .dot { background: #b02a37; }
-
-.icon {
-  width: 16px;
-  height: 16px;
-  stroke-width: 1.8;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  border-radius: 6px;
-}
-
-
-</style>
+<script>
+  lucide.createIcons();
+</script>
 
 {% endblock %}
+

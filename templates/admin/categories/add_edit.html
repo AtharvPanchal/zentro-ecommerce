@@ -38,44 +38,83 @@ Update existing category information
 <div class="card-body p-4">
 
 <form method="post" enctype="multipart/form-data" novalidate>
+<div class="row g-4">
 
-<div class="row g-4 align-items-start">
+  <!-- LEFT SIDE -->
+  <div class="col-lg-8">
 
-  <!-- Category Name -->
-  <div class="col-lg-6">
-    <label class="form-label fw-semibold">
-      Category Name <span class="text-danger">*</span>
-    </label>
+    <!-- Category Name -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold">
+        Category Name <span class="text-danger">*</span>
+      </label>
 
-    <input type="text"
-           name="name"
-           id="categoryName"
-           class="form-control form-control-lg"
-           placeholder="Example: Electronics"
-           value="{{ category.name if category else '' }}"
-           required>
+      <input type="text"
+             name="name"
+             id="categoryName"
+             class="form-control form-control-lg"
+             placeholder="Example: Electronics"
+             value="{{ category.name if category else '' }}"
+             required>
 
-    <div class="form-text">
-      URL slug preview:
-      <span id="slugPreview" class="fw-semibold text-primary"></span>
+      <div class="form-text">
+        URL slug preview:
+        <span id="slugPreview" class="fw-semibold text-primary"></span>
+      </div>
     </div>
 
-    <small class="text-muted">
-      This name will be visible to customers
-    </small>
+    <!-- Parent Category -->
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Parent Category</label>
+
+      <select name="parent_id" class="form-select form-select-lg">
+        <option value="">None (Top Level)</option>
+
+        {% for cat in categories %}
+          {% if not category or (cat.id != category.id and cat.id not in blocked_ids) %}
+            <option value="{{ cat.id }}"
+              {% if category and category.parent_id == cat.id %}selected{% endif %}>
+
+              {{ "│   " * (cat.level if cat.level else 0) }}{% if cat.level > 0 %}├── {% endif %}{{ cat.name }}
+
+            </option>
+          {% endif %}
+        {% endfor %}
+      </select>
+
+      <small class="text-muted">
+        Select parent to create subcategory
+      </small>
+    </div>
+
+    <!-- Status -->
+    <div class="mb-2">
+      <label class="form-label fw-semibold">Status</label>
+
+      <select name="status" class="form-select form-select-lg">
+        <option value="ACTIVE"
+          {% if category and category.status == "ACTIVE" %}selected{% endif %}>
+          ACTIVE
+        </option>
+        <option value="INACTIVE"
+          {% if category and category.status == "INACTIVE" %}selected{% endif %}>
+          INACTIVE
+        </option>
+      </select>
+    </div>
+
   </div>
 
-  <!-- Category Image -->
-  <div class="col-lg-3">
-    <label class="form-label fw-semibold">
-      Category Image
-    </label>
+  <!-- RIGHT SIDE -->
+  <div class="col-lg-4">
+
+    <label class="form-label fw-semibold">Category Image</label>
 
     <input type="file"
-       name="image"
-       id="imageInput"
-       class="form-control"
-       accept="image/*">
+           name="image"
+           id="imageInput"
+           class="form-control"
+           accept="image/*">
 
     <small class="text-muted">
       Allowed: JPG, PNG, WEBP | Max size: 2MB
@@ -85,38 +124,24 @@ Update existing category information
       <p class="mb-1 fw-semibold">Preview:</p>
 
       <img id="imagePreview"
-     src="{{ url_for('static', filename=category.image if category and category.image else 'img/placeholders/placeholder.png') }}"
-     class="img-thumbnail"
-     style="height:170px; width:350px; object-fit:contain; border-radius:10px;">
+           src="{{ url_for('static', filename=category.image if category and category.image else 'img/placeholders/placeholder.png') }}"
+           class="img-thumbnail"
+           style="height:200px; width:100%; object-fit:contain; border-radius:10px;">
     </div>
 
+    <a id="viewImageBtn"
+       href="{% if category and category.image %}{{ url_for('static', filename=category.image) }}{% else %}#{% endif %}"
+       target="_blank"
+       class="btn btn-primary btn-sm mt-2 w-100"
+       style="{% if not (category and category.image) %}display:none;{% endif %}">
+       View Image
+    </a>
 
-  <a id="viewImageBtn"
-   href="{% if category and category.image %}{{ url_for('static', filename=category.image) }}{% else %}#{% endif %}"
-   target="_blank"
-   class="btn btn-primary btn-sm mt-2 w-100"
-   style="{% if not (category and category.image) %}display:none;{% endif %}">
-   View Image
-</a>
-  </div>
-
-  <!-- Status -->
-  <div class="col-lg-3">
-    <label class="form-label fw-semibold">Status</label>
-
-    <select name="status" class="form-select form-select-lg">
-      <option value="ACTIVE"
-        {% if category and category.status == "ACTIVE" %}selected{% endif %}>
-        ACTIVE
-      </option>
-      <option value="INACTIVE"
-        {% if category and category.status == "INACTIVE" %}selected{% endif %}>
-        INACTIVE
-      </option>
-    </select>
   </div>
 
 </div>
+
+
 
 <!-- Divider -->
 <hr class="my-4">

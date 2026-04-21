@@ -1,0 +1,150 @@
+/* =========================================
+   ADMIN ACTIVITY LOGS – FILTER BAR
+========================================= */
+.audit-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* LEFT SIDE INPUT GROUP */
+.filter-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 1;
+}
+
+.filter-left .form-control,
+.filter-left .form-select {
+  height: 38px;
+  font-size: 0.85rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+/* SEARCH BOX WIDER */
+.filter-left input[type="text"] {
+  min-width: 280px;
+}
+
+/* SELECT + DATE */
+.filter-left select,
+.filter-left input[type="date"] {
+  min-width: 160px;
+}
+
+/* RIGHT BUTTON GROUP */
+.filter-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   TABLE HEADER STYLE
+========================================= */
+.admin-activity-table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+}
+
+/* ROW HOVER EFFECT */
+.activity-row:hover {
+  background: #f9fafb;
+}
+
+
+/* =========================================
+   ADMIN AVATAR (INITIAL)
+========================================= */
+.admin-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* =========================================
+   ACTION PILL (LOG ACTION)
+========================================= */
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+}
+
+
+/* =========================================
+   SEVERITY BADGES
+========================================= */
+.severity-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.severity-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.severity-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.severity-low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+
+/* =========================================
+   BUTTON FIX (TABLE ACTIONS)
+========================================= */
+.admin-activity-table .btn {
+  padding: 4px 8px;
+}
+
+
+/* =========================================
+   BADGE COLOR FIX (BOOTSTRAP OVERRIDE)
+========================================= */
+.badge.bg-secondary {
+  background: #e5e7eb !important;
+  color: #374151;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   TABLE ALIGNMENT FIX
+========================================= */
+.admin-activity-table td {
+  vertical-align: middle;
+}
+
+
+/* =========================================
+   HORIZONTAL SCROLL FIX
+========================================= */
+.table-responsive {
+  overflow-x: auto;
+  width: 100%;
+}

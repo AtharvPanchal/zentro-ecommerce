@@ -89,6 +89,7 @@
 <th class="text-start ps-2">Name</th>
               <th class="text-start ps-2">Slug</th>
               <th class="text-center">Status</th>
+              <th class="text-center">Stats</th>
               <th class="text-end pe-4">Action</th>
             </tr>
           </thead>
@@ -106,26 +107,34 @@
 <td class="text-center">
   <img src="{{ url_for('static', filename=c.image if c.image else 'img/placeholders/placeholder.png') }}"
        class="img-thumbnail"
-       style="height:80px; width:100px; object-fit:contain; background:#f8f9fa;">
+       style="height:70px; width:100px; object-fit:cover; border-radius:8px; background:#f8f9fa;">
 </td>
               <!-- NAME -->
-              <td class="text-start ps-2">
-                <div class="fw-semibold fs-6 d-flex align-items-center gap-2">
-                  <i class="bi bi-folder-fill text-warning"></i>
-                  {{ c.name }}
+<td class="text-start ps-2">
 
-                  {% if c.created_at and (loop.index == 1 and pagination and pagination.page == 1) %}
-                  <span class="badge bg-primary px-2 py-1" style="font-size: 11px;">
-                    NEW
-                  </span>
-                  {% endif %}
-                </div>
+  <div class="fw-semibold fs-6 d-flex align-items-center gap-2">
 
-                <small class="text-muted d-block">
-                  {{ c.created_at.strftime("%d %b %Y") }}, {{ c.created_at|timeago }}
-                </small>
-              </td>
 
+    
+   <i class="bi bi-folder-fill text-warning"></i>
+
+    <!-- NAME -->
+    {{ c.name }}
+
+   {% if c.created_at and (c.created_at|timeago).startswith('0') %}
+<span class="badge bg-primary px-2 py-1" style="font-size: 11px;">
+  NEW
+</span>
+{% endif %}
+  </div>
+
+  <small class="text-muted d-block">
+    {{ c.created_at.strftime("%d %b %Y") }}, {{ c.created_at|timeago }}
+  </small>
+
+</td>
+
+              
               <!-- SLUG -->
               <td class="text-start ps-2">
                 <span class="badge bg-secondary-subtle text-dark border px-3 py-2">
@@ -141,6 +150,40 @@
                   <span class="badge bg-secondary">INACTIVE</span>
                 {% endif %}
               </td>
+
+              <!-- STATS -->
+<td class="text-center">
+  <div class="stats-box p-2">
+
+    <div class="d-flex justify-content-between">
+      <span class="stats-label">Products</span>
+      <span class="stat-value">{{ c.total_products }}</span>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <span class="stats-label">Active</span>
+      <span class="stat-value">{{ c.active_products }}</span>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <span class="stats-label">Out</span>
+      <span class="stat-value">{{ c.out_of_stock }}</span>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <span class="stats-label">Stock</span>
+      <span class="stat-value">{{ c.total_stock }}</span>
+    </div>
+
+    <div class="d-flex justify-content-between border-top pt-2 mt-2">
+      <span class="stats-label">Avg ₹</span>
+      <span class="avg-price">
+  ₹{{ "{:,.2f}".format(c.avg_price if c.avg_price else 0) }}
+</span>
+    </div>
+
+  </div>
+</td>
 
               <!-- ACTION -->
               <td class="text-end pe-4">

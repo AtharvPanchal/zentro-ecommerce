@@ -271,6 +271,20 @@ class Category(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
+    # 🔗 SELF REFERENCE (SUBCATEGORY SYSTEM)
+    parent_id = db.Column(
+        db.Integer,
+        db.ForeignKey("categories.id"),
+        nullable=True,
+        index=True  # ⚡ performance boost
+    )
+
+    parent = db.relationship(
+        "Category",
+        remote_side=[id],
+        backref=db.backref("children", lazy="select")
+    )
+
     # 🏷 Human readable name
     name = db.Column(
         db.String(150),

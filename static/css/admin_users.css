@@ -130,7 +130,7 @@
   font-size: 0.9rem;
   font-weight: 600;
 
-  padding: 7px 15px;
+  padding: 7px 12px;
   height: 36px;
 
   border-radius: 6px;
@@ -148,9 +148,9 @@
 ========================================= */
 .audit-filter-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;   /* ✅ allow wrap */
 }
 
 /* FIX: Proper spacing instead of padding hack */
@@ -164,7 +164,7 @@
   align-items: center;
   gap: 10px;
   margin-left: auto;
-  flex-shrink: 0;
+  flex-wrap: wrap;   /* ✅ allow wrap */
 }
 
 /* Bigger filter buttons */
@@ -231,6 +231,7 @@
 .admin-users-table td {
   padding: 14px;
   vertical-align: middle;
+  overflow: hidden;
 }
 
 
@@ -348,7 +349,7 @@
 .actions-left {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* Right side (logs center aligned) */
@@ -369,9 +370,6 @@
   justify-content: center;
 }
 
-.admin-users-table td {
-  overflow: hidden;
-}
 
 
 /* =========================================
@@ -381,8 +379,8 @@
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
   font-size: 0.65rem;
-  padding: 3px 8px;
-  border-radius: 999px;
+  padding: 3px 12px;
+  border-radius: 6px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -405,4 +403,29 @@
 .admin-users-table td:nth-child(2) .text-truncate {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+
+/* =========================================
+   FILTER GRID FIX (NO BREAK GUARANTEE)
+========================================= */
+.filter-grid {
+  flex-wrap: wrap;
+  overflow-x: hidden;
+}
+
+.filter-grid .col-md-4,
+.filter-grid .col-md-2 {
+  min-width: 120px;  /* reduce width */
+}
+
+.audit-filter-bar input,
+.audit-filter-bar select {
+  height: 36px;
+  font-size: 0.85rem;
+}
+
+/* FIX: Date input proper width */
+.filter-grid input[type="date"] {
+  min-width: 130px;   /* ✅ enough space for dd-mm-yyyy */
 }

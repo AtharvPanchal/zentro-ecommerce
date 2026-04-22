@@ -21,9 +21,9 @@ from sqlalchemy.orm import joinedload
 
 
 
-# --------------------------------------------------
+#=====================================================
 # HELPER: LOG ADMIN ACTION INTO USER LOGIN ACTIVITY
-# --------------------------------------------------
+#=====================================================
 def log_admin_user_login_activity(user, status):
     activity = LoginActivity(
         user_id=user.id,
@@ -31,47 +31,38 @@ def log_admin_user_login_activity(user, status):
         user_agent=request.headers.get("User-Agent"),
         device="admin-action",
         login_status=status,
-        created_at=utc_now().replace(tzinfo=None)
+        created_at=utc_now()
     )
     db.session.add(activity)
 
 
-# --------------------------------------------------
+#===================================================
 # ADMIN - USER MANAGEMENT
-# --------------------------------------------------
+#===================================================
 @admin_bp.route("/users")
 @admin_required
 def admin_users():
-
-    # -----------------------------
     # FILTER PARAMS
-    # -----------------------------
     q = request.args.get("q", "").strip()
     status = request.args.get("status", "")
+    email_verified = request.args.get("email_verified")
+    from_date = request.args.get("from_date")
+    to_date = request.args.get("to_date")
 
-    # -----------------------------
-    # BASE QUERY
-    # -----------------------------
     query = User.query.options(
         joinedload(User.status_reasons)
     )
 
-
-    # -----------------------------
-    # SEARCH: EMAIL / ID
-    # -----------------------------
+    # SEARCH
     if q:
         if q.isdigit():
             query = query.filter(User.id == int(q))
         else:
             query = query.filter(User.email.ilike(f"%{q}%"))
 
-    # -----------------------------
-    # STATUS FILTER
-    # -----------------------------
+    # STATUS
     if status == "active":
-        now = utc_now().replace(tzinfo=None)
-
+        now = utc_now()
         query = query.filter(
             User.is_active.is_(True),
             or_(
@@ -80,16 +71,33 @@ def admin_users():
             )
         )
 
-
-
     elif status == "disabled":
         query = query.filter(User.is_active.is_(False))
 
     elif status == "locked":
         query = query.filter(
             User.lock_until.isnot(None),
-            User.lock_until > utc_now().replace(tzinfo=None)
+            User.lock_until > utc_now()
         )
+
+    # EMAIL VERIFIED
+    if email_verified == "true":
+        query = query.filter(User.email_verified.is_(True))
+    elif email_verified == "false":
+        query = query.filter(User.email_verified.is_(False))
+
+    # DATE RANGE
+    if from_date:
+        start_date = datetime.strptime(from_date, "%Y-%m-%d")
+        start_date = start_date.replace(hour=0, minute=0, second=0)
+        query = query.filter(User.created_at >= start_date)
+
+    if to_date:
+        end_date = datetime.strptime(to_date, "%Y-%m-%d")
+        end_date = end_date.replace(hour=23, minute=59, second=59)
+        query = query.filter(User.created_at <= end_date)
+
+
 
 
     # -----------------------------
@@ -115,7 +123,7 @@ def admin_users():
         "admin/users.html",
         users=users,
         pagination=pagination,
-        now=utc_now().replace(tzinfo=None)
+        now=utc_now()
     )
 
 
@@ -138,7 +146,7 @@ def lock_user(user_id):
         flash("Disabled user cannot be locked.", "danger")
         return redirect(url_for("admin.admin_users"))
 
-    now = utc_now().replace(tzinfo=None)
+    now = utc_now()
 
     # 🔐 FORCE ADMIN LOCK (24 HOURS)
     user.lock_until = now + timedelta(hours=24)
@@ -490,28 +498,69 @@ def export_user_login_history_csv(user_id):
 @admin_required
 def export_users():
 
-    users = User.query.order_by(User.created_at.desc()).all()
+    # FILTER PARAMS
+    q = request.args.get("q", "").strip()
+    status = request.args.get("status", "")
+    email_verified = request.args.get("email_verified")
+    from_date = request.args.get("from_date")
+    to_date = request.args.get("to_date")
+
+    query = User.query
+
+    # SEARCH
+    if q:
+        if q.isdigit():
+            query = query.filter(User.id == int(q))
+        else:
+            query = query.filter(User.email.ilike(f"%{q}%"))
+
+    # STATUS
+    if status == "active":
+        now = utc_now()
+        query = query.filter(
+            User.is_active.is_(True),
+            or_(User.lock_until.is_(None), User.lock_until <= now)
+        )
+
+    elif status == "disabled":
+        query = query.filter(User.is_active.is_(False))
+
+    elif status == "locked":
+        query = query.filter(
+            User.lock_until.isnot(None),
+            User.lock_until > utc_now()
+        )
+
+    # EMAIL VERIFIED
+    if email_verified == "true":
+        query = query.filter(User.email_verified.is_(True))
+    elif email_verified == "false":
+        query = query.filter(User.email_verified.is_(False))
+
+    # DATE RANGE
+    if from_date:
+        start_date = datetime.strptime(from_date, "%Y-%m-%d")
+        start_date = start_date.replace(hour=0, minute=0, second=0)
+        query = query.filter(User.created_at >= start_date)
+
+    if to_date:
+        end_date = datetime.strptime(to_date, "%Y-%m-%d")
+        end_date = end_date.replace(hour=23, minute=59, second=59)
+        query = query.filter(User.created_at <= end_date)
+
+    users = query.order_by(User.created_at.desc()).all()
 
     if not users:
         flash("No users found for export.", "warning")
         return redirect(url_for("admin.admin_users"))
 
+    # CSV
     output = StringIO()
     writer = csv.writer(output)
 
-    # HEADER
-    writer.writerow([
-        "ID",
-        "Email",
-        "Status",
-        "Created Date",
-        "Created Time"
-    ])
+    writer.writerow(["ID", "Email", "Status", "Created Date", "Created Time"])
 
-    # ROWS
     for u in users:
-        status = u.status
-
         created_date = ""
         created_time = ""
 
@@ -520,19 +569,9 @@ def export_users():
             created_date = ist_time.strftime("%d %b %Y")
             created_time = ist_time.strftime("%I:%M %p")
 
-        writer.writerow([
-            u.id,
-            u.email,
-            status,
-            created_date,
-            created_time
-        ])
+        writer.writerow([u.id, u.email, u.status, created_date, created_time])
 
-    response = Response(
-        output.getvalue(),
-        mimetype="text/csv"
-    )
-
+    response = Response(output.getvalue(), mimetype="text/csv")
     response.headers["Content-Disposition"] = "attachment; filename=users.csv"
 
     log_admin_action(

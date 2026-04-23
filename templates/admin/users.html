@@ -370,18 +370,18 @@ to_date=request.args.get('to_date')
 
       <!-- NEXT -->
       <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-        <a class="page-link"
-           href="{{ url_for('admin.admin_users',
-    page=pagination.prev_num,
-    q=request.args.get('q'),
-    status=request.args.get('status'),
-    email_verified=request.args.get('email_verified'),
-    from_date=request.args.get('from_date'),
-    to_date=request.args.get('to_date')
+  <a class="page-link"
+     href="{{ url_for('admin.admin_users',
+        page=pagination.next_num,
+        q=request.args.get('q'),
+        status=request.args.get('status'),
+        email_verified=request.args.get('email_verified'),
+        from_date=request.args.get('from_date'),
+        to_date=request.args.get('to_date')
 ) }}">
-          Next
-        </a>
-      </li>
+    Next
+  </a>
+</li>
 
     </ul>
   </nav>

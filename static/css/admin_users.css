@@ -427,5 +427,5 @@
 
 /* FIX: Date input proper width */
 .filter-grid input[type="date"] {
-  min-width: 130px;   /* ✅ enough space for dd-mm-yyyy */
+  min-width: 135px;   /* ✅ enough space for dd-mm-yyyy */
 }

@@ -107,9 +107,13 @@ body{
   <a href="{{ url_for('auth.forgot_password') }}" class="fw-semibold small">Forgot password?</a>
 </div>
 
-<div class="resend-link mb-3">
+<div class="text-muted small mt-2">
   Didn’t receive verification email?
-  <span onclick="resendVerification()">Resend</span>
+  <a href="#" onclick="resendVerification(event)" class="fw-semibold">Resend</a>
+  <br>
+  <span class="text-secondary">
+    Check your email spelling or spam folder.
+  </span>
 </div>
 
 <button type="button"
@@ -233,11 +237,40 @@ if (timer) {
 
 
 /* RESEND */
-function resendVerification(){
-  if(!loginEmail.value)return alert("Enter email first");
-  resendEmail.value=loginEmail.value;
-  resendForm.submit();
+function resendVerification(e){
+  e.preventDefault();
+
+  const emailInput = document.getElementById("loginEmail");
+  const resendInput = document.getElementById("resendEmail");
+
+  if(!emailInput.value){
+    document.querySelectorAll(".temp-alert").forEach(el => el.remove());
+
+    const alertBox = document.createElement("div");
+    alertBox.className = "alert alert-warning mt-2 temp-alert";
+    alertBox.innerText = "⚠️ Please enter your email first";
+
+    document.querySelector(".auth-right").prepend(alertBox);
+    setTimeout(() => alertBox.remove(), 3000);
+    return;
+  }
+
+  resendInput.value = emailInput.value;
+
+  const link = e.target;
+  link.innerText = "Sending...";
+  link.style.pointerEvents = "none";
+
+  setTimeout(() => {
+    link.innerText = "Sent ✔";
+  }, 400);
+
+  setTimeout(() => {
+    document.getElementById("resendForm").submit();
+  }, 500);
 }
+
+
 
 /* RECAPTCHA */
 function executeRecaptcha(e){

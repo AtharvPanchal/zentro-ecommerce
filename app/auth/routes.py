@@ -1,8 +1,8 @@
 from flask import (
     render_template, request,
-    redirect, url_for, flash,
-    session, current_app
+    redirect, url_for, flash, current_app, session
 )
+
 from flask_login import (
     login_user, logout_user,
     login_required
@@ -29,7 +29,29 @@ from . import auth_bp
 from datetime import timedelta
 from app.utils.time_utils import utc_now
 from app.models import CartItem, Product
-from flask import session
+
+
+
+#===============================================
+# Email Typo Detect  (gmail.com etc)
+#===============================================
+import difflib
+
+COMMON_DOMAINS = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]
+
+def suggest_email(email):
+    try:
+        name, domain = email.split("@")
+    except valueError:
+        return None
+
+    match = difflib.get_close_matches(domain, COMMON_DOMAINS, n=1, cutoff=0.85)
+    if match and match[0] != domain:
+        return f"{name}@{match[0]}"
+    return None
+
+
+
 
 
 # ==================================================
@@ -108,7 +130,7 @@ def log_login_attempt(user, status):
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
 
-    # ---------- GET (LOCK COUNTDOWN) ----------
+    # ---------- GET ----------
     email = request.args.get("email")
     lock_seconds = None
 
@@ -139,16 +161,18 @@ def login():
 
     # ---------- USER NOT FOUND ----------
     if not user:
+        suggestion = suggest_email(email)
+        if suggestion:
+            flash(f"⚠️ Did you mean {suggestion} ?", "warning")
+
         log_login_attempt(None, "user_not_found")
         flash("❌ Invalid Email or Password", "danger")
         return redirect(url_for("auth.login"))
 
-
-    # ---------- ACCOUNT LOCKED (CHECK FIRST) ----------
+    # ---------- ACCOUNT LOCKED ----------
     if user.lock_until and utc_now().replace(tzinfo=None) < user.lock_until:
         log_login_attempt(user, "locked")
         return redirect(url_for("auth.login", email=email))
-
 
     # ---------- WRONG PASSWORD ----------
     if not user.check_password(password):
@@ -181,7 +205,6 @@ def login():
         flash("🚫 Your Account Has Been Disabled By Admin.", "danger")
         return redirect(url_for("auth.login"))
 
-
     # ---------- EMAIL NOT VERIFIED ----------
     if not user.email_verified:
         log_login_attempt(user, "email_not_verified")
@@ -194,17 +217,9 @@ def login():
     db.session.commit()
 
     log_login_attempt(user, "success")
-
     login_user(user, remember=remember)
 
-    # NOTE: Guest cart is session-based and merged into DB cart on login (Phase-2 design)
-    # This prevents cart loss when a guest user logs in.
-
-    # ==================================================
-    # MERGE GUEST CART → USER CART (PHASE-2 FINAL FIX)
-    # ==================================================
-
-
+    # ---------- CART MERGE ----------
     guest_cart = session.pop("cart", None)
 
     if guest_cart:
@@ -232,15 +247,14 @@ def login():
                 )
 
         db.session.commit()
-
-        # Optional UX: inform user that cart was restored after login
         flash("🛒 Your Cart Items Have Been Restored", "info")
-
 
     session["session_version"] = user.session_version
 
     flash("✅ Login Successful", "success")
     return redirect(url_for("main.index"))
+
+
 
 
 
@@ -257,6 +271,12 @@ def signup():
 
     username = request.form.get("username", "").strip()
     email = request.form.get("email", "").strip().lower()
+
+    suggestion = suggest_email(email)
+    if suggestion:
+        flash(f"⚠️ Email looks incorrect. Did you mean {suggestion} ?", "warning")
+        return redirect(url_for("auth.login"))  # STOP signup
+
     password = request.form.get("password")
     confirm = request.form.get("confirm_password")
 
@@ -291,7 +311,8 @@ def signup():
     send_verification_email(user.email, token)
 
     flash("📧 Account Created! Please Verify Your Email.", "success")
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("auth.login")
+
 
 
 # ==================================================
@@ -318,6 +339,9 @@ def verify_email(token):
 
     flash("✅ Email Verified Successfully. You Can Now Log In.", "success")
     return redirect(url_for("auth.login"))
+
+
+
 
 # ==================================================
 # LOGOUT
@@ -446,4 +470,3 @@ def resend_verification():
 
     flash("📧 Verification Email Resent.", "info")
     return redirect(url_for("auth.login"))
-

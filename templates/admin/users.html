@@ -124,16 +124,15 @@
           </tr>
         </thead>
 
-        <tbody>
+        <tbody id="usersTableBody">
 
         {% if not users %}
-          <!-- EMPTY STATE -->
-          <tr>
-            <td colspan="5" class="text-center text-muted py-4">
-              No users found. Try adjusting filters.
-            </td>
-          </tr>
-        {% endif %}
+<tr id="emptyStateRow">
+  <td colspan="5" class="text-center text-muted py-4">
+    No users found. Try adjusting filters.
+  </td>
+</tr>
+{% endif %}
 
         {% for u in users %}
           <tr class="user-row">
@@ -167,19 +166,17 @@
   </div>
 
   <!-- SUBTEXT -->
-  <div class="text-muted small">
+ <div class="text-muted small">
 
-    Registered user
+  Registered user
 
-    {% if u.created_at %}
-      • {{ u.created_at.strftime('%d %b %Y') }}
-    {% endif %}
+  {% if u.created_at %}
+    • {{ u.created_at.strftime('%d %b %Y') }} •
+  {% endif %}
 
-    {% if u.time_ago %}
-      • {{ u.time_ago }}
-    {% endif %}
+  <span class="live-time" data-time="{{ u.created_at.isoformat() }}"></span>
 
-  </div>
+</div>
 
 </div>
               </div>
@@ -395,6 +392,141 @@ to_date=request.args.get('to_date')
 
 <script>
   lucide.createIcons();
+</script>
+
+
+<script>
+function loadLiveUsers(){
+
+  fetch("{{ url_for('api.get_live_users') }}")
+    .then(res => res.json())
+    .then(data => {
+
+      if(!data.success) return;
+
+      const tbody = document.getElementById("usersTableBody");
+      if(!tbody) return;
+
+      let firstRow = tbody.querySelector("tr");
+
+      const users = data.users;
+      if(users.length === 0) return;
+
+      const u = users[0];
+
+      // duplicate check
+      if(firstRow && firstRow.querySelector(".text-truncate")?.innerText === u.email){
+        return;
+      }
+
+      // remove empty row
+      const emptyRow = document.getElementById("emptyStateRow");
+      if(emptyRow){
+        emptyRow.remove();
+      }
+
+      // create row
+      const newRow = document.createElement("tr");
+      newRow.classList.add("user-row");
+
+      newRow.innerHTML = `
+        <td><span class="id-box">${u.id}</span></td>
+
+        <td>
+          <div class="d-flex align-items-center gap-3">
+            <div class="user-avatar">
+              ${u.email ? u.email[0].toUpperCase() : "U"}
+            </div>
+
+            <div>
+              <div class="fw-semibold">
+                <span class="text-truncate">${u.email}</span>
+                <span class="badge-new">NEW</span>
+              </div>
+
+              <div class="text-muted small">
+                Registered user •
+                <span class="live-time" data-time="${u.created_at}"></span>
+              </div>
+            </div>
+          </div>
+        </td>
+
+        <td>
+          <span class="status-pill success">
+            <span class="dot"></span> Active
+          </span>
+        </td>
+
+        <td><span class="text-muted">—</span></td>
+
+        <td class="text-end">
+          <span class="text-muted small">Auto added</span>
+        </td>
+      </tr>
+      `;
+
+      // insert animation
+      newRow.style.opacity = "0";
+      tbody.prepend(newRow);
+
+      setTimeout(() => {
+        newRow.style.transition = "0.3s";
+        newRow.style.opacity = "1";
+      }, 50);
+
+    })
+    .catch(err => console.log(err));
+}
+
+
+// 🔁 AUTO REFRESH
+loadLiveUsers();
+updateLiveTime();
+
+setInterval(() => {
+  loadLiveUsers();
+  updateLiveTime();
+}, 5000);
+
+
+// 🔥 TIME UPDATE FUNCTION (FINAL FIXED)
+function updateLiveTime(){
+
+  const rows = document.querySelectorAll(".user-row");
+
+  rows.forEach(row => {
+
+    const timeEl = row.querySelector(".live-time");
+    if(!timeEl) return;
+
+    const createdAt = timeEl.dataset.time;
+    if(!createdAt) return;
+
+    const now = new Date();
+    const created = new Date(createdAt + "Z");
+
+    const diff = Math.floor((now - created) / 1000);
+
+    let text = "just now";
+
+    if(diff >= 86400){
+      const days = Math.floor(diff / 86400);
+      text = days + " day ago";
+    }
+    else if(diff >= 3600){
+      const hrs = Math.floor(diff / 3600);
+      text = hrs + " hr ago";
+    }
+    else if(diff >= 60){
+      const mins = Math.floor(diff / 60);
+      text = mins + " min ago";
+    }
+
+    timeEl.innerText = text;
+
+  });
+}
 </script>
 
 {% endblock %}

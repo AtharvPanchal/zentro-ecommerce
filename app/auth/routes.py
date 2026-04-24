@@ -32,6 +32,9 @@ from app.models import CartItem, Product
 
 
 
+
+
+
 #===============================================
 # Email Typo Detect  (gmail.com etc)
 #===============================================
@@ -42,7 +45,7 @@ COMMON_DOMAINS = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]
 def suggest_email(email):
     try:
         name, domain = email.split("@")
-    except valueError:
+    except ValueError:
         return None
 
     match = difflib.get_close_matches(domain, COMMON_DOMAINS, n=1, cutoff=0.85)
@@ -92,6 +95,10 @@ def verify_recaptcha_v3(expected_action: str) -> bool:
         return False
 
 
+
+
+
+
 # ==================================================
 # EMAIL TOKEN
 # ==================================================
@@ -108,6 +115,9 @@ def confirm_email_token(token: str, expiration=3600):
         return None
 
 
+
+
+
 # ==================================================
 # LOGIN ACTIVITY LOGGER
 # ==================================================
@@ -122,6 +132,10 @@ def log_login_attempt(user, status):
     )
     db.session.add(activity)
     db.session.commit()
+
+
+
+
 
 
 # ==================================================
@@ -208,7 +222,7 @@ def login():
     # ---------- EMAIL NOT VERIFIED ----------
     if not user.email_verified:
         log_login_attempt(user, "email_not_verified")
-        flash("📧 Please Verify Your Email.", "warning")
+        flash("📧 Please verify your email. Also check spam folder or email spelling.", "warning")
         return redirect(url_for("auth.login"))
 
     # ---------- SUCCESS ----------
@@ -311,7 +325,9 @@ def signup():
     send_verification_email(user.email, token)
 
     flash("📧 Account Created! Please Verify Your Email.", "success")
-    return redirect(url_for("auth.login")
+    return redirect(url_for("auth.login"))
+
+
 
 
 
@@ -343,6 +359,7 @@ def verify_email(token):
 
 
 
+
 # ==================================================
 # LOGOUT
 # ==================================================
@@ -352,6 +369,8 @@ def logout():
     logout_user()
     flash("Logged Out Successfully", "info")
     return redirect(url_for("auth.login"))
+
+
 
 
 
@@ -383,6 +402,8 @@ def forgot_password():
     return render_template("auth/forgot_password.html")
 
 
+
+
 # ==================================================
 # VERIFY OTP
 # ==================================================
@@ -404,6 +425,9 @@ def verify_otp_route():
         return redirect(url_for("auth.reset_password", email=email))
 
     return render_template("auth/verify_otp.html", email=email)
+
+
+
 
 
 # ==================================================
@@ -442,6 +466,10 @@ def reset_password():
         return redirect(url_for("auth.login"))
 
     return render_template("auth/reset_password.html", email=email)
+
+
+
+
 
 
 # ==================================================

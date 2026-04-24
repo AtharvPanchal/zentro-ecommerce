@@ -445,3 +445,17 @@ font-size: 15px;
 .created-sub {
   font-size: 12px;
 }
+
+
+
+.custom-badge {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 4px 6px;
+  font-weight: 600;
+  background-color: #2563eb;   /*  SAME AS NEW BADGE */
+  color: #fff;
+}
+.custom-badge:hover {
+  background-color: #1d4ed8;
+}

@@ -107,18 +107,13 @@ body{
   <a href="{{ url_for('auth.forgot_password') }}" class="fw-semibold small">Forgot password?</a>
 </div>
 
-<div class="text-muted small mt-2">
+  <div class="text-muted small mt-2 mb-3">
   Didn’t receive verification email?
   <a href="#" onclick="resendVerification(event)" class="fw-semibold">Resend</a>
-  <br>
-  <span class="text-secondary">
-    Check your email spelling or spam folder.
-  </span>
 </div>
 
-<button type="button"
-        class="btn btn-primary w-100 mb-3"
-        onclick="executeRecaptcha(event)">
+<button type="submit"
+        class="btn btn-primary w-100 mb-3">
 
   <i class="fa-solid fa-right-to-bracket me-1"></i> Login
 </button>
@@ -271,19 +266,32 @@ function resendVerification(e){
 }
 
 
-
-/* RECAPTCHA */
-function executeRecaptcha(e){
+document.getElementById("loginForm").addEventListener("submit", function(e){
   e.preventDefault();
+
+  const form = this;
+  const btn = form.querySelector("button[type='submit']");
+
+  btn.disabled = true;
+  btn.innerText = "Logging in...";
+
   grecaptcha.ready(()=>{
     grecaptcha.execute("{{ config.RECAPTCHA_SITE_KEY }}",{action:"login"})
-    .then(t=>{
-      const i=document.createElement("input");
-      i.type="hidden";i.name="g-recaptcha-response";i.value=t;
-      loginForm.appendChild(i);loginForm.submit();
+    .then(token=>{
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "g-recaptcha-response";
+      input.value = token;
+
+      form.appendChild(input);
+      form.submit();
+    })
+    .catch(()=>{
+      btn.disabled = false;
+      btn.innerText = "Login";
     });
   });
-}
+});
 </script>
 
 </body>

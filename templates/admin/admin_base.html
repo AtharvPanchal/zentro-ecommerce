@@ -65,11 +65,22 @@
         {% endif %}
       </a>
 
-      <!-- Users -->
-      <a href="{{ url_for('admin.admin_users') }}"
-         class="{{ 'active' if request.endpoint == 'admin.admin_users' }}">
-        <i class="fa-solid fa-users"></i> Users
-      </a>
+
+      <!-- Users with User Count Badge -->
+<a href="{{ url_for('admin.admin_users') }}"
+   class="menu-item d-flex align-items-center gap-2 {{ 'active' if request.endpoint == 'admin.admin_users' }}">
+
+  <i class="fa-solid fa-users"></i>
+
+  <span>Users</span>
+
+  <span id="userBadge"
+      class="badge custom-badge ms-1"
+      style="{% if not new_users_count or new_users_count == 0 %}display:none;{% endif %}">
+  New +{{ new_users_count }}
+</span>
+
+</a>
 
       <!-- PRODUCTS DROPDOWN (SINGLE & CORRECT) -->
       <div class="menu-dropdown">
@@ -171,6 +182,40 @@
       toggle.parentElement.classList.toggle('open');
     });
   });
+</script>
+
+
+
+<script>
+function updateUserBadge() {
+
+  fetch("/api/new-users-count")
+    .then(res => res.json())
+    .then(data => {
+
+      if (!data.success) return;
+
+      const badge = document.getElementById("userBadge");
+
+
+      if (!badge) return;
+
+      if (data.count > 0) {
+        badge.innerText = "New +" + data.count;
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+    })
+    .catch(() => {});
+}
+
+// page load var
+updateUserBadge();
+
+// every 10 sec refresh
+setInterval(updateUserBadge, 10000);
 </script>
 
 {% block page_js %}{% endblock %}

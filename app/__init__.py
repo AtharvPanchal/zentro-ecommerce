@@ -8,13 +8,15 @@ from app.services.audit_retention import auto_archive_old_audit_logs
 from app.services.audit_cleanup_service import cleanup_old_archived_audit_logs
 from app.services.system_jobs import cleanup_expired_otps
 from flask_login import current_user
-from app.models import Wishlist
+from app.models import Wishlist, User
+from sqlalchemy import func
 
 from app.utils.time_utils import (
     timeago_ist,
     to_ist,
     format_ist,
-    IST
+    IST,
+    utc_now
 )
 
 import os
@@ -141,6 +143,25 @@ def create_app():
         return {
             "wishlist_count": count
         }
+
+    # --------------------------------------------------
+    # GLOBAL CONTEXT PROCESSOR (NEW USERS TODAY COUNT)
+    # --------------------------------------------------
+    @app.context_processor
+    def inject_new_users_count():
+        try:
+
+            now = utc_now()
+            start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            count = db.session.query(func.count(User.id)).filter(
+                User.created_at >= start
+            ).scalar()
+
+            return {"new_users_count": count}
+
+        except Exception:
+            return {"new_users_count": 0}
 
     #  AUDIT INSIGHT ROUTES (MISSING FIX)
     from app.admin.routes.audit_insight_routes import audit_insight_bp

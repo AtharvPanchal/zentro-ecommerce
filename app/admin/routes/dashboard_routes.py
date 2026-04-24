@@ -186,7 +186,8 @@ def dashboard():
 
     return render_template(
         "admin/dashboard.html",
-        dashboard=dashboard_data
+        dashboard=dashboard_data,
+        new_users_count=new_users_today
     )
 
 

@@ -1,7 +1,8 @@
 from flask import request, jsonify
 from flask_login import login_required, current_user
 from app.extensions import db
-from app.models import Product, DeliveryPincode, SavedForLater
+from app.models import Product, DeliveryPincode, SavedForLater, User
+from app.utils.time_utils import utc_now
 from . import api_bp
 from flask import url_for
 from app.models import CartItem
@@ -526,3 +527,68 @@ def live_search():
         success=True,
         results=results
     )
+
+
+
+# =====================================================
+# NEW USERS COUNT (ADMIN SIDEBAR BADGE )
+# =====================================================
+@api_bp.route("/new-users-count", methods=["GET"])
+def get_new_users_count():
+
+    try:
+        now = utc_now()
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        count = User.query.filter(
+            User.created_at >= start
+        ).count()
+
+        return jsonify(
+            success=True,
+            count=count
+        )
+
+    except Exception:
+        return jsonify(
+            success=False,
+            count=0
+        )
+
+
+
+# =====================================================
+# LIVE USERS LIST (ADMIN TABLE 🔥)
+# =====================================================
+@api_bp.route("/admin/live-users", methods=["GET"])
+@login_required
+def get_live_users():
+
+    try:
+        users = (
+            User.query
+            .order_by(User.created_at.desc())
+            .limit(10)   # latest 10 users
+            .all()
+        )
+
+        result = []
+
+        for u in users:
+            result.append({
+                "id": u.id,
+                "email": u.email,
+                "username": u.username,
+                "created_at": u.created_at.isoformat() + "Z",
+            })
+
+        return jsonify(
+            success=True,
+            users=result
+        )
+
+    except Exception:
+        return jsonify(
+            success=False,
+            users=[]
+        )

@@ -1,14 +1,16 @@
-from flask import request, jsonify
+from flask import request, jsonify, url_for
 from flask_login import login_required, current_user
 from app.extensions import db
 from app.models import Product, DeliveryPincode, SavedForLater, User
 from app.utils.time_utils import utc_now
 from . import api_bp
-from flask import url_for
 from app.models import CartItem
 from flask import session
 from app.services.price_service import PriceService
-from app.services.cart_service import CartService
+from app.admin.decorators import admin_required
+from datetime import timezone
+
+
 
 # =====================================================
 # PRODUCTS LIST
@@ -83,7 +85,10 @@ def add_to_cart():
             or request.args.get("product_id", type=int)
     )
 
-    qty = int(request.form.get("quantity", 1))
+    try:
+        qty = int(request.form.get("quantity", 1))
+    except (ValueError, TypeError):
+        return jsonify(success=False, message="Invalid quantity"), 400
 
     if not product_id:
         return jsonify(success=False, message="Product ID missing"), 400
@@ -137,7 +142,8 @@ def add_to_cart():
         cart_item = CartItem(
             user_id=current_user.id,
             product_id=product.id,
-            quantity=qty
+            quantity=qty,
+            price_at_add=product.price
         )
         db.session.add(cart_item)
 
@@ -210,8 +216,8 @@ def get_cart():
     if changes_made:
         db.session.commit()
 
-    pricing = PriceService.calculate_total(items)
-
+    pricing = PriceService.calculate_total(cart_items)
+    
     return jsonify(
         success=True,
         cart=cart_items,
@@ -227,8 +233,10 @@ def get_cart():
 def remove_from_cart():
     from app.models import CartItem
 
+    data = request.get_json() or {}
+
     cart_id = (
-        request.json.get("cart_id") if request.is_json
+        data.get("cart_id") if request.is_json
         else request.form.get("cart_id")
     )
 
@@ -255,8 +263,8 @@ def remove_from_cart():
 @api_bp.route("/cart/save-for-later", methods=["POST"])
 @login_required
 def save_for_later():
-
-    cart_id = request.json.get("cart_id")
+    data = request.get_json() or {}
+    cart_id = data.get("cart_id")
 
     item = CartItem.query.filter_by(
         id=cart_id,
@@ -286,8 +294,11 @@ def save_for_later():
 @api_bp.route("/cart/move-to-cart", methods=["POST"])
 @login_required
 def move_saved_to_cart():
+    data = request.get_json() or {}
+    saved_id = data.get("saved_id")
 
-    saved_id = request.json.get("saved_id")
+    if not saved_id:
+        return jsonify(success=False, message="Invalid request"), 400
 
     item = SavedForLater.query.filter_by(
         id=saved_id,
@@ -308,7 +319,11 @@ def move_saved_to_cart():
     ).first()
 
     if existing:
+        if existing.quantity + 1 > product.stock:
+            return jsonify(success=False, message="Stock limit exceeded"), 400
+
         existing.quantity += 1
+
     else:
         existing = CartItem(
             user_id=current_user.id,
@@ -318,7 +333,7 @@ def move_saved_to_cart():
         )
         db.session.add(existing)
 
-    db.session.add(existing)
+
     db.session.delete(item)
 
     db.session.commit()
@@ -562,6 +577,7 @@ def get_new_users_count():
 # =====================================================
 @api_bp.route("/admin/live-users", methods=["GET"])
 @login_required
+@admin_required
 def get_live_users():
 
     try:
@@ -579,7 +595,11 @@ def get_live_users():
                 "id": u.id,
                 "email": u.email,
                 "username": u.username,
-                "created_at": u.created_at.isoformat() + "Z",
+                "created_at": (
+                    u.created_at.astimezone(timezone.utc).isoformat()
+                    if u.created_at and u.created_at.tzinfo
+                    else u.created_at.replace(tzinfo=timezone.utc).isoformat()
+                ),
             })
 
         return jsonify(

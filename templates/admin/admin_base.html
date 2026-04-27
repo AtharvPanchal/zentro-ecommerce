@@ -22,6 +22,7 @@
 
   <!-- Admin Core CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 
   <!-- 🔐 CSRF TOKEN FOR JS -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -161,16 +162,47 @@
     </header>
 
     <section class="admin-content">
-      {% block content %}{% endblock %}
-    </section>
+
+  {% include "partials/_flash_messages.html" %}
+
+  {% block content %}{% endblock %}
+
+</section>
+
 
   </main>
 
 </div>
 
+<!-- =========================
+GLOBAL CONFIRM MODAL
+========================= -->
+<div id="confirmModal" class="confirm-modal">
+  <div class="confirm-box">
+
+    <div class="confirm-header">
+      <span>Confirm Action</span>
+      <button type="button" onclick="closeConfirm()">×</button>
+    </div>
+
+    <div class="confirm-body" id="confirmMessage">
+      Are you sure?
+    </div>
+
+    <div class="confirm-footer">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="closeConfirm()">Cancel</button>
+      <button type="button" class="btn btn-danger btn-sm" id="confirmOkBtn">Confirm</button>
+    </div>
+
+  </div>
+</div>
+
+
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
 
 <script>
   lucide.createIcons();
@@ -217,6 +249,56 @@ updateUserBadge();
 // every 10 sec refresh
 setInterval(updateUserBadge, 10000);
 </script>
+
+
+
+<script>
+let confirmCallback = null;
+
+function openConfirm(message, callback){
+  document.getElementById("confirmMessage").innerText = message;
+  document.getElementById("confirmModal").classList.add("active");
+  confirmCallback = callback;
+}
+
+function closeConfirm(){
+  document.getElementById("confirmModal").classList.remove("active");
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  const btn = document.getElementById("confirmOkBtn");
+  if(btn){
+    btn.addEventListener("click", function(){
+      if(confirmCallback) confirmCallback();
+      closeConfirm();
+    });
+  }
+});
+</script>
+
+<script>
+
+
+document.addEventListener("DOMContentLoaded", function(){
+
+  document.querySelectorAll(".confirm-form").forEach(form => {
+
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+
+      const message = form.dataset.confirm || "Are you sure?";
+
+      openConfirm(message, function(){
+        form.submit();
+      });
+
+    });
+
+  });
+
+});
+</script>
+
 
 {% block page_js %}{% endblock %}
 </body>

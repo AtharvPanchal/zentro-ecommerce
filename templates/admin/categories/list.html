@@ -197,10 +197,9 @@
 
                   <!-- TOGGLE -->
                   <form method="POST"
-                        action="{{ url_for('admin.category.toggle_category', category_id=c.id) }}"
-                        onsubmit="return confirm('Are you sure?');"
-                        class="d-inline">
-
+      action="{{ url_for('admin.category.toggle_category', category_id=c.id) }}"
+      class="d-inline confirm-form"
+      data-confirm="Are you sure you want to change this category status?">
                     <button type="submit"
                       class="btn btn-sm {% if c.status == 'ACTIVE' %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
 

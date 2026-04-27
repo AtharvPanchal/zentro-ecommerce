@@ -1,21 +1,16 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, session, Response
 from datetime import datetime, timedelta
 from sqlalchemy import or_
 from app.admin import admin_bp
 from app.admin.decorators import admin_required
 from app.extensions import db
-from app.models import User
-from app.models import UserStatusReason
-from flask import session
+from app.models import User, UserStatusReason, LoginActivity
 
-from app.models import LoginActivity
 
 import csv
 from io import StringIO
-from flask import Response
-from app.utils.time_utils import utc_now
 from app.utils.activity_logger import log_admin_action
-from app.utils.time_utils import IST
+from app.utils.time_utils import utc_now, IST, to_ist, ist_date_to_utc
 from sqlalchemy.orm import joinedload
 
 
@@ -75,9 +70,10 @@ def admin_users():
         query = query.filter(User.is_active.is_(False))
 
     elif status == "locked":
+        now = utc_now()
         query = query.filter(
             User.lock_until.isnot(None),
-            User.lock_until > utc_now()
+            User.lock_until > now
         )
 
     # EMAIL VERIFIED
@@ -90,11 +86,13 @@ def admin_users():
     if from_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
+        start_date = ist_date_to_utc(start_date)
         query = query.filter(User.created_at >= start_date)
 
     if to_date:
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = ist_date_to_utc(end_date)
         query = query.filter(User.created_at <= end_date)
 
 
@@ -119,13 +117,21 @@ def admin_users():
 
     users = pagination.items
 
+    # -----------------------------
+    # FIX TIMEZONE (IMPORTANT)
+    # -----------------------------
+    now = to_ist(utc_now())
+
+    for u in users:
+        if u.lock_until:
+            u.lock_until = to_ist(u.lock_until)
+
     return render_template(
         "admin/users.html",
         users=users,
         pagination=pagination,
-        now=utc_now()
+        now=now
     )
-
 
 
 # --------------------------------------------------
@@ -179,9 +185,17 @@ def lock_user(user_id):
         db.session.rollback()
         flash("Something went wrong. Try again.", "danger")
 
-    return redirect(url_for("admin.admin_users"))
+    page = request.form.get("page", 1)
 
-
+    return redirect(url_for(
+        "admin.admin_users",
+        page=page,
+        q=request.form.get("q"),
+        status=request.form.get("status"),
+        email_verified=request.form.get("email_verified"),
+        from_date=request.form.get("from_date"),
+        to_date=request.form.get("to_date")
+    ))
 
 # ==================================================
 # ENABLE / DISABLE USER (SOFT BAN)
@@ -240,7 +254,17 @@ def toggle_user_status(user_id):
         db.session.rollback()
         flash("Something went wrong.", "danger")
 
-    return redirect(url_for("admin.admin_users"))
+    page = request.form.get("page", 1)
+
+    return redirect(url_for(
+        "admin.admin_users",
+        page=page,
+        q=request.form.get("q"),
+        status=request.form.get("status"),
+        email_verified=request.form.get("email_verified"),
+        from_date=request.form.get("from_date"),
+        to_date=request.form.get("to_date")
+    ))
 
 
 # --------------------------------------------------
@@ -295,8 +319,17 @@ def unlock_user(user_id):
         db.session.rollback()
         flash("Something went wrong.", "danger")
 
+    page = request.form.get("page", 1)
 
-    return redirect(url_for("admin.admin_users"))
+    return redirect(url_for(
+        "admin.admin_users",
+        page=page,
+        q=request.form.get("q"),
+        status=request.form.get("status"),
+        email_verified=request.form.get("email_verified"),
+        from_date=request.form.get("from_date"),
+        to_date=request.form.get("to_date")
+    ))
 
 
 
@@ -350,7 +383,7 @@ def user_login_history(user_id):
     if from_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
-        start_date = start_date.replace(tzinfo=None)
+        start_date = ist_date_to_utc(start_date)
         logs_query = logs_query.filter(
             LoginActivity.created_at >= start_date
         )
@@ -358,10 +391,11 @@ def user_login_history(user_id):
     if to_date:
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
-        end_date = end_date.replace(tzinfo=None)
+        end_date = ist_date_to_utc(end_date)
         logs_query = logs_query.filter(
             LoginActivity.created_at <= end_date
         )
+
 
     # -----------------------------
     # PAGINATE
@@ -422,7 +456,7 @@ def export_user_login_history_csv(user_id):
     if from_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
-        start_date = start_date.replace(tzinfo=None)
+        start_date = ist_date_to_utc(start_date)
         logs_query = logs_query.filter(
             LoginActivity.created_at >= start_date
         )
@@ -430,7 +464,7 @@ def export_user_login_history_csv(user_id):
     if to_date:
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
-        end_date = end_date.replace(tzinfo=None)
+        end_date = ist_date_to_utc(end_date)
         logs_query = logs_query.filter(
             LoginActivity.created_at <= end_date
         )
@@ -464,7 +498,9 @@ def export_user_login_history_csv(user_id):
 
     # CSV ROWS
     for log in logs:
-        ist_time = log.created_at.replace(tzinfo=None).astimezone(IST)
+
+
+        ist_time = to_ist(log.created_at)
         writer.writerow([
             ist_time.strftime("%d %b %Y"),
             ist_time.strftime("%I:%M %p"),
@@ -541,11 +577,13 @@ def export_users():
     if from_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         start_date = start_date.replace(hour=0, minute=0, second=0)
+        start_date = ist_date_to_utc(start_date)
         query = query.filter(User.created_at >= start_date)
 
     if to_date:
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
         end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = ist_date_to_utc(end_date)
         query = query.filter(User.created_at <= end_date)
 
     users = query.order_by(User.created_at.desc()).all()
@@ -565,7 +603,9 @@ def export_users():
         created_time = ""
 
         if u.created_at:
-            ist_time = u.created_at.replace(tzinfo=None).astimezone(IST)
+
+
+            ist_time = to_ist(u.created_at)
             created_date = ist_time.strftime("%d %b %Y")
             created_time = ist_time.strftime("%I:%M %p")
 

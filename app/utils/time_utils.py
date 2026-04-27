@@ -5,7 +5,8 @@ IST = pytz.timezone("Asia/Kolkata")
 
 # 🔹 ALWAYS use this for DB + logic (UTC only)
 def utc_now():
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(timezone.utc)
+
 
 # 🔹 Convert any datetime to IST safely
 def to_ist(dt):
@@ -63,4 +64,4 @@ def ist_date_to_utc(dt):
     if dt.tzinfo is None:
         dt = IST.localize(dt)
 
-    return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt.astimezone(timezone.utc)   

@@ -167,12 +167,16 @@ def create_app():
     from app.admin.routes.audit_insight_routes import audit_insight_bp
     app.register_blueprint(audit_insight_bp)
 
+
     # --------------------------------------------------
     # JINJA FILTERS
     # --------------------------------------------------
     app.jinja_env.filters["timeago"] = timeago_ist
     app.jinja_env.filters["to_ist"] = to_ist
     app.jinja_env.filters["format_ist"] = format_ist
+
+    # ✅ IMPORTANT FIX (for direct function use in template)
+    app.jinja_env.globals["to_ist"] = to_ist
 
     # --------------------------------------------------
     # CLI COMMANDS

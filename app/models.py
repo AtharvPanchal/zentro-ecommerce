@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask_login import UserMixin
 from enum import Enum
 from app.extensions import db
@@ -44,7 +44,7 @@ class User(UserMixin, db.Model):
 
     session_version = db.Column(db.Integer, default=1, nullable=False)
     failed_login_attempts = db.Column(db.Integer, default=0, nullable=False)
-    lock_until = db.Column(db.DateTime, nullable=True)
+    lock_until = db.Column(db.DateTime(timezone=True), nullable=True)
 
     email_verified = db.Column(db.Boolean, default=False, nullable=False)
     email_verification_token = db.Column(db.String(255), nullable=True, index=True)
@@ -57,20 +57,23 @@ class User(UserMixin, db.Model):
         default=UserRole.USER.value
     )
 
-    created_at = db.Column(db.DateTime, default=utc_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
 
     # ==================================================
     # 🆕 NEW USER BADGE LOGIC
     # ==================================================
     @property
     def is_new(self):
-        """
-        User considered NEW if created within last 24 hours
-        """
         if not self.created_at:
             return False
 
-        return (utc_now().replace(tzinfo=None) - self.created_at) <= timedelta(hours=24)
+        created = self.created_at
+
+        #  FIX: handle old DB (naive datetime)
+        if created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+
+        return (utc_now() - created) <= timedelta(hours=24)
 
     # ==================================================
     # 🆕 TIME AGO (FOR UI)
@@ -80,7 +83,13 @@ class User(UserMixin, db.Model):
         if not self.created_at:
             return None
 
-        diff = utc_now().replace(tzinfo=None) - self.created_at
+        created = self.created_at
+
+
+        if created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+
+        diff = utc_now() - created
 
         if diff.days > 0:
             return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
@@ -109,9 +118,14 @@ class User(UserMixin, db.Model):
         if not self.is_active:
             return "disabled"
 
-        now = utc_now().replace(tzinfo=None)
+        now = utc_now()
 
-        if self.lock_until and self.lock_until > now:
+        lock_until = self.lock_until
+
+        if lock_until and lock_until.tzinfo is None:
+            lock_until = lock_until.replace(tzinfo=timezone.utc)
+
+        if lock_until and lock_until > now:
             return "locked"
 
         return "active"

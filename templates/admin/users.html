@@ -160,8 +160,8 @@
     </span>
 
     {% if u.is_new %}
-      <span class="badge-new">NEW</span>
-    {% endif %}
+  <span class="badge-new">NEW</span>
+{% endif %}
 
   </div>
 
@@ -171,10 +171,12 @@
   Registered user
 
   {% if u.created_at %}
-    • {{ u.created_at.strftime('%d %b %Y') }} •
+    • {{ to_ist(u.created_at).strftime('%d %b %Y') }}
   {% endif %}
 
-  <span class="live-time" data-time="{{ u.created_at.isoformat() }}"></span>
+  <span class="live-time" data-time="{{ u.created_at.strftime('%Y-%m-%d %H:%M:%S') }}">
+  just now
+</span>
 
 </div>
 
@@ -226,10 +228,10 @@
             <td>
   {% if u.lock_until and u.lock_until > now %}
     <div class="lock-date">
-      {{ (u.lock_until|to_ist).strftime('%d %b %Y') }}
+      {{ to_ist(u.lock_until).strftime('%d %b %Y') }}
     </div>
     <div class="lock-time">
-      {{ (u.lock_until|to_ist).strftime('%I:%M %p') }}
+      {{ to_ist(u.lock_until).strftime('%I:%M %p') }}
     </div>
   {% else %}
     <span class="text-muted">—</span>
@@ -248,17 +250,40 @@
 
     {% if u.lock_until and u.lock_until > now %}
 
-      <form method="POST" action="{{ url_for('admin.unlock_user', user_id=u.id) }}">
+      <form method="POST"
+      class="confirm-form"
+      action="{{ url_for('admin.unlock_user', user_id=u.id) }}"
+      data-confirm="Unlock and enable this user?">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+
+        <input type="hidden" name="q" value="{{ request.args.get('q','') }}">
+<input type="hidden" name="status" value="{{ request.args.get('status','') }}">
+<input type="hidden" name="email_verified" value="{{ request.args.get('email_verified','') }}">
+<input type="hidden" name="from_date" value="{{ request.args.get('from_date','') }}">
+<input type="hidden" name="to_date" value="{{ request.args.get('to_date','') }}">
+
         <button type="submit" class="btn btn-sm btn-outline-success action-btn">
           <i data-lucide="unlock" class="icon"></i>
           <span>Unlock & Enable</span>
         </button>
       </form>
 
-      <form method="POST" action="{{ url_for('admin.unlock_user', user_id=u.id) }}">
+      <form method="POST"
+      class="confirm-form"
+      action="{{ url_for('admin.unlock_user', user_id=u.id) }}"
+      data-confirm="Unlock this user (keep disabled)?">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
         <input type="hidden" name="keep_disabled" value="1">
+
+
+        <input type="hidden" name="q" value="{{ request.args.get('q','') }}">
+<input type="hidden" name="status" value="{{ request.args.get('status','') }}">
+<input type="hidden" name="email_verified" value="{{ request.args.get('email_verified','') }}">
+<input type="hidden" name="from_date" value="{{ request.args.get('from_date','') }}">
+<input type="hidden" name="to_date" value="{{ request.args.get('to_date','') }}">
+
         <button type="submit" class="btn btn-sm btn-outline-secondary action-btn">
           <i data-lucide="unlock" class="icon"></i>
           <span>Unlock only</span>
@@ -267,8 +292,21 @@
 
     {% else %}
 
-      <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}">
+      <form method="POST"
+class="confirm-form"
+action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}"
+data-confirm="Are you sure you want to change user status?">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+
+
+        <input type="hidden" name="q" value="{{ request.args.get('q','') }}">
+<input type="hidden" name="status" value="{{ request.args.get('status','') }}">
+<input type="hidden" name="email_verified" value="{{ request.args.get('email_verified','') }}">
+<input type="hidden" name="from_date" value="{{ request.args.get('from_date','') }}">
+<input type="hidden" name="to_date" value="{{ request.args.get('to_date','') }}">
+
+
         {% if u.is_active %}
           <button type="submit" class="btn btn-sm btn-outline-warning action-btn">
             <i data-lucide="user-x" class="icon"></i>
@@ -283,8 +321,21 @@
       </form>
 
       {% if u.is_active %}
-      <form method="POST" action="{{ url_for('admin.lock_user', user_id=u.id) }}">
+     <form method="POST"
+class="confirm-form"
+action="{{ url_for('admin.lock_user', user_id=u.id) }}"
+data-confirm="Are you sure you want to lock this user?">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="page" value="{{ request.args.get('page', 1) }}">
+
+
+        <input type="hidden" name="q" value="{{ request.args.get('q','') }}">
+<input type="hidden" name="status" value="{{ request.args.get('status','') }}">
+<input type="hidden" name="email_verified" value="{{ request.args.get('email_verified','') }}">
+<input type="hidden" name="from_date" value="{{ request.args.get('from_date','') }}">
+<input type="hidden" name="to_date" value="{{ request.args.get('to_date','') }}">
+
+
         <button type="submit" class="btn btn-sm btn-outline-danger action-btn">
           <i data-lucide="lock" class="icon"></i>
           <span>Lock</span>
@@ -446,7 +497,7 @@ function loadLiveUsers(){
 
               <div class="text-muted small">
                 Registered user •
-                <span class="live-time" data-time="${u.created_at}"></span>
+                <span class="live-time" data-time="${u.created_at.replace('T',' ').split('.')[0]}"></span>
               </div>
             </div>
           </div>
@@ -490,7 +541,7 @@ setInterval(() => {
 }, 5000);
 
 
-// 🔥 TIME UPDATE FUNCTION (FINAL FIXED)
+//  TIME UPDATE FUNCTION (FINAL FIXED)
 function updateLiveTime(){
 
   const rows = document.querySelectorAll(".user-row");
@@ -504,23 +555,34 @@ function updateLiveTime(){
     if(!createdAt) return;
 
     const now = new Date();
-    const created = new Date(createdAt + "Z");
 
-    const diff = Math.floor((now - created) / 1000);
+    let created;
+
+try {
+  created = new Date(
+    createdAt.endsWith("Z") ? createdAt : createdAt + "Z"
+  );
+} catch {
+  return;
+}
+
+if (isNaN(created.getTime())) return;
+
+    const diff = Math.floor((now.getTime() - created.getTime()) / 1000);
 
     let text = "just now";
 
     if(diff >= 86400){
       const days = Math.floor(diff / 86400);
-      text = days + " day ago";
+      text = days + " day" + (days > 1 ? "s" : "") + " ago";
     }
     else if(diff >= 3600){
       const hrs = Math.floor(diff / 3600);
-      text = hrs + " hr ago";
+      text = hrs + " hr" + (hrs > 1 ? "s" : "") + " ago";
     }
     else if(diff >= 60){
       const mins = Math.floor(diff / 60);
-      text = mins + " min ago";
+      text = mins + " min" + (mins > 1 ? "s" : "") + " ago";
     }
 
     timeEl.innerText = text;

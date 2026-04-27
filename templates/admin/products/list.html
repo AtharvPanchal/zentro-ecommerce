@@ -166,9 +166,9 @@ Products | Admin
                   </a>
 
                   <form method="POST"
-                        action="{{ url_for('admin.admin_products.toggle_product', product_id=product.id) }}"
-                        class="d-inline"
-                        onsubmit="return confirm('Are You Sure?');">
+      action="{{ url_for('admin.admin_products.toggle_product', product_id=product.id) }}"
+      class="d-inline confirm-form"
+      data-confirm="Are you sure you want to change this product status?">
 
                     <button class="btn btn-sm {% if product.status=='ACTIVE' %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
                       {% if product.status=='ACTIVE' %}
